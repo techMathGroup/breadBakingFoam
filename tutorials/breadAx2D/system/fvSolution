@@ -35,7 +35,7 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors 500;
+    nOuterCorrectors 250;
     debug 0;    // -- debug level
     residualControl
     {
@@ -61,7 +61,10 @@ relaxationFactors
 {
     fields
     {
-        D 0.1;
+        D 0.05;
+        pG 0.5;
+        omegaV 0.5;
+        T 0.5;
     }
     equations
     {

@@ -5,3 +5,8 @@ src/finiteVolume/lnInclude
 # -- results
 *0 
 *log.*
+
+vizuals/time60.txt
+
+ZZ_pythonCtrlScripts
+ZZ_cases
