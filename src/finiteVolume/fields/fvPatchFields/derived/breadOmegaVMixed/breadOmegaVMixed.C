@@ -274,12 +274,13 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
         scalarField TBound = T.boundaryField()[patch().index()];
         scalarField pGBound = pG.boundaryField()[patch().index()];
         scalarField pGCells = pG.boundaryField()[patch().index()].patchInternalField();
-        
+                
         scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
         scalarField K1Bound = rhoGBound * permBound * patch().deltaCoeffs();
         scalarField K2Bound = rhoGBound * DEff * patch().deltaCoeffs();
 
-        scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound * alphaGBound;
+        // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound * alphaGBound;
+        scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound;
         scalarField f = 1 - K2Bound / denominator;
         scalarField a = (kM_ * rhoGBound * omegaVInf_) / denominator;
 
