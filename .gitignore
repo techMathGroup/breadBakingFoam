@@ -7,6 +7,7 @@ src/finiteVolume/lnInclude
 *log.*
 
 vizuals/time60.txt
+ZZ_myVizuals/*
 
 ZZ_pythonCtrlScripts
 ZZ_cases
