@@ -27,7 +27,7 @@ solidModel     breadBakingSolid;
 // "nonLinearGeometryTotalLagrangianTotalDisplacementCoeffs"
 {
     // Maximum number of momentum correctors
-    nCorrectors           1;
+    nCorrectors           5;
 
     // Solution tolerance for displacement
     solutionTolerance       1e-6;
