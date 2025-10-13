@@ -47,7 +47,7 @@ boundaryField
         valueFraction   uniform 0;
         value           uniform 300;
         alpha           9;
-        TInf            468;
+        TInf            476;
 	}
 
     "(bottomOur)"
@@ -58,6 +58,6 @@ boundaryField
         valueFraction   uniform 0;
         value           uniform 300;
         alpha           11;
-        TInf            468;
+        TInf            476;
 	}
 }

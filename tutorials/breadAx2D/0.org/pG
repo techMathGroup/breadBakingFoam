@@ -28,7 +28,8 @@ boundaryField
 		type wedge;
 	}
 
-    "(bottom|sides|sidesOur|bottomOur|topOur)"
+    "(bottom|sides)"
+    // "(bottom|sides|sidesOur|topOur|bottomOur)"
     {
         // type breadPGMixed;
         // kM              0.01;   // -- mass transfer coefficient
@@ -41,6 +42,50 @@ boundaryField
         // value           uniform 1e5;
         type fixedValue;
         value $internalField;
+	}
+    sidesOur
+    {
+        type breadPGMixed;
+        kM               0.009; // -- heat transfer coefficient
+        pGInf        1e5;    // -- oven temperature
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e5;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e5;
+        // type fixedValue;
+        // value $internalField;
+	}
+
+    topOur
+    {
+        type fixedValue;
+        value $internalField;
+        // type breadPGMixed;
+        // // kM               0.007; // -- heat transfer coefficient
+        // kM               0.008; // -- heat transfer coefficient
+        // pGInf        1e5;    // -- oven temperature
+
+        // // -- mixed BC mandatory entires
+        // refValue        uniform 1e5;
+        // refGradient     uniform 0;
+        // valueFraction   uniform 0;
+        // value           uniform 1e5;
+	}
+
+    bottomOur
+    {
+        type breadPGMixed;
+        // kM               0.001; // -- heat transfer coefficient
+        kM               0.007; // -- heat transfer coefficient
+        pGInf        1e5;    // -- oven temperature
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e5;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e5;
 	}
 }
 

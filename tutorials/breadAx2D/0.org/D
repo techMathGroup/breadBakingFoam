@@ -50,6 +50,12 @@ boundaryField
     {
         type            fixedDisplacementZeroShear;
         value           uniform (0 0 0);
+        // type            breadDSide;
+        // sidePos         5.8e-2;
+        // refValue        uniform (0 0 0);
+        // refGradient     uniform (0 0 0);
+        // valueFraction   uniform 1;
+        // value           uniform 0;
     }
 
     bottomOur
@@ -64,6 +70,12 @@ boundaryField
         traction        uniform (0 0 0);
         pressure        uniform 0;
         value           uniform (0 0 0);
+        // type            breadDSide;
+        // sidePos         5.73e-2;
+        // refValue        uniform (0 0 0);
+        // refGradient     uniform (0 0 0);
+        // valueFraction   uniform 1;
+        // value           uniform 0;
     }
 }
 
