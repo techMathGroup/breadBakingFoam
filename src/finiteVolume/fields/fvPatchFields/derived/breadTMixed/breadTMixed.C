@@ -168,6 +168,9 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
             << "    To avoid this warning fully specify the mapping in derived"
             << " patch fields." << endl;
     }
+    alpha_ = ptf.alpha_;
+    TInf_ = ptf.TInf_;
+    intLamName_ = ptf.intLamName_;
 }
 
 
@@ -182,7 +185,11 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    alpha_ = ptf.alpha_;
+    TInf_ = ptf.TInf_;
+    intLamName_ = ptf.intLamName_;
+}
 
 
 // template<class Type>
@@ -197,7 +204,11 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    alpha_ = ptf.alpha_;
+    TInf_ = ptf.TInf_;
+    intLamName_ = ptf.intLamName_;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -245,12 +256,16 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
 
     if(this->db().objectRegistry::foundObject<volScalarField>(intLamName_))
     {
-        // -- heat transfer to bread computation
-        // -- patch deltaCoeffs
         const volScalarField& lambdaEff = this->db().objectRegistry::lookupObject<volScalarField>(intLamName_);
-        scalarField lambdaEffBound = lambdaEff.boundaryField()[patch().index()];
-        scalarField f = 1.0 / (1.0 + (lambdaEffBound * patch().deltaCoeffs()) / (alpha_));
-        this->valueFraction() = f;
+        if (lambdaEff.boundaryField()[this->patch().index()].size() != 0)
+        {
+            // -- heat transfer to bread computation
+            // -- patch deltaCoeffs
+            // const volScalarField& lambdaEff = this->db().objectRegistry::lookupObject<volScalarField>(intLamName_);
+            scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
+            scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
+            this->valueFraction() = f;
+        }
     }
 
     scalarField::operator=

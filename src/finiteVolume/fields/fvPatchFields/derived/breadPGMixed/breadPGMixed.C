@@ -166,6 +166,8 @@ Foam::breadPGMixedFvPatchScalarField::breadPGMixedFvPatchScalarField
             << "    To avoid this warning fully specify the mapping in derived"
             << " patch fields." << endl;
     }
+    kM_ = ptf.kM_;
+    pGInf_ = ptf.pGInf_;
 }
 
 
@@ -180,7 +182,10 @@ Foam::breadPGMixedFvPatchScalarField::breadPGMixedFvPatchScalarField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    kM_ = ptf.kM_;
+    pGInf_ = ptf.pGInf_;
+}
 
 
 // template<class Type>
@@ -195,7 +200,10 @@ Foam::breadPGMixedFvPatchScalarField::breadPGMixedFvPatchScalarField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    kM_ = ptf.kM_;
+    pGInf_ = ptf.pGInf_;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -243,43 +251,47 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
 
     if(this->db().objectRegistry::foundObject<volScalarField>("permGLViscG"))
     {
-        IOdictionary transportProperties = this->db().objectRegistry::lookupObject<IOdictionary>("transportProperties");
-        IOdictionary thermophysicalProperties = this->db().objectRegistry::lookupObject<IOdictionary>("thermophysicalProperties");
-        // -- heat transfer to bread computation
-        // -- patch deltaCoeffs
-        scalar molMRef;
-        // dimensionedScalar permGLViscG, univR;
-        dimensionedScalar univR;
-        // transportProperties.readEntry("kGOver",kG);
-        transportProperties.subDict("genProps").readEntry("univR",univR);
-
-        // thermophysicalProperties.subDict("solid").readEntry("permGLViscG",permGLViscG);
-        thermophysicalProperties.subDict("mixture").subDict("specie").readEntry("molWeight",molMRef);
-        molMRef = molMRef * 1e-3;
-
         const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("permGLViscG");
-        const volScalarField& T = this->db().objectRegistry::lookupObject<volScalarField>("T");
-        const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
-        const volScalarField& Mg = this->db().objectRegistry::lookupObject<volScalarField>("Mg");
-        const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
-        const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
+        if (perm.boundaryField()[this->patch().index()].size() != 0)
+        {
+            IOdictionary transportProperties = this->db().objectRegistry::lookupObject<IOdictionary>("transportProperties");
+            IOdictionary thermophysicalProperties = this->db().objectRegistry::lookupObject<IOdictionary>("thermophysicalProperties");
+            // -- heat transfer to bread computation
+            // -- patch deltaCoeffs
+            scalar molMRef;
+            // dimensionedScalar permGLViscG, univR;
+            dimensionedScalar univR;
+            // transportProperties.readEntry("kGOver",kG);
+            transportProperties.subDict("genProps").readEntry("univR",univR);
 
-        scalarField rhoGBound = rhoG.boundaryField()[patch().index()];
-        scalarField permBound = perm.boundaryField()[patch().index()];
-        scalarField MgBound = Mg.boundaryField()[patch().index()];
-        scalarField TBound = T.boundaryField()[patch().index()];
-        
-        scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
-        scalarField K1Bound = rhoGBound * permBound * patch().deltaCoeffs();
-        scalarField TInf = TBound;
+            // thermophysicalProperties.subDict("solid").readEntry("permGLViscG",permGLViscG);
+            thermophysicalProperties.subDict("mixture").subDict("specie").readEntry("molWeight",molMRef);
+            molMRef = molMRef * 1e-3;
 
-        // scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound * alphaGBound;
-        scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound;
-        scalarField f = 1 - K1Bound / denominator;
-        scalarField a = (kM_ * molMRef * pGInf_ / (univR.value() * TInf)) / denominator;
+            
+            const volScalarField& T = this->db().objectRegistry::lookupObject<volScalarField>("T");
+            const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
+            const volScalarField& Mg = this->db().objectRegistry::lookupObject<volScalarField>("Mg");
+            const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
+            const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
 
-        this->valueFraction() = f;
-        this->refValue() = a / f;
+            scalarField rhoGBound = rhoG.boundaryField()[patch().index()];
+            scalarField permBound = perm.boundaryField()[patch().index()];
+            scalarField MgBound = Mg.boundaryField()[patch().index()];
+            scalarField TBound = T.boundaryField()[patch().index()];
+            
+            scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
+            scalarField K1Bound = rhoGBound * permBound * patch().deltaCoeffs();
+            scalarField TInf = TBound;
+
+            // scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound * alphaGBound;
+            scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound;
+            scalarField f = 1 - K1Bound / denominator;
+            scalarField a = (kM_ * molMRef * pGInf_ / (univR.value() * TInf)) / denominator;
+
+            this->valueFraction() = f;
+            this->refValue() = a / f;
+        }
     }
 
     scalarField::operator=

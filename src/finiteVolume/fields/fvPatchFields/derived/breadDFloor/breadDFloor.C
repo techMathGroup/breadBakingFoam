@@ -165,6 +165,7 @@ Foam::breadDFloorFvPatchVectorField::breadDFloorFvPatchVectorField
             << "    To avoid this warning fully specify the mapping in derived"
             << " patch fields." << endl;
     }
+    floorPos_ = ptf.floorPos_;
 }
 
 
@@ -179,7 +180,9 @@ Foam::breadDFloorFvPatchVectorField::breadDFloorFvPatchVectorField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    floorPos_ = ptf.floorPos_;
+}
 
 
 // template<class Type>
@@ -194,7 +197,9 @@ Foam::breadDFloorFvPatchVectorField::breadDFloorFvPatchVectorField
     refGrad_(ptf.refGrad_),
     valueFraction_(ptf.valueFraction_),
     source_(ptf.source_)
-{}
+{
+    floorPos_ = ptf.floorPos_;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -242,43 +247,46 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
 
     if(this->db().objectRegistry::foundObject<volScalarField>("impK"))
     {
-        const volSymmTensorField& sigma = this->db().objectRegistry::lookupObject<volSymmTensorField>("sigma");
-        const volTensorField& gradD = this->db().objectRegistry::lookupObject<volTensorField>("grad(D)");
-        const volTensorField& F = this->db().objectRegistry::lookupObject<volTensorField>("F");
         const volScalarField& impK = this->db().objectRegistry::lookupObject<volScalarField>("impK");
-        const volScalarField& rImpK = this->db().objectRegistry::lookupObject<volScalarField>("(1|impK)");
-        const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
-        const surfaceVectorField& Cf = patch().boundaryMesh().mesh().Cf();
-
-        symmTensorField sigmaBound = sigma.boundaryField()[patch().index()];
-        tensorField gradDBound = gradD.boundaryField()[patch().index()];
-        scalarField impKBound = impK.boundaryField()[patch().index()];
-        scalarField rImpKBound = rImpK.boundaryField()[patch().index()];
-        tensorField FBound = F.boundaryField()[patch().index()];
-        vectorField DBound = D.boundaryField()[patch().index()];
-        vectorField CfBound = Cf.boundaryField()[patch().index()];
-
-        tensorField FinvBound = inv(FBound);
-        vectorField n = patch().nf();
-        vectorField nCurrent = FinvBound.T() & n;
-        nCurrent /= mag(nCurrent);
-
-        vectorField gradDForcedBound = (- (nCurrent & sigmaBound) + impKBound * (n & gradDBound)) * rImpKBound;
-
-        forAll(CfBound, faceI)
+        if (impK.boundaryField()[this->patch().index()].size() != 0)
         {
-            if ((CfBound[faceI][0] + DBound[faceI][0]) < floorPos_ )
+            const volSymmTensorField& sigma = this->db().objectRegistry::lookupObject<volSymmTensorField>("sigma");
+            const volTensorField& gradD = this->db().objectRegistry::lookupObject<volTensorField>("grad(D)");
+            const volTensorField& F = this->db().objectRegistry::lookupObject<volTensorField>("F");
+            const volScalarField& rImpK = this->db().objectRegistry::lookupObject<volScalarField>("(1|impK)");
+            const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
+            const surfaceVectorField& Cf = patch().boundaryMesh().mesh().Cf();
+
+            symmTensorField sigmaBound = sigma.boundaryField()[patch().index()];
+            tensorField gradDBound = gradD.boundaryField()[patch().index()];
+            scalarField impKBound = impK.boundaryField()[patch().index()];
+            scalarField rImpKBound = rImpK.boundaryField()[patch().index()];
+            tensorField FBound = F.boundaryField()[patch().index()];
+            vectorField DBound = D.boundaryField()[patch().index()];
+            vectorField CfBound = Cf.boundaryField()[patch().index()];
+
+            tensorField FinvBound = inv(FBound);
+            vectorField n = patch().nf();
+            vectorField nCurrent = FinvBound.T() & n;
+            nCurrent /= mag(nCurrent);
+
+            vectorField gradDForcedBound = (- (nCurrent & sigmaBound) + impKBound * (n & gradDBound)) * rImpKBound;
+
+            forAll(CfBound, faceI)
             {
-                this->valueFraction()[faceI] = 1;
-                this->refGrad()[faceI] = vector(0,0,0);
-                vector oprava = DBound[faceI];
-                oprava[0] = floorPos_ - CfBound[faceI][0] * 0.999;
-                this->refValue()[faceI] = oprava;
-            }
-            else
-            {
-                this->valueFraction()[faceI] = 0;
-                this->refGrad()[faceI] = gradDForcedBound[faceI];
+                if ((CfBound[faceI][0] + DBound[faceI][0]) < floorPos_ )
+                {
+                    this->valueFraction()[faceI] = 1;
+                    this->refGrad()[faceI] = vector(0,0,0);
+                    vector oprava = DBound[faceI];
+                    oprava[0] = floorPos_ - CfBound[faceI][0] * 0.999;
+                    this->refValue()[faceI] = oprava;
+                }
+                else
+                {
+                    this->valueFraction()[faceI] = 0;
+                    this->refGrad()[faceI] = gradDForcedBound[faceI];
+                }
             }
         }
     }

@@ -31,13 +31,15 @@ boundaryField
     {
         type breadOmegaVMixed;
         kM               0.01; // -- heat transfer coefficient
-        omegaVInf        0;    // -- oven temperature
+        omegaVInf        1e-6;    // -- oven temperature
 
         // -- mixed BC mandatory entires
         refValue        uniform 1e-6;
         refGradient     uniform 0;
         valueFraction   uniform 0;
         value           uniform 1e-6;
+        // type fixedValue;
+        // value $internalField;
 	}
 
     // our experiment
