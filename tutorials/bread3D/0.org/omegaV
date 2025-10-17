@@ -31,7 +31,7 @@ boundaryField
     {
         type breadOmegaVMixed;
         kM               0.01; // -- heat transfer coefficient
-        omegaVInf        0;    // -- oven temperature
+        omegaVInf        1;    // -- oven temperature
 
         // -- mixed BC mandatory entires
         refValue        uniform 1e-6;

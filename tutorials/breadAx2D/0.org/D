@@ -50,32 +50,37 @@ boundaryField
     {
         // type            fixedDisplacementZeroShear;
         // value           uniform (0 0 0);
-        type            breadDSide;
-        sidePos         5.81e-2;
-        refValue        uniform (0 0 0);
-        refGradient     uniform (0 0 0);
-        valueFraction   uniform 1;
-        value           uniform 0;
+        // type            breadDSide;
+        // sidePos         5.81e-2;
+        // refValue        uniform (0 0 0);
+        // refGradient     uniform (0 0 0);
+        // valueFraction   uniform 1;
+        // value           uniform 0;
+        type            solidTraction;
+        traction        uniform (10 20 0);
+        pressure        uniform 0;
+        value           uniform (0 0 0);
     }
 
     bottomOur
     {
-        type            fixedDisplacementZeroShear;
+        // type            fixedDisplacementZeroShear;
         value           uniform (0 0 0);
+        type            fixedValue;
     }
 
     topOur
     {
-        // type            solidTraction;
-        // traction        uniform (0 0 0);
-        // pressure        uniform 0;
-        // value           uniform (0 0 0);
-        type            breadDSide;
-        sidePos         5.81e-2;
-        refValue        uniform (0 0 0);
-        refGradient     uniform (0 0 0);
-        valueFraction   uniform 1;
-        value           uniform 0;
+        type            solidTraction;
+        traction        uniform (0 0 0);
+        pressure        uniform 0;
+        value           uniform (0 0 0);
+        // type            breadDSide;
+        // sidePos         5.81e-2;
+        // refValue        uniform (0 0 0);
+        // refGradient     uniform (0 0 0);
+        // valueFraction   uniform 1;
+        // value           uniform 0;
     }
 }
 

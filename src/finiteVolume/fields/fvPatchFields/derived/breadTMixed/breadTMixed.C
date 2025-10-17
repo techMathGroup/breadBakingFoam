@@ -77,9 +77,10 @@ bool Foam::breadTMixedFvPatchScalarField::readMixedEntries
     refGrad_.assign(*hasGrad, p.size());
     valueFraction_.assign(*hasFrac, p.size());
     dict.readEntry("alpha", alpha_);
-    dict.readEntry("TInf", TInf_);
     intLamName_ = dict.getOrDefault<word>("intLamName", "lambdaEff");
-    this->refValue() = TInf_;
+    TInfDict_ = dict.subDict("TInfTableDict");
+    TInfTable_ = interpolationTable<scalar>(TInfDict_);
+    this->refValue() = TInfTable_(0);
     return true;
 }
 
@@ -169,8 +170,9 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
             << " patch fields." << endl;
     }
     alpha_ = ptf.alpha_;
-    TInf_ = ptf.TInf_;
     intLamName_ = ptf.intLamName_;
+    TInfTable_ = ptf.TInfTable_;
+    TInfDict_ = ptf.TInfDict_;
 }
 
 
@@ -187,8 +189,9 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
     source_(ptf.source_)
 {
     alpha_ = ptf.alpha_;
-    TInf_ = ptf.TInf_;
     intLamName_ = ptf.intLamName_;
+    TInfTable_ = ptf.TInfTable_;
+    TInfDict_ = ptf.TInfDict_;
 }
 
 
@@ -206,8 +209,9 @@ Foam::breadTMixedFvPatchScalarField::breadTMixedFvPatchScalarField
     source_(ptf.source_)
 {
     alpha_ = ptf.alpha_;
-    TInf_ = ptf.TInf_;
     intLamName_ = ptf.intLamName_;
+    TInfTable_ = ptf.TInfTable_;
+    TInfDict_ = ptf.TInfDict_;
 }
 
 
@@ -262,9 +266,11 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             // -- heat transfer to bread computation
             // -- patch deltaCoeffs
             // const volScalarField& lambdaEff = this->db().objectRegistry::lookupObject<volScalarField>(intLamName_);
+            const scalar t = this->db().time().timeOutputValue();
             scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
             scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
             this->valueFraction() = f;
+            this->refValue() = TInfTable_(t);
         }
     }
 
@@ -359,8 +365,8 @@ void Foam::breadTMixedFvPatchScalarField::write(Ostream& os) const
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
     breadTMixedFvPatchScalarField::writeScalarEntry(os, "alpha", alpha_);
-    breadTMixedFvPatchScalarField::writeScalarEntry(os, "TInf", TInf_);
     source_.writeEntry("source", os);
+    os.writeEntry("TInfTableDict", TInfDict_);
     fvPatchScalarField::writeValueEntry(os);
 }
 

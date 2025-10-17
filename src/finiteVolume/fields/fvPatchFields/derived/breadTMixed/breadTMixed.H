@@ -62,6 +62,7 @@ SourceFiles
 #include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
 #include "updateableSnGrad.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,8 +98,11 @@ class breadTMixedFvPatchScalarField
         //- internal heat transfer coefficient field name 
         word intLamName_;
 
-        //- TInf
-        scalar TInf_;
+        //- dictionary with T in oven
+        dictionary TInfDict_;
+
+        //- Interpolation table for temperature vs time
+        interpolationTable<scalar> TInfTable_;
 
 protected:
 

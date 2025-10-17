@@ -30,7 +30,10 @@ boundaryField
         valueFraction   uniform 0;
         value           uniform 300;
         alpha           10;
-        TInf            463;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTable";
+        }
 	}
 	
 	"(wedgeZ0|wedgeZE)"
@@ -47,7 +50,10 @@ boundaryField
         valueFraction   uniform 0;
         value           uniform 300;
         alpha           9;
-        TInf            476;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTableOur";
+        }
 	}
 
     "(bottomOur)"
@@ -58,6 +64,9 @@ boundaryField
         valueFraction   uniform 0;
         value           uniform 300;
         alpha           11;
-        TInf            476;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTableOur";
+        }
 	}
 }
