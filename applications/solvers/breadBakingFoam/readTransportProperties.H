@@ -67,8 +67,7 @@ thermophysicalProperties.subDict("mixture").subDict("transport").readEntry("D", 
 // dimensionedScalar CpVapor ("CpVapor", CpL.dimensions(), 1930.55);
 
 // -- reaction
-dimensionedScalar dH, R0, c, d, kMPCOpen, kMPCClosed, TOpen, deltaTOpen;
-reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("R0", R0);
+dimensionedScalar dH, R0, c, d, kMPCOpen, kMPCClosed, TOpen, deltaTOpen, Tm, deltaT, evCoef1, evCoef2;
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("dH", dH);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("c", c);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("d", d);
@@ -76,8 +75,13 @@ reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("TOpen
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("deltaTOpen", deltaTOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCOpen", kMPCOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCClosed", kMPCClosed);
-dimensionedScalar Tm ("Tm", dimTemperature, 313);
-dimensionedScalar deltaT ("Tm", dimTemperature, 10);
+reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef1", evCoef1);
+reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef2", evCoef2);
+reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("Tm", Tm);
+reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("R0", R0);
+reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("deltaT", deltaT);
+// dimensionedScalar Tm ("Tm", dimTemperature, 313);
+// dimensionedScalar deltaT ("Tm", dimTemperature, 10);
 
 // scalar TOpen = 75;
 // scalar deltaTOpen = 10;

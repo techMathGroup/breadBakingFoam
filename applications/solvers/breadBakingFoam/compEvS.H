@@ -15,7 +15,8 @@ if (withEq == 1)
 
     scalar n = 0.38;
     // volScalarField a = Foam::exp(-0.0071 * T / dummyT + 4.5);
-    volScalarField a = Foam::exp(-0.0056 * T / dummyT + 5.5);
+    // volScalarField a = Foam::exp(-0.0056 * T / dummyT + 5.5);
+    volScalarField a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
     volScalarField aw = Foam::pow(moisture * 100 / a, (1.0 / n)) / (Foam::pow(moisture * 100/ a, (1.0 / n)) + 1); 
     pVEq = pSat * aw;
 
