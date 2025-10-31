@@ -77,7 +77,8 @@ bool Foam::breadOmegaVMixedFvPatchScalarField::readMixedEntries
     refGrad_.assign(*hasGrad, p.size());
     valueFraction_.assign(*hasFrac, p.size());
     dict.readEntry("kM", kM_);
-    dict.readEntry("omegaVInf", omegaVInf_);
+    omegaVInfDict_ = dict.subDict("omegaVInfTableDict");
+    omegaVInfTable_ = interpolationTable<scalar>(omegaVInfDict_);
     return true;
 }
 
@@ -167,7 +168,8 @@ Foam::breadOmegaVMixedFvPatchScalarField::breadOmegaVMixedFvPatchScalarField
             << " patch fields." << endl;
     }
     kM_ = ptf.kM_;
-    omegaVInf_ = ptf.omegaVInf_;
+    omegaVInfTable_ = ptf.omegaVInfTable_;
+    omegaVInfDict_ = ptf.omegaVInfDict_;
 }
 
 
@@ -184,7 +186,8 @@ Foam::breadOmegaVMixedFvPatchScalarField::breadOmegaVMixedFvPatchScalarField
     source_(ptf.source_)
 {
     kM_ = ptf.kM_;
-    omegaVInf_ = ptf.omegaVInf_;
+    omegaVInfTable_ = ptf.omegaVInfTable_;
+    omegaVInfDict_ = ptf.omegaVInfDict_;
 }
 
 
@@ -202,7 +205,8 @@ Foam::breadOmegaVMixedFvPatchScalarField::breadOmegaVMixedFvPatchScalarField
     source_(ptf.source_)
 {
     kM_ = ptf.kM_;
-    omegaVInf_ = ptf.omegaVInf_;
+    omegaVInfTable_ = ptf.omegaVInfTable_;
+    omegaVInfDict_ = ptf.omegaVInfDict_;
 }
 
 
@@ -254,6 +258,7 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
         const volScalarField& DEff = this->db().objectRegistry::lookupObject<volScalarField>("DEff");
         if (DEff.boundaryField()[this->patch().index()].size() != 0)
         {
+            const scalar t = this->db().time().timeOutputValue();
             IOdictionary transportProperties = this->db().objectRegistry::lookupObject<IOdictionary>("transportProperties");
             IOdictionary thermophysicalProperties = this->db().objectRegistry::lookupObject<IOdictionary>("thermophysicalProperties");
             // -- heat transfer to bread computation
@@ -293,7 +298,7 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
             // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound;
             scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound;
             scalarField f = 1.0 - K2Bound / denominator;
-            scalarField a = (kM_ * rhoGBound * omegaVInf_) / denominator;
+            scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t)) / denominator;
 
             this->valueFraction() = f;
             this->refValue() = a / f;
@@ -397,7 +402,7 @@ void Foam::breadOmegaVMixedFvPatchScalarField::write(Ostream& os) const
     valueFraction_.writeEntry("valueFraction", os);
     source_.writeEntry("source", os);
     os.writeEntry("kM", this->kM_);
-    os.writeEntry("omegaVInf", this->omegaVInf_);
+    os.writeEntry("omegaVInfTableDict", omegaVInfDict_);
     // writeScalarEntry(os, "kM", kM_);
     // writeScalarEntry(os, "omegaVInf", omegaVInf_);
     fvPatchScalarField::writeValueEntry(os);

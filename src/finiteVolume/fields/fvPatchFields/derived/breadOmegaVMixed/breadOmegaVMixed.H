@@ -62,6 +62,7 @@ SourceFiles
 #include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
 #include "updateableSnGrad.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,8 +95,11 @@ class breadOmegaVMixedFvPatchScalarField
         //- mass transfer coefficient
         scalar kM_;
 
-        //- omegaV inf
-        scalar omegaVInf_;
+        //- dictionary with omegaVInf in oven
+        dictionary omegaVInfDict_;
+
+        //- Interpolation table for temperature vs time
+        interpolationTable<scalar> omegaVInfTable_;
 
 protected:
 
