@@ -60,6 +60,7 @@ boundaryField
         omegaVInfTableDict   
         {
             file "$FOAM_CASE/constant/omegaVInfTableOur";
+            outOfBounds warp;
         }
 	}
 
@@ -77,6 +78,7 @@ boundaryField
         omegaVInfTableDict   
         {
             file "$FOAM_CASE/constant/omegaVInfTableOur";
+            outOfBounds warp;
         }
 	}
 
@@ -94,6 +96,7 @@ boundaryField
         omegaVInfTableDict   
         {
             file "$FOAM_CASE/constant/omegaVInfTableOur";
+            outOfBounds warp;
         }
         // type zeroGradient;
 	}
