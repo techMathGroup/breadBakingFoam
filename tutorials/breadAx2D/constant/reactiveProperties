@@ -29,14 +29,22 @@ reactProps
 {
 	evaporation
 	{
-		R0 R0 [1 -3 -1 0 0 0 0] 0.0035;
+        intBoil intBoil [0 0 -1 0 0 0 0] 5;
 		dH dH [0 2 -2 0 0 0 0] -2.38318e+06;
 		c c [0 0 -1 0 0 0 0] 500;
 		d d [0 0 -1 0 0 0 0] 0.5;
 		TOpen TOpen [0 0 0 0 0 0 0] 75;
-		kMPCOpen kMPCOpen [0 0 -1 0 0 0 0] 0.5;
-		kMPCClosed kMPCClosed [0 0 -1 0 0 0 0] 0.5;
+		kMPCOpen kMPCOpen [0 0 -1 0 0 0 0] 0.42;
+		kMPCClosed kMPCClosed [0 0 -1 0 0 0 0] 0.42;
 		deltaTOpen deltaTOpen [0 0 0 0 0 0 0] 10;
+        evCoef1 evCoef1 [0 0 0 0 0 0 0] -0.0071;
+		evCoef2 evCoef2 [0 0 0 0 0 0 0] 4.5;
+	}
+    fermentation
+	{
+		R0 R0 [1 -3 -1 0 0 0 0] 0.00055;
+		Tm Tm [0 0 0 1 0 0 0] 314;
+		deltaT deltaT [0 0 0 1 0 0 0] 10;
 	}
 }
 
