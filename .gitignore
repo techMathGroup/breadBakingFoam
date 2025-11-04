@@ -1,0 +1,15 @@
+# -- compilation logs 
+*linux*
+src/finiteVolume/lnInclude
+
+# -- results
+*0 
+*log.*
+
+vizuals/time60.txt
+ZZ_myVizuals/*
+
+ZZ_pythonCtrlScripts
+ZZ_cases
+
+tutorials/*/all*

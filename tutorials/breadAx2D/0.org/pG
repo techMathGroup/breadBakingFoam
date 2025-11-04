@@ -1,0 +1,96 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     1.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform 1e5;
+// internalField   uniform 64794;
+// internalField   uniform 162668.280336008;
+
+boundaryField
+{
+	"(wedgeZ0|wedgeZE)"
+	{
+		type wedge;
+	}
+
+    "(bottom|sides)"
+    // "(bottom|sides|sidesOur|topOur|bottomOur)"
+    {
+        // type breadPGMixed;
+        // kM              0.01;   // -- mass transfer coefficient
+        // pGInf            1e5;   // -- oven temperature
+
+        // // -- mixed BC mandatory entires
+        // refValue        uniform 1e5;
+        // refGradient     uniform 0;
+        // valueFraction   uniform 0;
+        // value           uniform 1e5;
+        type fixedValue;
+        value $internalField;
+	}
+    sidesOur
+    {
+        type breadPGMixed;
+        kM               0.009; // -- heat transfer coefficient
+        pGInf        1e5;    // -- oven temperature
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e5;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e5;
+        // type fixedValue;
+        // value $internalField;
+        // type zeroGradient;
+	}
+
+    topOur
+    {
+        type fixedValue;
+        value $internalField;
+        // type breadPGMixed;
+        // // kM               0.007; // -- heat transfer coefficient
+        // kM               0.008; // -- heat transfer coefficient
+        // pGInf        1e5;    // -- oven temperature
+
+        // // -- mixed BC mandatory entires
+        // refValue        uniform 1e5;
+        // refGradient     uniform 0;
+        // valueFraction   uniform 0;
+        // value           uniform 1e5;
+	}
+
+    bottomOur
+    {
+        // type zeroGradient;
+        // type fixedValue;
+        // value $internalField;
+        type breadPGMixed;
+        // kM               0.001; // -- heat transfer coefficient
+        kM               0.007; // -- heat transfer coefficient
+        pGInf        1e5;    // -- oven temperature
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e5;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e5;
+	}
+}
+
+// ************************************************************************* //

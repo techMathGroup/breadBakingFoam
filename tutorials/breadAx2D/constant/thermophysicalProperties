@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     1.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        nMoles          1;
+        molWeight           44;
+    }
+    thermodynamics
+    {
+        Cp                853.01;            // -- J/kg/K
+        Hf              0;
+        Tref            0;
+    }
+    transport
+    {
+        mu              26.415e-6;
+        Pr              0.705;
+        D D [0 2 -1 0 0 0 0] 5e-06;
+    }
+}
+
+
+// ************************************************************************* //
+solid
+{
+	lambda lambda [1 1 -3 -1 0 0 0] 0.47;
+	rho rho [1 -3 0 0 0 0 0] 700;
+	Cp Cp [0 2 -2 -1 0 0 0] 600;
+}
+liquid
+{
+	lambda lambda [1 1 -3 -1 0 0 0] 0.641;
+	rho rho [1 -3 0 0 0 0 0] 1000;
+	Cp Cp [0 2 -2 -1 0 0 0] 4200;
+}
+CO2
+{
+	Cp Cp [0 2 -2 -1 0 0 0] 853;
+	molM molM [1 0 0 0 -1 0 0] 0.044;
+}
+vapor
+{
+	molM molM [1 0 0 0 -1 0 0] 0.018;
+	Cp Cp [0 2 -2 -1 0 0 0] 1878;
+}

@@ -1,0 +1,70 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     breadBakingFoam;
+
+startFrom       latestTime;
+
+startTime 	    0;
+
+stopAt          endTime;
+
+endTime   	           900;
+
+deltaT              1;
+
+writeControl        adjustableRunTime;
+
+writeInterval    	   20;
+// writeInterval    	   20;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+trapFpe true;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   8;
+
+runTimeModifiable true;
+
+
+// functions
+// {
+//     residuals
+//     {
+//         type            solverInfo;
+//         libs            (utilityFunctionObjects);
+//         fields          (".*");
+//     }
+// }
+libs
+(
+    "libsolids4FoamModels.so"
+    "libbreadMixedBCs.so"
+);
+
+
+
+
+// ************************************************************************* //
