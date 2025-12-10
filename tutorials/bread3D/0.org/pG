@@ -28,7 +28,7 @@ boundaryField
 		type wedge;
 	}
 
-    "(bottom|sides)"
+    "(sides)"
     // "(bottom|sides|sidesOur|topOur|bottomOur)"
     {
         // type breadPGMixed;
@@ -43,57 +43,9 @@ boundaryField
         type fixedValue;
         value $internalField;
 	}
-    sidesOur
-    {
-        type breadPGMixed;
-        kM               0.009; // -- heat transfer coefficient
-        pGInf        1e5;    // -- oven temperature
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e5;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e5;
-        // type fixedValue;
-        // value $internalField;
-	}
-
-    topOur
-    {
-        type fixedValue;
-        value $internalField;
-        // type breadPGMixed;
-        // // kM               0.007; // -- heat transfer coefficient
-        // kM               0.008; // -- heat transfer coefficient
-        // pGInf        1e5;    // -- oven temperature
-
-        // // -- mixed BC mandatory entires
-        // refValue        uniform 1e5;
-        // refGradient     uniform 0;
-        // valueFraction   uniform 0;
-        // value           uniform 1e5;
-	}
-
-    bottomOur
-    {
-        type breadPGMixed;
-        // kM               0.001; // -- heat transfer coefficient
-        kM               0.007; // -- heat transfer coefficient
-        pGInf        1e5;    // -- oven temperature
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e5;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e5;
-	}
-    
     bottom
     {
-        // type fixedValue;
-        // value $internalField;
         type breadPGMixed;
-        // kM               0.001; // -- heat transfer coefficient
         kM               3e-4; // -- heat transfer coefficient
         pGInf        1e5;    // -- oven temperature
 
@@ -102,7 +54,8 @@ boundaryField
         refGradient     uniform 0;
         valueFraction   uniform 0;
         value           uniform 1e5;
-	}
+    }
+
     "symmetryPatch"
     {
         type  symmetry;

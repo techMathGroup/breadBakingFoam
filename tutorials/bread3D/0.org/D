@@ -45,7 +45,9 @@ boundaryField
 
     "(bottom)"
     {
-        type            fixedDisplacementZeroShear;
+        // type            fixedDisplacementZeroShear;
+        type            fixedDisplacementShear;
+        // forceZeroShearGrad true;
         // type            fixedValue;
         value           uniform (0 0 0);
         // type            breadDFloor;

@@ -1,0 +1,50 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* Apply flex layout for wrapper */
+@media screen and (min-width: 64em) {
+  .wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
+    max-width: 100% !important; // remove theme width restriction
+    margin: 0 auto !important;  // remove centering offsets
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Header as left sidebar */
+  header {
+    width: 300px !important;
+    flex-shrink: 0 !important;
+    margin: 0 2rem 0 0 !important; // margin-right
+    text-align: left !important;
+
+    float: none !important;   // remove any float
+    position: relative !important; // remove absolute positioning
+    display: block !important;
+  }
+
+  /* Main section fills remaining space */
+  section {
+    flex: 1 1 auto !important; // allow growing and shrinking
+    min-width: 0 !important;   // prevents overflow
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* Footer below everything */
+  footer {
+    flex-basis: 100% !important;
+    margin-top: 2rem !important;
+  }
+}
+
+/* Make images inside section responsive */
+section img {
+  max-width: 100% !important;
+  height: auto !important;
+}

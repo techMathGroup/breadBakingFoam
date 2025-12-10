@@ -41,17 +41,17 @@ PIMPLE
     {
         omegaV        
         {
-            tolerance 1e-8;
+            tolerance 1e-5;
             relTol 0;
         }
         T           
         {
-            tolerance 1e-8;
+            tolerance 1e-5;
             relTol 0;
         }
         pG         
         {
-            tolerance 1e-8;
+            tolerance 1e-5;
             relTol 0;
         }
     }
@@ -62,15 +62,20 @@ relaxationFactors
     fields
     {
         D 0.1;
-        // omegaV 0.1;
-        // pG 0.1;
+        // DFinal 0.1;
+        omegaV 0.1;
         // T 0.1;
         // pG 0.1;
     }
     equations
     {
+        gammaSnGradCorr(pG)_0 0.5;
+        gammaSnGradCorr(omegaV)_0 0.5;
+        gammaSnGradCorr(T)_0 0.5;
+        snGradCorr(D) 0.5;
         // omegaV 0.99;
-        // D 0.8;
+        // D 0.99;
+        // pG 0.99;
         // DFinal 0.95;
     }
 }

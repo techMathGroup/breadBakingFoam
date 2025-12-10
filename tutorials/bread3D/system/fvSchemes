@@ -34,14 +34,15 @@ ddtSchemes
 gradSchemes
 {
     // default            Gauss linear;
-    default            none;
-    grad(pG)           Gauss linear;
-    grad(yV)           Gauss linear;
-    grad(DD)            extendedLeastSquares 0.0;
-    grad(D)            extendedLeastSquares 0.0;
-    grad(Mg)           Gauss linear;
-    grad(omegaV)       Gauss linear;
-    grad(T)            Gauss linear;
+    default            extendedLeastSquares 0.0;
+    // grad(pG)           Gauss linear;
+    // grad(yV)           Gauss linear;
+    // // grad(DD)            extendedLeastSquares 0.0;
+    // grad(D)            extendedLeastSquares 0.0;
+    // // grad(D)            Gauss linear;
+    // grad(Mg)           Gauss linear;
+    // grad(omegaV)       Gauss linear;
+    // grad(T)            Gauss linear;
 }
 
 divSchemes
@@ -51,12 +52,12 @@ divSchemes
 
 laplacianSchemes
 {
-    default            Gauss linear corrected;
+    default            relaxedNonOrthoGauss linear corrected 0.5;
 }
 
 snGradSchemes
 {
-    default             corrected;
+    default             corrected 0.5;
 }
 
 interpolationSchemes

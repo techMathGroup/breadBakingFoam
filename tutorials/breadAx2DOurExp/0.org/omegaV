@@ -1,0 +1,82 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omegaV;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 7.7e-3;
+
+boundaryField
+{
+    "(wedgeZ0|wedgeZE)"
+	{
+		type wedge;
+	}   
+
+    sides
+    {
+        type breadOmegaVMixed;
+        kM               6e-4; // -- heat transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 7.7e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 7.7e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaVInfTable";
+            outOfBounds warn;
+        }
+    }
+
+    top
+    {
+        type breadOmegaVMixed;
+        kM               0.01; // -- heat transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 7.7e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 7.7e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaVInfTable";
+            outOfBounds warn;
+        }
+    }
+
+    bottom
+    {
+        type breadOmegaVMixed;
+        kM               3e-4; // -- heat transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 7.7e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 7.7e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaVInfTable";
+            outOfBounds warn;
+        }
+        // type zeroGradient;
+    }
+}
+
+
+// ************************************************************************* //

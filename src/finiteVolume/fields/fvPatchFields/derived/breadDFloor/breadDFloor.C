@@ -262,6 +262,7 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
             scalarField impKBound = impK.boundaryField()[patch().index()];
             scalarField rImpKBound = rImpK.boundaryField()[patch().index()];
             tensorField FBound = F.boundaryField()[patch().index()];
+            // vectorField DIntField = D.boundaryField()[patch().index()].internalField();
             vectorField DBound = D.boundaryField()[patch().index()];
             vectorField CfBound = Cf.boundaryField()[patch().index()];
 
@@ -272,14 +273,17 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
 
             vectorField gradDForcedBound = (- (nCurrent & sigmaBound) + impKBound * (n & gradDBound)) * rImpKBound;
 
+            // vectorField DNew = DIntField + gradDForcedBound/patch().deltaCoeffs();
+
             forAll(CfBound, faceI)
             {
+                // if ((CfBound[faceI][0] + DNew[faceI][0]) < floorPos_ )
                 if ((CfBound[faceI][0] + DBound[faceI][0]) < floorPos_ )
                 {
                     this->valueFraction()[faceI] = 1;
                     this->refGrad()[faceI] = vector(0,0,0);
                     vector oprava = DBound[faceI];
-                    oprava[0] = floorPos_ - CfBound[faceI][0] ;
+                    oprava[0] = floorPos_ - CfBound[faceI][0];
                     this->refValue()[faceI] = oprava;
                 }
                 else

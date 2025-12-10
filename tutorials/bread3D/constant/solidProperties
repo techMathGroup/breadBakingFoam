@@ -18,13 +18,15 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // solidModel     nonLinearGeometryTotalLagrangianTotalDisplacementMy;
-solidModel     breadBakingSolid;
+// solidModel     breadBakingSolid;
+solidModel     unsBreadBakingSolid;
 // solidModel     nonLinearGeometryTotalLagrangianTotalDisplacement;
 // solidModel     nonLinearGeometryUpdatedLagrangian;
 // solidModel     nonLinearGeometryTotalLagrangianTotalDisplacement;
 
-"nonLinearGeometryTotalLagrangianTotalDisplacementCoeffs|nonLinearGeometryTotalLagrangianTotalDisplacementMyCoeffs|nonLinearGeometryUpdatedLagrangianCoeffs|breadBakingSolidCoeffs"
+"nonLinearGeometryTotalLagrangianTotalDisplacementCoeffs|nonLinearGeometryTotalLagrangianTotalDisplacementMyCoeffs|nonLinearGeometryUpdatedLagrangianCoeffs|breadBakingSolidCoeffs|unsBreadBakingSolidCoeffs"
 {
+    restart true;
     // Maximum number of momentum correctors
     nCorrectors           1;
 

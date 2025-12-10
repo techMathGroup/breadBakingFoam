@@ -266,8 +266,23 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             // -- heat transfer to bread computation
             // -- patch deltaCoeffs
             // const volScalarField& lambdaEff = this->db().objectRegistry::lookupObject<volScalarField>(intLamName_);
+            // const fvMesh& mesh = patch().boundaryMesh().mesh();
+            // const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
+            // const surfaceVectorField& Sf = mesh.Sf();
+
+            // vectorField DCells = D.boundaryField()[this->patch().index()].patchInternalField();
+            // vectorField DBound = D.boundaryField()[this->patch().index()];
+            // vectorField SfBound = Sf.boundaryField()[this->patch().index()];
+
+            // Pout << "DBound size" << DBound.size() <<endl;
+            // Pout << "SfBound size" << SfBound.size() <<endl;
+
+            // scalarField Dmag = (DBound - DCells) & SfBound / mag(SfBound);
+
+            // scalarField DCorrect = (DBound - DCells) & mesh
             const scalar t = this->db().time().timeOutputValue();
             scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
+            // scalarField f = 1.0 / (1.0 + (lambdaEffBound / (mag(this->patch().delta() + (DBound - DCells)))) / (alpha_));
             scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
             this->valueFraction() = f;
             this->refValue() = TInfTable_(t);

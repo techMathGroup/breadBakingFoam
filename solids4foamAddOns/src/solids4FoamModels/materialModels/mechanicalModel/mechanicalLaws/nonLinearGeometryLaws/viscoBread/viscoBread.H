@@ -82,59 +82,34 @@ class viscoBread
         autoPtr<surfaceScalarField> JfPtr_;
 
         //- Total plastic strain
-        volSymmTensorField epsilonP_;
+        // volSymmTensorField epsilonP_;
 
         //- Total plastic strain surface field
-        surfaceSymmTensorField epsilonPf_;
+        // surfaceSymmTensorField epsilonPf_;
 
         //- Incremental change of plastic strain
-        volSymmTensorField DEpsilonP_;
+        // volSymmTensorField DEpsilonP_;
 
         //- Incremental change of plastic strain surface field
         surfaceSymmTensorField DEpsilonPf_;
 
-        //- Elastic left Cauchy-Green trial strain tensor with volumetric term
-        //  removed. Trial means that plasticity is neglected.
-        volSymmTensorField bEbarTrial_;
-
-        //- Elastic left Cauchy-Green trial strain tensor with volumetric term
-        //  removed surface field
-        surfaceSymmTensorField bEbarTrialf_;
-
-        //- Elastic left Cauchy-Green strain tensor with volumetric term removed
-        volSymmTensorField bEbar_;
-
-        //- Elastic left Cauchy-Green strain tensor with volumetric term removed
-        //  surface field
-        surfaceSymmTensorField bEbarf_;
-
-        //- Plastic multiplier increment - plastric strain scaled by sqrt(2/3)
-        volScalarField DLambda_;
-
-        //- Plastic multiplier increment - surface field
-        surfaceScalarField DLambdaf_;
-
-        //- plasticN is the return direction to the yield surface
-        volSymmTensorField plasticN_;
-
-        //- plasticN surface field
-        surfaceSymmTensorField plasticNf_;
-
-        //- Maximum allowed error in the plastic strain integration
-        const scalar maxDeltaErr_;
-
-        //- Tolerance for Newton loop
-        static scalar LoopTol_;
-
-        //- Maximum number of iterations for Newton loop
-        static label MaxNewtonIter_;
-
-        //- finiteDiff is the delta for finite difference differentiation
-        static scalar finiteDiff_;
-
-        //- Store sqrt(2/3) as it is used often
-        static scalar sqrtTwoOverThree_;
-
+        volSymmTensorField D0_;
+        surfaceSymmTensorField D0f_;
+        volScalarField T_;
+        volScalarField alphaG_;
+        volScalarField tau_;
+        volTensorField invF_;
+        surfaceTensorField invFf_;
+        volTensorField S_;
+        surfaceTensorField Sf_;
+        volTensorField dEpsPInit_;
+        surfaceTensorField dEpsPInitf_;
+        volTensorField dEpsInit_;
+        surfaceTensorField dEpsInitf_;
+        volSymmTensorField dSigma_;
+        surfaceSymmTensorField dSigmaf_;
+        volSymmTensorField dSigmaP_;
+        surfaceSymmTensorField dSigmaPf_;
 
     // Private Member Functions
 

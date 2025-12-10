@@ -40,10 +40,10 @@ IOdictionary reactiveProperties
 
 // -- model transport parameters 
 dimensionedScalar univR, permGLViscGSc, kappaS;
-scalar withDeformation, withEq;
+scalar withDeformation;
 transportProperties.subDict("genProps").readEntry("univR", univR); // -- universal gas constant
 transportProperties.readEntry("withDeformation", withDeformation);
-transportProperties.readEntry("withEq", withEq);
+// transportProperties.readEntry("withEq", withEq);
 transportProperties.readEntry("permGLViscG",permGLViscGSc);
 
 // -- model thermophysical parameters 
@@ -67,10 +67,8 @@ thermophysicalProperties.subDict("mixture").subDict("transport").readEntry("D", 
 // dimensionedScalar CpVapor ("CpVapor", CpL.dimensions(), 1930.55);
 
 // -- reaction
-dimensionedScalar dH, R0, c, d, kMPCOpen, kMPCClosed, TOpen, deltaTOpen, Tm, deltaT, evCoef1, evCoef2;
+dimensionedScalar dH, R0, kMPCOpen, kMPCClosed, TOpen, deltaTOpen, Tm, deltaT, evCoef1, evCoef2;
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("dH", dH);
-reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("c", c);
-reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("d", d);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("TOpen", TOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("deltaTOpen", deltaTOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCOpen", kMPCOpen);

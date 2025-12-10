@@ -151,6 +151,7 @@ public:
 
             //- Evolve the solid solver and solve the mathematical model
             virtual bool evolve();
+            virtual void updateFields();
 
             //- Traction boundary surface normal gradient
             virtual tmp<vectorField> tractionBoundarySnGrad

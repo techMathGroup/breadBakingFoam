@@ -12,9 +12,10 @@ rsync -r solids4foamAddOns/src $pathToSolids4Foam
 
 # compile solids4foam
 echo "Compiling solids4foam"
+export S4F_NO_FILE_FIXES=1
 prevPath=$(pwd)
 cd $pathToSolids4Foam
-./Allwmake
+./Allwmake -j
 cd $prevPath
 
 # compile breadBakingFoam

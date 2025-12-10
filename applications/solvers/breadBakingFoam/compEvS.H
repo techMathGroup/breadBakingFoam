@@ -3,8 +3,8 @@ pV = pG * yV;
 // pV = dummyP * 1e5 * yV;
 
 // -- different approaches to evRate calculation
-if (withEq == 1)
-{
+// if (withEq == 1)
+// {
     // -- saturated water pressure
     pSat = dummyP * 1e3 * Foam::exp(16.2886 - 3816.44 / (T / dummyT - 46.13));
     // pSat = dummyP * 597 * Foam::exp((T / dummyT - 273) / (T / dummyT - 35.86));
@@ -24,7 +24,9 @@ if (withEq == 1)
     volScalarField kMPC = alpha * kMPCOpen + (1 - alpha) * kMPCClosed;
 
     // evRate = kMPC * (1 - alphaL - alphaS) / univR / T * (aw * pSat - pV) * molMV;
-    evRate = kMPC * (1 - alphaL - alphaS) / Foam::pow(J, 0.333) / univR / T * (aw * pSat - pV) * molMV;
+    // evRate = kMPC * (1 - alphaL - alphaS) / Foam::pow(J, 0.333) / univR / T * (aw * pSat - pV) * molMV;
+    // evRate = kMPC * (1 - alphaL - alphaS) / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pV) * molMV;
+    evRate = kMPC / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pV) * molMV;
 
     // -- equalibrium water vapor presure (Zhang)
     // volScalarField a = 4463.083750 * moisture * Foam::exp(0.007 * T / dummyT - 4.61) * (Foam::pow(moisture * Foam::exp(0.007 * T / dummyT - 4.61), 0.82482));
@@ -50,33 +52,33 @@ if (withEq == 1)
     // evRate = intBoil * alphaL / (1-alphaL) * molMC / univR / dimensionedScalar("dummyT", dimTemperature, 300) * (pVEq - pV);
     // evRate = intBoil * (1 - alphaS) * molMC / univR / dimensionedScalar("dummyT", dimTemperature, 300) * (pVEq - pV);
     // evRate = intBoil * (1 - alphaS) * molMC / univR / T * (pVEq - pV);
-}
+// }
 // -- from (M. Al-Nasser Numerical simulation of bread baking in a convection oven 2021)
-else
-{
-    // -- saturated temperature
-    forAll(TSat, cellI)
-    {
-        if (pV[cellI] > SMALL)
-        {
-            TSat[cellI] = (-2.4432439345097229911e7+2.30650e5*Foam::log(pV[cellI]))/(-1.1598177639491068526e5+5000*Foam::log( pV[cellI]));
-        }
-    }
+// else
+// {
+//     // -- saturated temperature
+//     forAll(TSat, cellI)
+//     {
+//         if (pV[cellI] > SMALL)
+//         {
+//             TSat[cellI] = (-2.4432439345097229911e7+2.30650e5*Foam::log(pV[cellI]))/(-1.1598177639491068526e5+5000*Foam::log( pV[cellI]));
+//         }
+//     }
 
-    evRate = 0 * evRate;
-    forAll(T, cellI)
-    {
-        if (T[cellI] <= TSat[cellI])
-        {
-            evRate[cellI] +=  c.value() * (1 - alphaS[cellI] - alphaL[cellI]) * rhoG[cellI] * omegaV[cellI] * (T[cellI] - TSat[cellI]) / TSat[cellI];
-        }
-        else
-        {
-            evRate[cellI] += d.value() * alphaL[cellI] * rhoL.value() * (T[cellI] - TSat[cellI]) / TSat[cellI];
-        }
-    }
+//     evRate = 0 * evRate;
+//     forAll(T, cellI)
+//     {
+//         if (T[cellI] <= TSat[cellI])
+//         {
+//             evRate[cellI] +=  c.value() * (1 - alphaS[cellI] - alphaL[cellI]) * rhoG[cellI] * omegaV[cellI] * (T[cellI] - TSat[cellI]) / TSat[cellI];
+//         }
+//         else
+//         {
+//             evRate[cellI] += d.value() * alphaL[cellI] * rhoL.value() * (T[cellI] - TSat[cellI]) / TSat[cellI];
+//         }
+//     }
 
-    evRate = evRate * Foam::pow(TSat / dummyT, -0.5);
-}
+//     evRate = evRate * Foam::pow(TSat / dummyT, -0.5);
+// }
 
 // ************************************************************************* //

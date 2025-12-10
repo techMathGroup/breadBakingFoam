@@ -179,7 +179,7 @@ bool breadBakingSolid::evolve()
     {
         predict();
     }
-
+    scalar initialResidual = 0;
     int iCorr = 0;
 #ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector> solverPerfD;
@@ -197,14 +197,14 @@ bool breadBakingSolid::evolve()
     do
     {
         // -- pressure field
-        volScalarField pG = mesh().lookupObject<volScalarField>("pG");
+        const volScalarField& pG = mesh().lookupObject<volScalarField>("pG");
 
         // -- expansion driving force
         volScalarField deltaP = pG - min(pG);
 
         // -- bread composition
-        volScalarField alphaS = mesh().lookupObject<volScalarField>("alphaS");
-        volScalarField alphaL = mesh().lookupObject<volScalarField>("alphaL");
+        const volScalarField& alphaS = mesh().lookupObject<volScalarField>("alphaS");
+        const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
 
         // -- bread density
         volScalarField rho = dimensionedScalar("rhoL", dimMass / dimVolume, 1000) * alphaL + dimensionedScalar("rhoS", dimMass / dimVolume, 700) * alphaS;
@@ -239,6 +239,11 @@ bool breadBakingSolid::evolve()
         // Fixed or adaptive field under-relaxation
         D().relax();
         // relaxField(D(), iCorr);
+
+        if (iCorr == 0)
+        {
+            initialResidual = mag(solverPerfD.initialResidual());
+        }
 
         // Increment of displacement
         DD() = D() - D().oldTime();
@@ -282,15 +287,13 @@ bool breadBakingSolid::evolve()
             D()
         ) && ++iCorr < nCorr()
     );
-
-    // Interpolate cell displacements to vertices
-    mechanical().interpolate(D(), gradD(), pointD());
-
-    // Increment of point displacement
-    pointDD() = pointD() - pointD().oldTime();
-
-    // Velocity
-    U() = fvc::ddt(D());
+    Info<< solverPerfD.solverName() << ": Solving for " << D().name()
+    << ", Initial residual = " << initialResidual
+    << ", Final residual = " << solverPerfD.initialResidual()
+    << ", No outer iterations = " << iCorr << nl
+    // << " Max relative residual = " << maxRes
+    // << ", Relative residual = " << res
+    << ", enforceLinear = " << enforceLinear() << endl;
 
 #ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector>::debug = 1;
@@ -299,6 +302,18 @@ bool breadBakingSolid::evolve()
 #endif
 
     return true;
+}
+
+void breadBakingSolid::updateFields()
+{
+    // Interpolate cell displacements to vertices
+    mechanical().interpolate(D(), gradD(), pointD());
+
+    // Increment of point displacement
+    pointDD() = pointD() - pointD().oldTime();
+
+    // Velocity
+    U() = fvc::ddt(D());
 }
 
 

@@ -27,7 +27,7 @@ boundaryField
 		type wedge;
 	}
 	
-	"(sides|bottom|sidesOur|bottomOur|topOur)"
+	"(sides|bottom)"
 	{
         type zeroGradient;
 	}

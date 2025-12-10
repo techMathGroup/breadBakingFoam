@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
             }
         }
 
+        physics().updateFields();
+
         physics().updateTotalFields();
 
         runTime.printExecutionTime(Info);
