@@ -43,7 +43,7 @@ lambdaS = 0.45
 perm = 0.9e-12  # -- bread permeability 
 
 # -- heat capacities for the individual phases
-CpS = 700   # -- solid phase
+CpS = 1200   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
@@ -54,7 +54,7 @@ rhoL = 1000  # -- liquid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.023
+kMPC = 0.03
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
 evCoef1 = -0.0056

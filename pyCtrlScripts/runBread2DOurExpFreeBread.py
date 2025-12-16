@@ -20,16 +20,16 @@ baseCaseDir = '../tutorials/bread3DOurExp/' # -- base case for simulation
 # baseCaseDir = '../ZZ_cases/00_breads/breadAx2DOurExp/'
 # baseCaseDir = '../ZZ_cases/00_breads/fine_breadAx2DOurExp_lam0.44/'
 # baseCaseDir = '../ZZ_cases/00_breads/bread3DOurExp/'
-baseCaseDir = '../ZZ_cases/00_breads/bread2DOurFree/'
-outFolder = '../ZZ_cases/00_breads/bread2DOurFree/'
+# baseCaseDir = '../ZZ_cases/00_breads/bread2DOurFree/'
+outFolder = '../ZZ_cases/00_breads/bread2DOuralpha10/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
 makeGeom = True # -- creation of the geometry for computation
 runDynSim = True    # -- run simulation
-prepBlockMesh = False    # -- preparation of the blockMeshDict script
-makeGeom = False # -- creation of the geometry for computation
-runDynSim = False    # -- run simulation
+# prepBlockMesh = False    # -- preparation of the blockMeshDict script
+# makeGeom = False # -- creation of the geometry for computation
+# runDynSim = False    # -- run simulation
 runPostProcess = True   # -- run post-processing
 # runPostProcess = False   # -- run post-processing
 
@@ -42,17 +42,17 @@ hLoaf = 7e-2  # -- loaf height
 
 '''Internal transport parameters'''
 # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-DFree = 2.22e-5 
+DFree = 2.22e-6
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
-lambdaS = 0.44
+lambdaS = 0.47
 
 perm = 3e-12  # -- bread permeability 
 
 # -- heat capacities for the individual phases
-CpS = 700   # -- solid phase
+CpS = 1200   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
@@ -63,7 +63,7 @@ rhoL = 1000  # -- liquid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.023
+kMPC = 0.03
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
 evCoef1 = -0.0056
@@ -71,9 +71,9 @@ evCoef2 = 5.5
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
-R0 = 6e-4 
+R0 = 7e-4 
 Tm = 314
-Tm = 308
+# Tm = 308
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
@@ -95,8 +95,8 @@ DFinalRelax = 1
 
 '''Boundary conditions'''
 kMSides = 6e-4   # -- external mass transfer coeficient
-kMBottom = 3e-4   # -- external mass transfer coeficient
-kMTop = 0.01   # -- external mass transfer coeficient
+kMBottom = 1e-4   # -- external mass transfer coeficient
+kMTop = 0.0086   # -- external mass transfer coeficient
 alphaG = 10 # -- external heat transfer coeficient 
 
 '''Post-processing'''
@@ -107,7 +107,7 @@ fig, axs = plt.subplots(3, 2, figsize=(18, 16))  # figure with plots
 baseCase = OpenFOAMCase()
 baseCase.loadOFCaseFromBaseCase(baseCaseDir)
 baseCase.changeOFCaseDir(outFolder)
-# baseCase.copyBaseCase()
+baseCase.copyBaseCase()
 
 # OTHER COMPUTATIONS====================================================
 dA = mSStep
@@ -122,15 +122,16 @@ if prepBlockMesh:
 # CHANGE THE PARAMETERS IN OPENFOAM DICTIONARIES========================
 # 1) BOUNDARY CONDITIONS
 # -- change in tutorial case
-# baseCase.setParameters(
-#     [
-#         ['0.org/omegaV', 'kM', str(kMSides), 'sides'],
-#         ['0.org/omegaV', 'kM', str(kMBottom), 'bottom'],
-#         ['0.org/omegaV', 'kM', str(kMTop), 'top'],
-#         ['0.org/pG', 'kM', str(kMSides), 'sides'],
-#         ['0.org/pG', 'kM', str(kMBottom), 'bottom'],
-#     ]
-# )
+baseCase.setParameters(
+    [
+        ['0.org/omegaV', 'kM', str(kMSides), 'sides'],
+        ['0.org/omegaV', 'kM', str(kMBottom), 'bottom'],
+        ['0.org/pG', 'kM', str(kMSides), 'sides'],
+        ['0.org/pG', 'kM', str(kMBottom), 'bottom'],
+        ['0.org/T', 'alpha', str(alphaG), 'sides'],
+        ['0.org/T', 'alpha', str(alphaG), 'bottom'],
+    ]
+)
 
 # 2) constant/transportProperties
 baseCase.setParameters(

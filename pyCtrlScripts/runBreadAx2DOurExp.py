@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
 # baseCaseDir = '../ZZ_cases/00_breads/breadAx2DOurExp/'
 # baseCaseDir = '../ZZ_cases/00_breads/fine_breadAx2DOurExp_lam0.44/'
-outFolder = '../ZZ_cases/00_breads/fine_breadAx2DOurExp_lam0.44/'
+outFolder = '../ZZ_cases/00_breads/breadAx2DOurExp/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
@@ -59,7 +59,7 @@ rhoL = 1000  # -- liquid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.023
+kMPC = 0.03
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
 evCoef1 = -0.0056
@@ -67,7 +67,7 @@ evCoef2 = 5.5
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
-R0 = 3.2e-4 
+R0 = 3.5e-4 
 Tm = 314
 Tm = 308
 
@@ -77,7 +77,7 @@ nu = 0.15   # -- Poisson ratio
 E = 12000   # -- Youngs modulus
 
 '''Numerics'''
-timeStep = 0.5  # -- computational time step
+timeStep = 1  # -- computational time step
 plusTime1 = 870 # -- how long to run with deformation
 plusTime2 = 730 # -- how long to run without deformation
 writeInt = 30   # -- how often to write results
@@ -93,7 +93,7 @@ DFinalRelax = 1
 kMSides = 6e-4   # -- external mass transfer coeficient
 kMBottom = 3e-4   # -- external mass transfer coeficient
 kMTop = 0.01   # -- external mass transfer coeficient
-alphaG = 10 # -- external heat transfer coeficient 
+alphaG = 9.5 # -- external heat transfer coeficient 
 
 '''Post-processing'''
 fig, axs = plt.subplots(3, 1, figsize=(9, 16))  # figure with plots
@@ -134,6 +134,9 @@ baseCase.setParameters(
         ['0.org/omegaV', 'kM', str(kMTop), 'top'],
         ['0.org/pG', 'kM', str(kMSides), 'sides'],
         ['0.org/pG', 'kM', str(kMBottom), 'bottom'],
+        ['0.org/T', 'alpha', str(alphaG), 'sides'],
+        ['0.org/T', 'alpha', str(alphaG), 'bottom'],
+        ['0.org/T', 'alpha', str(alphaG), 'top'],
     ]
 )
 

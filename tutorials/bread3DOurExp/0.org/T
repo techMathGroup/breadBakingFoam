@@ -28,7 +28,37 @@ boundaryField
     }
 
     // custom experiment
-    "(sides|bottom|top)"
+    top
+	{
+        type breadTMixed;
+        refValue        uniform 302;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 302;
+        alpha           9.5;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTable";
+            outOfBounds warn;
+        }
+	}
+
+    sides
+	{
+        type breadTMixed;
+        refValue        uniform 302;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 302;
+        alpha           9.5;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTable";
+            outOfBounds warn;
+        }
+	}
+
+    bottom
 	{
         type breadTMixed;
         refValue        uniform 302;
