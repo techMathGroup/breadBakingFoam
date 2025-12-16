@@ -64,7 +64,8 @@ DEff.correctBoundaryConditions();
 
 //https://www.sciencedirect.com/science/article/pii/S0960308508000333
 // lambdaEff = dummyLamdba * (0.421 - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+// lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+lambdaEff = dummyLamdba * (lambdaS.value() / 0.607 * (-0.736+(0.734e-2)*T/dummyT-(0.95e-5)*Foam::pow(T/dummyT,2)) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
 lambdaEff.correctBoundaryConditions();
 
 // -- evaporation enthalpy
