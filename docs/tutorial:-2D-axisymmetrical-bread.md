@@ -88,24 +88,24 @@ The parameters for the internal transfer in the bread can be changed directly in
 ```
 '''Internal transport parameters'''
 # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-DFree = 2.22e-6 
+DFree = 2.2e-5 
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
-lambdaS = 0.447 
+lambdaS = 0.42 
 
 perm = 0.9e-12  # -- bread permeability 
 
 # -- heat capacities for the individual phases
-CpS = 700   # -- solid phase
+CpS = 1200   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
 
 # -- mass densities for the individual phases
 rhoS = 700  # -- solid density    
-rhoL = 1000  # -- liquid density   
+rhoL = 1000  # -- liquid density  
 ```
 
 `DFree` parameter sets up the free volumetric diffusivity of the water vapors in carbon dioxide. The temperature and composition dependence of the effective diffusivity is then calculated directly in the solver. `lambdaS` sets up the heat conductivity of the dough material with zero porosity, i.e. the absolute term in equation (5) in https://doi.org/10.1016/j.fbp.2008.04.002 that is used for calculation of the effective heat conductivity. Specific heat capacities and mass densities can be then changed by `Cp` and `rho` parameters.
@@ -115,7 +115,7 @@ Evaporation is calculated using Hertz-Knudsen equation while the needed water ac
 ```
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.42
+kMPC = 0.023
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
 evCoef1 = -0.0056
@@ -123,7 +123,7 @@ evCoef2 = 5.5
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
-R0 = 22e-4 
+R0 = 23e-4 
 Tm = 314
 ```
 `kMPC` sets up the evaporation coefficient in the Hertz-Knudsen formula. `evCoef1` and `evCoef` are the coefficients for the Oswin model for water activity. Finally, `R0` and `Tm` are the pre-exponential factor and temperature of the fermentation maximum in CO2 generation kinetics.
@@ -191,4 +191,4 @@ Now, you can split the layout and vizualize multiple variables at once.
 
 <img alt="tutBreadAx2DAfterVizFields" src="tutBreadAx2DAfterVizFields.png" />
 
-Alternatively, you can try to load prepared paraview state in `ZZ_dataForPostProcessing/seeMultipleFields.pvsm`.
+Alternatively, you can load prepared paraview state in `ZZ_dataForPostProcessing/seeMultipleFields.pvsm`.

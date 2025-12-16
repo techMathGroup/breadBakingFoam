@@ -228,3 +228,11 @@ To further examine the results, you can visualize them using paraview software.
 1. run the `paraview` (in this description we use Paraview 5.12.1),
 2. open `runBreadAx2DOurExp.OpenFOAM` file, that was created during run of `Allrun` script or `pyCtrlScripts/runBreadAx2DOurExp.py`,
 3. select open data with `Open FOAM Reader`,
+
+Follow the same steps as described in the Post-Processing section of the tutorial [2D Axisymmetrical geometry acording to https://doi.org/10.1002/aic.10518](https://github.com/techMathGroup/breadBakingFoam/blob/main/docs/tutorial%3A-2D-axisymmetrical-bread.md) or load prepared paraview state in `ZZ_dataForPostProcessing/seeMultipleFields.pvsm` to get such a visualization:
+
+<img alt="tutBreadAx2DOurExpPostProcess" src="tutBreadAx2DOurExpAllFields.png" />
+
+Additionaly, you can save animation of growth which can be further compared with the experimental data.
+
+<img alt="tutBreadAx2DOurExpAnim" src="tutBreadAx2DOurExpAnim.webp" />

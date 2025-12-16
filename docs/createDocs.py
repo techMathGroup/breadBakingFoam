@@ -10,7 +10,7 @@ import shutil
 import re
 
 # SETUP=================================================================
-wikiGithub = "https://github.com/hlavatytomas/breadBakingFoam.wiki.git"
+wikiGithub = "https://github.com/techMathGroup/breadBakingFoam.wiki.git"
 
 # CODE==================================================================
 # -- get the name of the wiki page
