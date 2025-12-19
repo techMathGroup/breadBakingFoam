@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|alphaS|alphaL|D)"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|D)"
     {
         solver          PBiCGStab;
         preconditioner  DIC;
@@ -25,7 +25,7 @@ solvers
         relTol          0.001;
     }
  
-    "(pG|T|omegaV|alphaS|alphaL|D)Final"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|D)Final"
     {
         solver          PBiCGStab;
         preconditioner  DIC;
@@ -72,7 +72,7 @@ relaxationFactors
         // DFinal 0.1;
         omegaV 0.1;
         // T 0.1;
-        // pG 0.1;
+        pG 0.1;
     }
     equations
     {

@@ -21,6 +21,6 @@ probeOur
     // Mandatory entries
     type                probes;
     libs                (sampling);
-    probeLocations      ((0.069 0 0));
+    probeLocations      ((0.0649 0 0) (1.5e-2 0.056 0));
     fields              (T D);
 }

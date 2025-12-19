@@ -32,10 +32,17 @@ boundaryField
     
     "(bottom)"
     {
+        type            fixedDisplacementZeroShear;
         // type            fixedDisplacementShear;
         // fricCoeff   -2e4;
-        type            fixedValue;
+        // type            fixedValue;
         value           uniform (0 0 0);
+        // type            breadDFloor;
+        // floorPos        -2e-3;
+        // refValue        uniform (0 0 0);
+        // refGradient     uniform (0 0 0);
+        // valueFraction   uniform 1;
+        // value           uniform 0;
     }
 
     "symmetryPatch"
@@ -54,7 +61,7 @@ boundaryField
         // pressure        uniform 0;
         // value           uniform (0 0 0);
         type            breadDFloor;
-        floorPos        0;
+        floorPos        5e-4;
         refValue        uniform (0 0 0);
         refGradient     uniform (0 0 0);
         valueFraction   uniform 1;
