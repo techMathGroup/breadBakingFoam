@@ -15,3 +15,7 @@ ZZ_cases
 tutorials/*/all*
 
 *__pycache__*
+
+applications/solvers/breadBakingFoamDough
+pyCtrlScripts/runBread*Test*
+tutorials/*Test
