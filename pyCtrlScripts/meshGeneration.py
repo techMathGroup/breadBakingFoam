@@ -444,17 +444,23 @@ def prep2DMeshOurExp(rLoaf, hLoaf, x0, y0, z0, dA, dX, dY, dZ, grX, grY, grZ, ba
     ### WRITE ###
     fvMesh.writeBMD("%s/system/" % baseCase.dir)
 
-def y(x, z, hLoaf, rLoaf1, rLoaf2):
-    return ((1 - z**2 / rLoaf2**2 - (x)**2 / hLoaf**2) * rLoaf1**2)**0.5
+def y(x, z, hLoaf, rLoaf1,rLoaf2, up=0):
+    return ((1 - z**2 / rLoaf2**2 - (x - up)**2 / hLoaf**2) * rLoaf1**2)**0.5
 
-def x(y, z, hLoaf, rLoaf1, rLoaf2):
-    return ((1 - z**2 / rLoaf2**2 - y**2 / rLoaf1**2) * hLoaf**2)**0.5
+def z(x, y, hLoaf, rLoaf1,rLoaf2, up=0):
+    return ((1 - y**2 / rLoaf1**2 - (x - up)**2 / hLoaf**2) * rLoaf2**2)**0.5
 
-def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase, for2DExtrude=False):
+def x(y, z, hLoaf, rLoaf1,rLoaf2, up=0):
+    return (((1 - z**2 / rLoaf2**2 - y**2 / rLoaf1**2) * hLoaf**2)**0.5 + up)
+
+def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase, for2DExtrude=False, up=0):
     # -- preparation of the blockMeshDictFile for geometry generation
     fvMesh = mesh()
+    hLoaf = hLoaf - up
 
     nPointsForEdge = 100
+    impGr = "1"
+    invImpGr = "1"
 
     p1 = 0.4
     p2 = 0.7
@@ -476,13 +482,13 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
         [rInX, rInY, 0],                                       #5
         [rInX, rInY, rInZ],                                       #6
         [0, rInY, rInZ],                                       #7
-        [0, rLoaf1, 0],                                       #8
-        [0, y(0, p2* rLoaf2, hLoaf, rLoaf1, rLoaf2), p2* rLoaf2],                                       #9
-        [x(p3*rLoaf1, 0, hLoaf, rLoaf1, rLoaf2), p3*rLoaf1, 0],                                       #10
-        [x(p4*rLoaf1, p4* rLoaf2, hLoaf, rLoaf1, rLoaf2), p4*rLoaf1, p4* rLoaf2],                                       #11
-        [0, 0, rLoaf2],                                       #12
-        [x(0, p3*rLoaf2, hLoaf, rLoaf1, rLoaf2), 0, p3*rLoaf2],                                       #13 -- with edge
-        [hLoaf, 0,0 ],                                       #14 -- with edge
+        [0, y(0, 0, hLoaf, rLoaf1,rLoaf2, up=up), 0],                                       #8
+        [0, y(0, p2* rLoaf2, hLoaf, rLoaf1,rLoaf2, up=up), p2* rLoaf2],                                       #9
+        [x(p3*rLoaf1, 0, hLoaf, rLoaf1,rLoaf2, up=up), p3*rLoaf1, 0],                                       #10
+        [x(p4*rLoaf1, p4* rLoaf2, hLoaf, rLoaf1,rLoaf2, up=up), p4*rLoaf1, p4* rLoaf2],                                       #11
+        [0, 0, z(0, 0, hLoaf, rLoaf1,rLoaf2, up=up)],                                       #12
+        [x(0, p3*rLoaf2, hLoaf, rLoaf1,rLoaf2, up=up), 0, p3*rLoaf2],                                       #13 -- with edge
+        [x(0, 0, hLoaf, rLoaf1,rLoaf2, up=up), 0,0 ],                                       #14 -- with edge
         
     ])
 
@@ -508,7 +514,7 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     nCells = [nCX, nCY, nCZ]
 
     # grading
-    grading = [grX, grY, grZ]
+    grading = [impGr, grY, grZ]
 
     # create the block
     block1 = fvMesh.addBlock(vertices, neighbours, nCells, grading)
@@ -535,10 +541,34 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     nCells = [nCX, nCY2, nCZ]
 
     # grading
-    grading = [grX, grY, grZ]
+    grading = [impGr, invImpGr, grZ]
 
     # create the block
     block2 = fvMesh.addBlock(vertices, neighbours, nCells, grading)
+    
+    # # edges 
+    # xTu = np.linspace(body[8,0], body[10,0], nPointsForEdge)
+    # yTu = [y(xx, 0, hLoaf, rLoaf1,rLoaf2, up=up) for xx in xTu]
+    # edges = []
+    # for yInd in range(len(yTu)):
+    #     edges.append([xTu[yInd], yTu[yInd], 0])
+    # fvMesh.addEdge("polyLine", block2.retEYEZ0(), edges)
+
+    # xTu = np.linspace(body[9,0], body[11,0], nPointsForEdge)
+    # k = (body[9,2] - body[11,2]) / (body[9,0] -body[11,0])
+    # a = body[9,2] - k * body[9,0]
+    # zTu = [(k * xx + a) for xx in xTu]
+    # edges = []
+    # for yInd in range(len(xTu)):
+    #     edges.append([xTu[yInd], y(xTu[yInd], zTu[yInd], hLoaf, rLoaf1,rLoaf2, up=up) , zTu[yInd]])
+    # fvMesh.addEdge("polyLine", block2.retEYEZE(), edges)
+
+    # zTu = np.linspace(body[8,2], body[9,2], nPointsForEdge)
+    # yTu = [y(0, zz, hLoaf, rLoaf1,rLoaf2, up=up) for zz in zTu]
+    # edges = []
+    # for yInd in range(len(yTu)):
+    #     edges.append([0, yTu[yInd], zTu[yInd]])
+    # fvMesh.addEdge("polyLine", block2.retEX0YE(), edges)
 
     # edges 
     yTu = np.linspace(body[8,1], body[10,1], nPointsForEdge)
@@ -586,20 +616,20 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     nCells = [nCX, nCY, nCY2]
 
     # grading
-    grading = [grX, grY, grZ]
+    grading = [impGr, grY, invImpGr]
 
     # create the block
     block3 = fvMesh.addBlock(vertices, neighbours, nCells, grading)
 
-    zTu = np.linspace(body[12,2], body[13,2], nPointsForEdge)
-    xTu = [x(0, zz, hLoaf, rLoaf1, rLoaf2) for zz in zTu]
+    xTu = np.linspace(body[12,0], body[13,0], nPointsForEdge)
+    zTu = [z(xx, 0, hLoaf, rLoaf1,rLoaf2, up=up) for xx in xTu]
     edges = []
     for yInd in range(len(xTu)):
         edges.append([xTu[yInd], 0, zTu[yInd]])
     fvMesh.addEdge("polyLine", block3.retEY0ZE(), edges)
 
-    zTu = np.linspace(body[12,2], body[9,2], nPointsForEdge)
-    yTu = [y(0, zz, hLoaf, rLoaf1, rLoaf2) for zz in zTu]
+    yTu = np.linspace(body[12,1], body[9,1], nPointsForEdge)
+    zTu = [z(0, yy, hLoaf, rLoaf1,rLoaf2, up=up) for yy in yTu]
     edges = []
     for yInd in range(len(yTu)):
         edges.append([0, yTu[yInd], zTu[yInd]])
@@ -627,20 +657,20 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     nCells = [nCY2, nCY, nCZ]
 
     # grading
-    grading = [grX, grY, grZ]
+    grading = [invImpGr, grY, grZ]
 
     # create the block
     block4 = fvMesh.addBlock(vertices, neighbours, nCells, grading)
 
     yTu = np.linspace(body[14,1], body[10,1], nPointsForEdge)
-    xTu = [x(yy, 0, hLoaf, rLoaf1, rLoaf2) for yy in yTu]
+    xTu = [x(yy, 0, hLoaf, rLoaf1,rLoaf2, up=up) for yy in yTu]
     edges = []
     for yInd in range(len(yTu)):
         edges.append([xTu[yInd], yTu[yInd], 0])
     fvMesh.addEdge("polyLine", block4.retEXEZ0(), edges)
 
     zTu = np.linspace(body[14,2], body[13,2], nPointsForEdge)
-    xTu = [x(0, zz, hLoaf, rLoaf1, rLoaf2) for zz in zTu]
+    xTu = [x(0, zz, hLoaf, rLoaf1,rLoaf2, up=up) for zz in zTu]
     edges = []
     for yInd in range(len(xTu)):
         edges.append([xTu[yInd], 0, zTu[yInd]])
