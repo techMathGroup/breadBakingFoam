@@ -501,8 +501,25 @@ void Foam::viscoBread::correct(volSymmTensorField& sigma)
     const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
     alphaG_ = 1 - alphaL - alphaS;
 
+    // -- load the dictionary with the reaction data
+    IOdictionary mechanicalProperties
+    (
+        IOobject
+        (
+            "mechanicalProperties",      // dictionary name
+            mesh().time().constant(),            // dict is found in "constant"
+            mesh(),                      // registry for the dict
+            IOobject::MUST_READ,        // must exist, otherwise failure
+            IOobject::NO_WRITE          // dict is only read by the solver
+        )
+    );
+
+    scalar tau0 = mechanicalProperties.lookupOrDefault<scalar>("tau0", 1.0);
+    // Info << "Tau0" << tau0;
+    // thermophysicalProperties.subDict("solid").readEntry("rho", rhoS);
     // -- relaxation time, Young modulus, Poisson ration, pre-elastic matrix factor
-    tau_ = (9.0 * (2.0 / 3.14 * Foam::atan((T_ - 65) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
+    // tau_ = 20*(9.0 * (2.0 / 3.14 * Foam::atan((T_ - 65) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
+    tau_ = tau0 * (9.0 * (2.0 / 3.14 * Foam::atan((T_ - 65) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
     dimensionedScalar E = 9 * mu_ * K_ / (3 * K_ + mu_);
     dimensionedScalar nu = 0.5 * (3 * K_ - 2 * mu_) / (3 * K_ + mu_);
 

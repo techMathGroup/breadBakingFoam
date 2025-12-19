@@ -64,6 +64,8 @@ class fixedDisplacementShearFvPatchVectorField
         //- Displacement time series
         interpolationTable<vector> dispSeries_;
 
+        scalar fricCoeff_;
+
         //- Switch to force the shear gradient to be zero
         const Switch forceZeroShearGrad_;
 

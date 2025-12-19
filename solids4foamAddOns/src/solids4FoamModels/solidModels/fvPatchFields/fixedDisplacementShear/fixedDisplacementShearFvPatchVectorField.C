@@ -40,8 +40,10 @@ fixedDisplacementShearFvPatchVectorField
     solidDirectionMixedFvPatchVectorField(p, iF),
     totalDisp_(p.size(), vector::zero),
     dispSeries_(),
-    forceZeroShearGrad_(false)
-{}
+    forceZeroShearGrad_(false),
+    fricCoeff_(0)
+{
+}
 
 
 fixedDisplacementShearFvPatchVectorField::
@@ -61,7 +63,9 @@ fixedDisplacementShearFvPatchVectorField
 #endif
     dispSeries_(pvf.dispSeries_),
     forceZeroShearGrad_(pvf.forceZeroShearGrad_)
-{}
+{
+    fricCoeff_ = pvf.fricCoeff_;
+}
 
 
 fixedDisplacementShearFvPatchVectorField::
@@ -113,6 +117,9 @@ fixedDisplacementShearFvPatchVectorField
         transform(I - valueFraction(), gradValue)
     );
 
+    dict.readEntry("fricCoeff", fricCoeff_);
+    Info << "Fric coeff loaded " << fricCoeff_ <<endl;
+
     Field<vector>::operator=(normalValue + transformGradValue);
 }
 
@@ -128,7 +135,10 @@ fixedDisplacementShearFvPatchVectorField
     totalDisp_(pvf.totalDisp_),
     dispSeries_(pvf.dispSeries_),
     forceZeroShearGrad_(pvf.forceZeroShearGrad_)
-{}
+{
+    fricCoeff_ = pvf.fricCoeff_;
+    Info << "Fric coeff loaded " << fricCoeff_ <<endl;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -146,6 +156,7 @@ void fixedDisplacementShearFvPatchVectorField::autoMap
 #else
     totalDisp_.autoMap(m);
 #endif
+    Info << "In mapper 1 " << fricCoeff_ <<endl;
 }
 
 
@@ -162,6 +173,8 @@ void fixedDisplacementShearFvPatchVectorField::rmap
         refCast<const fixedDisplacementShearFvPatchVectorField>(pvf);
 
     totalDisp_.rmap(rpvf.totalDisp_, addr);
+    Info << "In mapper 2 " << fricCoeff_ <<endl;
+    // fricCoeff_ = pvf.fricCoeff_;
 }
 
 
@@ -216,15 +229,19 @@ void fixedDisplacementShearFvPatchVectorField::updateCoeffs()
         {
             const volVectorField& U = this->db().objectRegistry::lookupObject<volVectorField>("U");
             vectorField UBound = U.boundaryField()[patch().index()];
-            force = -1e6 * UBound;
+            // force[1] = fricCoeff_ * UBound;
             // Info << "maxUBound " << max(UBound) << endl;
-            // forAll(refGrad(), faceI)
-            // {
-            //     force[faceI][1] = -1e6 * UBound[faceI][1];
-            //     force[faceI][2] = -1e6 * UBound[faceI][2];
-            //     // refGrad()[faceI][1] = -1e1 * UBound[faceI][1];
-            //     // refGrad()[faceI][2] = -1e1 * UBound[faceI][2];
-            // }
+            forAll(refGrad(), faceI)
+            {
+                force[faceI][1] = fricCoeff_ * UBound[faceI][1];
+                // force[faceI][2] = -1e6 * UBound[faceI][2];
+                // refGrad()[faceI][1] = -1e1 * UBound[faceI][1];
+                // refGrad()[faceI][2] = -1e1 * UBound[faceI][2];
+            }
+        }
+        else
+        {
+            Info << "U not found" <<endl;
         }
 
 
@@ -270,6 +287,12 @@ void fixedDisplacementShearFvPatchVectorField::write(Ostream& os) const
 
     os.writeKeyword("forceZeroShearGrad")
         << forceZeroShearGrad_ << token::END_STATEMENT << nl;
+    Info << "fricCoeff " << fricCoeff_ << endl;
+    os.write("\n\t\t");
+    os.write("fricCoeff");
+    os.write("\t");
+    os.write(fricCoeff_);
+    os.write(";\n");
 
     solidDirectionMixedFvPatchVectorField::write(os);
 }

@@ -206,8 +206,27 @@ bool breadBakingSolid::evolve()
         const volScalarField& alphaS = mesh().lookupObject<volScalarField>("alphaS");
         const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
 
+        // -- load the dictionary with the reaction data
+        IOdictionary thermophysicalProperties
+        (
+            IOobject
+            (
+                "thermophysicalProperties",      // dictionary name
+                mesh().time().constant(),            // dict is found in "constant"
+                mesh(),                      // registry for the dict
+                IOobject::MUST_READ,        // must exist, otherwise failure
+                IOobject::NO_WRITE          // dict is only read by the solver
+            )
+        );
+
+        dimensionedScalar rhoS, rhoL;
+        thermophysicalProperties.subDict("solid").readEntry("rho", rhoS);
+        thermophysicalProperties.subDict("liquid").readEntry("rho", rhoL);
+
+        // Info << "rhoL" << rhoL << endl;
+
         // -- bread density
-        volScalarField rho = dimensionedScalar("rhoL", dimMass / dimVolume, 1000) * alphaL + dimensionedScalar("rhoS", dimMass / dimVolume, 700) * alphaS;
+        volScalarField rho = rhoL * alphaL + rhoS * alphaS;
 
         // Store fields for under-relaxation and residual calculation
         D().storePrevIter();
