@@ -18,4 +18,5 @@ tutorials/*/all*
 
 applications/solvers/breadBakingFoamDough
 pyCtrlScripts/runBread*Test*
+# pyCtrlScripts/*Opt.py
 tutorials/*Test
