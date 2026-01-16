@@ -25,7 +25,7 @@ forAll(permGLViscG, cellI)
 // permGLViscG = permGLViscGSc / nuG * kGForPerm;
 // DEff = D * Foam::pow(kGForPerm * (1 - alphaS), 1.333);
 
-
+// DEff = D * (1 - alphaL - alphaS) / 3.5;
 // Info << "min(nuG) " << min(nuG).value() << endl;
 // Info << "min(permGLViscG) " << min(permGLViscG).value() << endl;
 
@@ -64,8 +64,21 @@ DEff.correctBoundaryConditions();
 
 //https://www.sciencedirect.com/science/article/pii/S0960308508000333
 // lambdaEff = dummyLamdba * (0.421 - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-lambdaEff = dummyLamdba * (lambdaS.value() / 0.607 * (-0.736+(0.734e-2)*T/dummyT-(0.95e-5)*Foam::pow(T/dummyT,2)) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+// volScalarField PhiL = alphaL / (alphaL + alphaS);
+// lambdaEff = dummyLamdba * 0.155 + lambdaEff / (0.615 * PhiL + 0.421 * (1-PhiL)) * PhiL;
+// lambdaEff = dummyLamdba * (lambdaS.value() / 0.607 * (-0.736+(0.734e-2)*T/dummyT-(0.95e-5)*Foam::pow(T/dummyT,2)) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+// lambdaEff = dummyLamdba * ((alphaS / (alphaS + alphaL) * 0.15 + alphaL / (alphaS + alphaL) * 0.615) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+// Info << "max(lambdaEff)" << max(lambdaEff) <<endl;
+
+// forAll(lambdaEff, cellI)
+// {
+//     if(moisture[cellI] < 0.12 || T[cellI] > 373)
+//     {
+//         // lambdaEff[cellI] = 0.05;
+//         DEff[cellI] = DEff[cellI]*0.01;
+//     }
+// }
 lambdaEff.correctBoundaryConditions();
 
 // -- evaporation enthalpy

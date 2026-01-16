@@ -6,11 +6,13 @@
         // J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * thermo.Cp()) * fvm::ddt(T)
         // J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * thermo.Cp()) * fvm::ddt(T)
         J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + (1 - omegaV) * CpCO2)) * fvm::ddt(T)
+        // J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + (1 - omegaV) * CpCO2)) * fvm::ddt(T)
 
         // CpS * rhoS * fvm::ddt(J, alphaS, T)
         // + CpL * rhoL * fvm::ddt(J, alphaL, T)
-        // + thermo.Cp() * rhoG * fvm::ddt(J, alphaG, T)
-        // + thermo.Cp() * J * alphaG * T * fvc::ddt(rhoG)
+        // - CpCO2 * rhoG * fvm::ddt(J, alphaL, T)
+        // - CpCO2 * rhoG * fvm::ddt(J, alphaS, T)
+        // + CpCO2 * J * (1 - alphaL - alphaS) * T * fvc::ddt(rhoG)
 
         ==
 

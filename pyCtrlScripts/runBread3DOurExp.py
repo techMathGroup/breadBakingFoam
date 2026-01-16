@@ -32,7 +32,7 @@ mSStep = 0.15e-2 # -- aproximate computational cell size
 rLoaf1 = 8.0e-2  # -- loaf radius                
 rLoaf2 = 8.0e-2  # -- loaf radius                
 hLoaf = 7e-2  # -- loaf height 
-up = 0e-2
+up = 0e-2   # -- move the elipse geometry up
 
 '''Internal transport parameters'''
 # -- free volumetric difusivity of the water vapors in CO2 at 300 K
@@ -72,7 +72,7 @@ Tm = 314
 withDeformation = 1 # -- turn on (1) /off (0) deformation
 nu = 0.15   # -- Poisson ratio
 E = 12000   # -- Youngs modulus
-tau0 = 20
+tau0 = 20   # -- multiplicator of the tau 
 
 '''Numerics'''
 timeStep = 1  # -- computational time step
