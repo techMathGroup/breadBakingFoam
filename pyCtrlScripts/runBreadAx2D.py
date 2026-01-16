@@ -69,6 +69,7 @@ Tm = 314
 withDeformation = 1 # -- turn on (1) /off (0) deformation
 nu = 0.15   # -- Poisson ratio
 E = 12000   # -- Youngs modulus
+tGelat = 65 # -- temperature of gelatization
 
 '''Numerics'''
 timeStep = 1    # -- computational time step
@@ -168,7 +169,8 @@ baseCase.setParameters(
 baseCase.setParameters(
     [
         ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
-        ['constant/mechanicalProperties', 'E', str(E), 'bread']
+        ['constant/mechanicalProperties', 'E', str(E), 'bread'],
+        ['constant/mechanicalProperties', 'tGelat', str(tGelat), '']
     ]
 )
 
