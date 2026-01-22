@@ -464,7 +464,7 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
 
     p1 = 0.4
     p2 = 0.7
-    p3 = 0.68
+    p3 = 0.6
     p4 = 0.57
 
     nasobekX = 1.5
@@ -571,8 +571,10 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     # fvMesh.addEdge("polyLine", block2.retEX0YE(), edges)
 
     # edges 
-    yTu = np.linspace(body[8,1], body[10,1], nPointsForEdge)
-    xTu = [x(yy, 0, hLoaf, rLoaf1, rLoaf2) for yy in yTu]
+    # yTu = np.linspace(body[8,1], body[10,1], nPointsForEdge)
+    # xTu = [x(yy, 0, hLoaf, rLoaf1, rLoaf2,up=up) for yy in yTu]
+    xTu = np.linspace(body[8,0], body[10,0], nPointsForEdge)
+    yTu = [y(xx, 0, hLoaf, rLoaf1, rLoaf2,up=up) for xx in xTu]
     edges = []
     for yInd in range(len(yTu)):
         edges.append([xTu[yInd], yTu[yInd], 0])
@@ -584,11 +586,11 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     zTu = [(k * yy + a) for yy in yTu]
     edges = []
     for yInd in range(len(yTu)):
-        edges.append([x(yTu[yInd], zTu[yInd], hLoaf, rLoaf1, rLoaf2), yTu[yInd], zTu[yInd]])
+        edges.append([x(yTu[yInd], zTu[yInd], hLoaf, rLoaf1, rLoaf2,up=up), yTu[yInd], zTu[yInd]])
     fvMesh.addEdge("polyLine", block2.retEYEZE(), edges)
 
     zTu = np.linspace(body[8,2], body[9,2], nPointsForEdge)
-    yTu = [y(0, zz, hLoaf, rLoaf1, rLoaf2) for zz in zTu]
+    yTu = [y(0, zz, hLoaf, rLoaf1, rLoaf2,up=up) for zz in zTu]
     edges = []
     for yInd in range(len(yTu)):
         edges.append([0, yTu[yInd], zTu[yInd]])
