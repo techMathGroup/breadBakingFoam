@@ -16,7 +16,10 @@ tutorials/*/all*
 
 *__pycache__*
 
-applications/solvers/breadBakingFoamDough
+applications/solvers/*Test
 pyCtrlScripts/runBread*Test*
 # pyCtrlScripts/*Opt.py
 tutorials/*Test
+
+pyCtrlScripts/*swin*
+pyCtrlScripts/*GAB*

@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|alphaS|alphaL|D)"
+    "(pG|T|omegaV|alphaS|alphaL|D|alphaLGel)"
     {
         solver          PBiCGStab;
         preconditioner  DIC;
@@ -25,7 +25,7 @@ solvers
         relTol          0.001;
     }
  
-    "(pG|T|omegaV|alphaS|alphaL|D)Final"
+    "(pG|T|omegaV|alphaS|alphaL|D|alphaLGel)Final"
     {
         solver          PBiCGStab;
         preconditioner  DIC;

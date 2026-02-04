@@ -17,8 +17,6 @@ import matplotlib.pyplot as plt
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-# baseCaseDir = '../ZZ_cases/00_breads/breadAx2DOurExp/'
-# baseCaseDir = '../ZZ_cases/00_breads/fine_breadAx2DOurExp_lam0.44/'
 outFolder = '../ZZ_cases/00_breads/breadAx2DOurExp/'
 
 # WHAT SHOULD RUN=======================================================
@@ -38,38 +36,41 @@ hLoaf = 4.75e-2  # -- loaf height
 
 '''Internal transport parameters'''
 # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-DFree = 2.22e-6 
+DFree = 5e-6 
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
-lambdaS = 0.44
+lambdaS = 0.55
 
-perm = 3e-12  # -- bread permeability 
+perm = 2.6e-12  # -- bread permeability 
 
 # -- heat capacities for the individual phases
-CpS = 700   # -- solid phase
+
+CpS = 1450   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
 
 # -- mass densities for the individual phases
-rhoS = 700  # -- solid density    
+rhoS = 1200  # -- solid density    
 rhoL = 1000  # -- liquid density   
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.03
+kMPC = 0.04
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
-evCoef1 = -0.0056
-evCoef2 = 5.5
+evCoef1 = -0.0071
+evCoef2 = 4.5
+n = 0.38
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
-R0 = 3.5e-4 
+R0 = 3e-4 
 Tm = 314
-Tm = 308
+Tm = 310
+tGelatEv = 57
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
@@ -78,22 +79,25 @@ E = 12000   # -- Youngs modulus
 
 '''Numerics'''
 timeStep = 1  # -- computational time step
-plusTime1 = 870 # -- how long to run with deformation
-plusTime2 = 730 # -- how long to run without deformation
+plusTime1 = 480 # -- how long to run with deformation
+plusTime2 = 1120 # -- how long to run without deformation
 writeInt = 30   # -- how often to write results
 nIter = 50  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
-nCores = 4 # -- number of cores to run the simulation
+nCores = 8 # -- number of cores to run the simulation
 
 # -- relaxation factors
 DRelax = 0.1
 DFinalRelax = 1
 
 '''Boundary conditions'''
-kMSides = 6e-4   # -- external mass transfer coeficient
+kMSides = 5e-4   # -- external mass transfer coeficient
 kMBottom = 3e-4   # -- external mass transfer coeficient
-kMTop = 0.01   # -- external mass transfer coeficient
-alphaG = 9.5 # -- external heat transfer coeficient 
+kMTop = 3e-3   # -- external mass transfer coeficient
+alphaG = 10 # -- external heat transfer coeficient 
+
+# outFolder = '../ZZ_cases/01_ourBreads/00_alphaG_%g_kmsides%g_kmbottom%g_kmtop%g_r0_%g_perm_%g_dfree_%g_kmpc_%g/' % (alphaG, kMSides, kMBottom, kMTop, R0, perm, DFree, 
+kMPC)
 
 '''Post-processing'''
 fig, axs = plt.subplots(3, 1, figsize=(9, 16))  # figure with plots
@@ -172,6 +176,8 @@ baseCase.setParameters(
         ['constant/reactiveProperties', 'evCoef2', str(evCoef2), 'evaporation'],
         ['constant/reactiveProperties', 'R0', str(R0), 'fermentation'],
         ['constant/reactiveProperties', 'Tm', str(Tm), 'fermentation'],
+        ['constant/reactiveProperties', 'nCoef', str(n), 'evaporation'],
+        ['constant/reactiveProperties', 'TGelEv', str(tGelatEv), 'gelatization']
     ]
 )
         

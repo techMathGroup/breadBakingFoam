@@ -10,25 +10,27 @@ FoamFile
     version     1.0;
     format      ascii;
     class       volScalarField;
-    object      alphaS;
+    location    "0";
+    object      alphaL;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 0 0 0 0 0 0];
 
-// internalField   uniform 0.136;
-internalField   uniform 0.228;
+// internalField   uniform 0.153;
+internalField   uniform 0.0;
+
 
 boundaryField
 {
+	"(wedgeZ0|wedgeZE|wedge)"
+	{
+		type wedge;
+	}
+	
 	"(sides|bottom|top)"
 	{
         type zeroGradient;
-	}
-	
-	"(wedgeZ0|wedgeZE)"
-	{
-		type wedge;
 	}
 }
 

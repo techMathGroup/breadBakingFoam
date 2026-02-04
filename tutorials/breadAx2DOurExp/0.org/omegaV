@@ -27,6 +27,8 @@ boundaryField
 
     sides
     {
+        // type fixedValue;
+        // value uniform 7.7e-3;
         type breadOmegaVMixed;
         kM               6e-4; // -- heat transfer coefficient
 
@@ -44,6 +46,8 @@ boundaryField
 
     top
     {
+        // type fixedValue;
+        // value uniform 7.7e-3;
         type breadOmegaVMixed;
         kM               0.01; // -- heat transfer coefficient
 
@@ -61,6 +65,8 @@ boundaryField
 
     bottom
     {
+        // type fixedValue;
+        // value uniform 7.7e-3;
         type breadOmegaVMixed;
         kM               3e-4; // -- heat transfer coefficient
 
@@ -74,7 +80,7 @@ boundaryField
             file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
-        // type zeroGradient;
+        type zeroGradient;
     }
 }
 

@@ -30,6 +30,8 @@ boundaryField
     // custom experiment
     top
 	{
+        //         type fixedValue;
+        // value uniform 302.5;
         type breadTMixed;
         refValue        uniform 302;
         refGradient     uniform 0;
@@ -45,6 +47,8 @@ boundaryField
 
     sides
 	{
+        //         type fixedValue;
+        // value uniform 302.5;
         type breadTMixed;
         refValue        uniform 302;
         refGradient     uniform 0;
@@ -60,6 +64,8 @@ boundaryField
 
     bottom
 	{
+        // type fixedValue;
+        // value uniform 302.5;
         type breadTMixed;
         refValue        uniform 302;
         refGradient     uniform 0;
