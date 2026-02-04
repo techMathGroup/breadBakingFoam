@@ -1,6 +1,34 @@
 // -- calculation of the Darcy permeability, effective difusivity and effective heat conductivity
 kGForPerm = (1 - 1.1 * (alphaL / (1 - alphaS))); // -- relative permeability (Zhang Transport Processes and Large Deformation During Baking of Bread 2005)
 kGForPerm.correctBoundaryConditions();
+
+// -- CRUST FORMATION MODEL: reduce permeability when moisture drops
+// Parameters for crust transition
+const scalar X_transition = 0.18;  // moisture content where crust starts forming
+const scalar X_crust = 0.08;        // fully crusted moisture content
+const scalar f_crust = 0.05;        // permeability reduction factor (5% of original)
+
+volScalarField crustFactor = moisture * 0.0 + 1.0;  // Initialize to 1.0 everywhere
+forAll(crustFactor, cellI)
+{
+    scalar X = moisture[cellI];
+    if (X < X_transition)
+    {
+        if (X <= X_crust)
+        {
+            crustFactor[cellI] = f_crust;  // Fully crusted
+        }
+        else
+        {
+            // Linear transition from 1.0 to f_crust
+            crustFactor[cellI] = f_crust + (1.0 - f_crust) * (X - X_crust) / (X_transition - X_crust);
+        }
+    }
+}
+
+// Apply crust factor to relative permeability
+kGForPerm = kGForPerm * crustFactor;
+kGForPerm.correctBoundaryConditions();
 volScalarField D = DG * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
 D.correctBoundaryConditions();
 nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113);
@@ -90,7 +118,8 @@ volScalarField dHT = - dimensionedScalar("dummyDH", dH.dimensions(), 1)
                     - 23771.6 * Foam::pow(tau, 1.667)
                     + 19241 * Foam::pow(tau, 1.833)) * 1000;
 
-dimensionedScalar dHConst("dummyDH", dH.dimensions(), -2430492.1);
+// dimensionedScalar dHConst("dummyDH", dH.dimensions(), -2430492.1);
+dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2257362.5);
 dimensionedScalar dHS("dummyDH", dH.dimensions(), 20.7e3);
 
 // ************************************************************************* //
