@@ -459,8 +459,8 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
     hLoaf = hLoaf - up
 
     nPointsForEdge = 100
-    impGr = "1"
-    invImpGr = "1"
+    impGr = "5"
+    invImpGr = "0.2"
 
     p1 = 0.4
     p2 = 0.7
