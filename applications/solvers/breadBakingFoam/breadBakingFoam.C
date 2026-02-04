@@ -67,6 +67,11 @@ int main(int argc, char *argv[])
 
     while (runTime.run()){
 
+        // -- CO2 bookkeeping (initialized on first timestep)
+        static bool co2Init = false;
+        static double initialBreadMass = 0.0;  // total mass (solid + liquid + gas) at t0
+        static double cumCO2 = 0.0;            // cumulative CO2 produced [kg]
+
         physics().setDeltaT(runTime);
 
         ++runTime;
@@ -74,7 +79,24 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
         volScalarField invT = 1/T;
 
-        dimensionedScalar dTime = runTime.time().deltaT();
+        const double dtVal = runTime.deltaT().value();
+
+        if (!co2Init)
+        {
+            const dimensionedScalar breadMass =
+                fvc::domainIntegrate
+                (
+                    J *
+                    (
+                        alphaS * rhoS
+                      + alphaL * rhoL
+                      + (scalar(1) - alphaS - alphaL) * rhoG
+                    )
+                );
+
+            initialBreadMass = breadMass.value();
+            co2Init = true;
+        }
 
         while (pimple.loop())
         {
@@ -143,6 +165,25 @@ int main(int argc, char *argv[])
         physics().updateFields();
 
         physics().updateTotalFields();
+
+        // -- CO2 accumulation and optional log
+        const dimensionedScalar mDotCO2 = fvc::domainIntegrate(J * mCO2);
+        const double mDotCO2Val = mDotCO2.value();
+
+        cumCO2 += mDotCO2Val * dtVal;
+
+        if (debug >= 1)
+        {
+            Info<< "CO2 prod [kg/s]: " << mDotCO2Val
+                << ", cum CO2 [kg]: " << cumCO2;
+
+            if (initialBreadMass > SMALL)
+            {
+                Info<< ", CO2/bread ratio: " << cumCO2 / initialBreadMass;
+            }
+
+            Info<< endl;
+        }
 
         runTime.printExecutionTime(Info);
         
