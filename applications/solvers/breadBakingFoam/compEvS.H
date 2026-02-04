@@ -13,11 +13,14 @@ pV = pG * yV;
     // volScalarField A = 15.64 - 0.1 * (T / dummyT - 273);
     // volScalarField B = 0.38 + 1.69e-3 * (T - 273);
 
-    scalar n = 0.38;
+    // scalar n = 0.38;
     // volScalarField a = Foam::exp(-0.0071 * T / dummyT + 4.5);
     // volScalarField a = Foam::exp(-0.0056 * T / dummyT + 5.5);
     volScalarField a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
-    volScalarField aw = Foam::pow(moisture * 100 / a, (1.0 / n)) / (Foam::pow(moisture * 100/ a, (1.0 / n)) + 1); 
+    volScalarField moistureForEv = moisture *  (1 - (1.0 / 3.14 * Foam::atan((T / dummyT - TGelatEv - 273) / 2) + 1)/2);
+    Info << "min moistureForEv " << min(moistureForEv).value() << " max moistureForEv " << max(moistureForEv).value() << endl;
+    volScalarField aw = Foam::pow(moistureForEv * 100 / a, (1.0 / nCoef)) / (Foam::pow(moistureForEv * 100/ a, (1.0 / nCoef)) + 1); 
+    // volScalarField aw = Foam::pow(moisture * 100 / a, (1.0 / nCoef)) / (Foam::pow(moisture * 100/ a, (1.0 / nCoef)) + 1); 
     pVEq = pSat * aw;
 
     volScalarField alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.14 + 0.5;
@@ -27,6 +30,13 @@ pV = pG * yV;
     // evRate = kMPC * (1 - alphaL - alphaS) / Foam::pow(J, 0.333) / univR / T * (aw * pSat - pV) * molMV;
     // evRate = kMPC * (1 - alphaL - alphaS) / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pV) * molMV;
     evRate = kMPC / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pV) * molMV;
+    // evRate = kMPC / univR / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pV) * molMV;
+
+    // Gate evaporation by starch gelatinization: below ~65 C water remains bound
+    // scalar Tgel = 338.0;       // 65 C in Kelvin
+    // scalar dTgel = 8.0;        // smooth transition width [K]
+    // volScalarField gelFactor = 0.5 * (1.0 + Foam::tanh((T / dummyT - Tgel) / dTgel));
+    // evRate *= gelFactor;
 
     // -- equalibrium water vapor presure (Zhang)
     // volScalarField a = 4463.083750 * moisture * Foam::exp(0.007 * T / dummyT - 4.61) * (Foam::pow(moisture * Foam::exp(0.007 * T / dummyT - 4.61), 0.82482));
