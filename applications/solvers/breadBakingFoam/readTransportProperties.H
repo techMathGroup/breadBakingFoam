@@ -68,6 +68,7 @@ thermophysicalProperties.subDict("mixture").subDict("transport").readEntry("D", 
 
 // -- reaction
 dimensionedScalar dH, R0, kMPCOpen, kMPCClosed, TOpen, deltaTOpen, Tm, deltaT, evCoef1, evCoef2;
+scalar nCoef, TGelatEv;
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("dH", dH);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("TOpen", TOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("deltaTOpen", deltaTOpen);
@@ -75,6 +76,8 @@ reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCO
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCClosed", kMPCClosed);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef1", evCoef1);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef2", evCoef2);
+reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("nCoef", nCoef);
+reactiveProperties.subDict("reactProps").subDict("gelatization").readEntry("TGelEv", TGelatEv);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("Tm", Tm);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("R0", R0);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("deltaT", deltaT);
