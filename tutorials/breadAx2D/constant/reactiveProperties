@@ -49,6 +49,7 @@ reactProps
     gelatization
 	{
 		TGelEv  60;
+        alphaKept 0.2;  
 	}
 }
 
