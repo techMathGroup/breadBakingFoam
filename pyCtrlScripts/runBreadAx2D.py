@@ -13,6 +13,7 @@ from blockMeshDictClassV8 import *
 from meshGeneration import *
 import re
 import matplotlib.pyplot as plt
+import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
@@ -35,15 +36,16 @@ hLoaf = 3.5e-2  # -- loaf height
 arcL = 0.008    # -- length of the arc at the side of the bread   
 
 '''Internal transport parameters'''
-# -- free volumetric difusivity of the water vapors in CO2 at 300 K
-DFree = 2e-6
+
+DFree = 2e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
+tort = 10   # -- tortuosity
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
 lambdaS = 0.55 
 
-perm = 1e-13  # -- bread permeability 
+perm = 2.5e-12  # -- bread permeability (Zhang 2005)
 
 # -- heat capacities for the individual phases
 CpS = 1450   # -- solid phase
@@ -60,27 +62,32 @@ rhoL = 1000  # -- liquid density
 kMPC = 0.02
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
-evCoef1 = -0.0071
-evCoef2 = 4.5
+# evCoef1 = -0.0071
+# evCoef2 = 4.5
+evCoef1 = -0.0056
+evCoef2 = 5.5
 n = 0.38
+
+# outFolder = '../ZZ_cases/00_breads/breadAx2D_corrE_alphaKept_%g/'%(alphaKept)
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
 R0 = 3e-4 
-Tm = 310
+R0 = 1.8e-4 
+Tm = 313    # -- kinetics from Zhang 2005
 tau0 = 1
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
 nu = 0.15   # -- Poisson ratio
-E = 12000   # -- Youngs modulus
+E = 10000   # -- Youngs modulus
 tGelat = 65 # -- temperature of gelatization (solid )
 tGelatEv = 57   # -- temperature of gelatization (evaporation)
 
 '''Numerics'''
 timeStep = 1    # -- computational time step
-plusTime1 = 880 # -- how long to run with deformation
-plusTime2 = 20 # -- how long to run without deformation
+plusTime1 = 400 # -- how long to run with deformation
+plusTime2 = 500 # -- how long to run without deformation
 writeInt = 20   # -- how often to write results
 nIter = 50  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
@@ -94,10 +101,8 @@ DFinalRelax = 1
 kG = 0.01   # -- external mass transfer coeficient
 alphaG = 10 # -- external heat transfer coeficient 
 
-# outFolder = '../ZZ_cases/00_breads/00_base_tGelatEv_%g_tau0_%g_lambdaS_%g_kmpc_%g_dfree_%g_coef1_%g/'%(tGelatEv, tau0, lambdaS, kMPC, DFree, evCoef1)
-
 '''Post-processing'''
-fig, axs = plt.subplots(3, 1, figsize=(9, 16))  # figure with plots
+fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
 
 # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
 # -- create OpenFOAMCase object to change values in dictionaries
@@ -125,6 +130,7 @@ baseCase.setParameters(
     [
         ['constant/transportProperties', 'withDeformation', str(withDeformation), ''],
         ['constant/transportProperties', 'permGLViscG', str(perm), ''],
+        ['constant/transportProperties', 'tort', str(tort), ''],
     ]
 )
 
@@ -153,7 +159,6 @@ baseCase.setParameters(
         ['constant/reactiveProperties', 'R0', str(R0), 'fermentation'],
         ['constant/reactiveProperties', 'Tm', str(Tm), 'fermentation'],
         ['constant/reactiveProperties', 'nCoef', str(n), 'evaporation'],
-        ['constant/reactiveProperties', 'TGelEv', str(tGelatEv), 'gelatization']
     ]
 )
         
@@ -257,6 +262,7 @@ if runPostProcess:
         baseCase.runCommands(
             [
                 'postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess',
+                'postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux',
                 'rm -rf 0',
                 'intMoisture > log.intMoisture',
             ]
@@ -266,6 +272,7 @@ if runPostProcess:
         baseCase.runCommands(
             [
                 'foamJob -parallel -screen postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess',
+                'foamJob -parallel -screen postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux',
                 'rm -rf processor*/0',
                 'foamJob -parallel -screen intMoisture > log.intMoisture',
             ]
@@ -299,8 +306,10 @@ if runPostProcess:
     # -- Convert displacements to numpy array
     D = np.array(rows)
         
-    # -- Load temperature profiles in probe points
+    # -- Load temperature and pressure profiles in probe points
     probesT = np.loadtxt(baseCase.dir + '/postProcessing/probeZhang/%d/T'%latestTime, skiprows=3)
+    probespG = np.loadtxt(baseCase.dir + '/postProcessing/probeZhang/%d/pG'%latestTime, skiprows=3)
+    CO2Out = np.loadtxt(baseCase.dir + '/postProcessing/patchIntegrate(CO2Flux,name=sides)/%d/surfaceFieldValue.dat'%latestTime, skiprows=6)
 
     # -- Load total moisture evolution 
     file_path = "%s/log.intMoisture" %baseCase.dir
@@ -347,17 +356,31 @@ if runPostProcess:
     axs[1].set_title("Total moisture content in the the bread")
     axs[1].legend()
 
-    # -- Displacement
-    axs[2].plot(probesT[1:,0] / 60, D[:, 1, 1], 'b', label='simulation DY')
-    axs[2].plot(probesT[1:,0] / 60, D[:, 2, 0], 'r', label='simulation DX')
-    axs[2].plot(DExp[:,0] / 60, DExp[:,1], 'xr', label='experimental DX')
-    axs[2].plot(DExp[:,0] / 60, DExp[:,2], 'xb', label='experimental DY')
+    axs[2].plot(probespG[:,0] / 60, probespG[:,1], 'r', label='center pressure simulation')
+    axs[2].plot(probespG[:,0] / 60, probespG[:,2], 'b', label='surface pressure simulation')
     axs[2].set_xlabel("time (min)")
-    axs[2].set_ylabel("displacement in X and Y directions")
-    axs[2].set_xlim(0,15)
-    axs[2].set_title("Displecement of the bread in vertical (X) and horizontal (Y) directions")
+    axs[2].set_ylabel("p (Pa)")
+    axs[2].set_xlim(0, 15)
+    axs[2].set_title("Pressure evolution in the center of the loaf")
     axs[2].legend()
-    fig.tight_layout()
+
+    # -- Displacement
+    axs[3].plot(probesT[1:,0] / 60, D[:, 1, 1], 'b', label='simulation DY')
+    axs[3].plot(probesT[1:,0] / 60, D[:, 2, 0], 'r', label='simulation DX')
+    axs[3].plot(DExp[:,0] / 60, DExp[:,1], 'xr', label='experimental DX')
+    axs[3].plot(DExp[:,0] / 60, DExp[:,2], 'xb', label='experimental DY')
+    axs[3].set_xlabel("time (min)")
+    axs[3].set_ylabel("displacement in X and Y directions")
+    axs[3].set_xlim(0,15)
+    axs[3].set_title("Displecement of the bread in vertical (X) and horizontal (Y) directions")
+    axs[3].legend()
+
+    # axs[4].plot(CO2Out[:,0] / 60, CO2Out[:,1], 'b', label='CO2 flux simulation')
+    # fig.tight_layout()
+
+    print("CO2Out: ", np.sum(CO2Out[:,1]) * writeInt)
 
     plt.savefig(baseCase.dir + 'postProcessingPlot.png')
+    np.savetxt(os.path.join(baseCase.dir, 'temperatureProbe.dat'), probesT, header='time\tcenter\tsurface\ttop', comments='')
+    np.savetxt(os.path.join(baseCase.dir, 'moisture.dat'), moistureSim, header='time\tmoisture', comments='')
                                         

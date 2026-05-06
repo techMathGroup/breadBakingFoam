@@ -293,6 +293,20 @@ volScalarField alphaG
 
 volScalarField preCoef = - alphaG * rhoG * permGLViscG;
 
+surfaceScalarField CO2Flux
+(
+    IOobject
+    (
+        "CO2Flux",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption1
+    ),
+    ((fvc::interpolate(preCoef * J) / mag(physics->mesh().Sf()))) * (fvc::interpolate(fvc::grad(pG)) & (fvc::interpolate(Finv.T()) & physics->mesh().Sf()))
+);
+
+
 // surfaceScalarField gradPg
 // (
 //     IOobject

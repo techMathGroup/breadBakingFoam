@@ -176,6 +176,13 @@ int main(int argc, char *argv[])
             rhoG = Mg / univR / T * pG;
             rhoG.correctBoundaryConditions();
 
+
+            preCoef = - rhoG * permGLViscG;
+            volScalarField preCoefDiff = - rhoG * DEff;
+            CO2Flux = fvc::interpolate(preCoef * omegaC * fvc::grad(pG)) & physics->mesh().Sf()/mag(physics->mesh().Sf());
+            CO2Flux += fvc::interpolate(preCoefDiff * fvc::grad(omegaC)) & physics->mesh().Sf()/mag(physics->mesh().Sf());
+            CO2Flux += fvc::interpolate(preCoefDiff * omegaC / Mg* fvc::grad(Mg)) & physics->mesh().Sf()/mag(physics->mesh().Sf());
+
             // -- basic log
             if (debug >= 1)
             {
