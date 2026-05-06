@@ -34,20 +34,6 @@ volScalarField Mg
     1 / (omegaV / molMV + (1 - omegaV) / molMC)
 );
 
-// -- water vapor molar fraction
-volScalarField yV
-(
-    IOobject
-    (
-        "yV",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::NO_READ,
-        writeOption1
-    ),
-    omegaV / molMV * Mg
-);
-
 // -- generation CO2 rate
 volScalarField mCO2
 (
@@ -62,16 +48,32 @@ volScalarField mCO2
     R0 * Foam::exp(-(T - Tm) / deltaT)
 );
 
+
+// -- generation CO2 rate
+volScalarField nCO2
+(
+    IOobject
+    (
+        "nCO2",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    mCO2 / molMC
+    // mCO2
+);
+
 // -- deformarion gradient
 volTensorField F 
 (
     IOobject
     (
-        "F",
+        "solverF",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        writeOption1
+        IOobject::NO_WRITE
     ),
     physics->gradD().T() + I
 );
@@ -83,11 +85,11 @@ volScalarField J
 (
     IOobject
     (
-        "J",
+        "solverJ",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        writeOption1
+        IOobject::NO_WRITE
     ),
     Foam::det(F)
 );
@@ -106,18 +108,18 @@ volScalarField rhoG
     pG * Mg / univR / T
 );
 
-// -- water vapor pressure
-volScalarField pV
+// -- density of the gas in pores
+volScalarField yV
 (
     IOobject
     (
-        "pV",
+        "yV",
         runTime.timeName(),
         physics->mesh(),
         IOobject::NO_READ,
         writeOption2
     ),
-    pG * yV
+    omegaV
 );
 
 // -- saturated pressure
@@ -148,34 +150,6 @@ volScalarField moisture
     alphaL * rhoL / (alphaS * rhoS)
 );
 
-// -- equalibrium water vapor pressure
-volScalarField pVEq
-(
-    IOobject
-    (
-        "pVEq",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    pSat
-);
-
-// -- saturated pressure
-volScalarField TSat
-(
-    IOobject
-    (
-        "TSat",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    dummyT * (-2.4432439345097229911e7+2.30650e5*Foam::log(pV / dummyP))/(-1.1598177639491068526e5+5000*Foam::log( pV / dummyP))
-);
-
 // -- evaporation rate
 volScalarField evRate
 (
@@ -187,23 +161,24 @@ volScalarField evRate
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    kMPCOpen * (1 - alphaS) * molMC / univR / T * (pVEq - pV) * 0
+    kMPCOpen * (1 - alphaS) * molMC / univR / T * (pG) * 0
 );
 
 // -- permeability
-volScalarField kGForPerm
-(
-    IOobject
-    (
-        "kGForPerm",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    (1 - 1.1 * (alphaL / (1 - alphaS))),
-    "zeroGradient"
-);
+// -- legacy from Zhang
+// volScalarField kGForPerm
+// (
+//     IOobject
+//     (
+//         "kGForPerm",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     (1 - 1.1 * (alphaL / (1 - alphaS))),
+//     "zeroGradient"
+// );
 
 volScalarField nuG
 (
@@ -219,9 +194,6 @@ volScalarField nuG
     "zeroGradient"
 );
 
-// volScalarField kGForPerm = (1 - 1.1 * (alphaL / (1 - alphaS)));
-// volScalarField nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113);
-
 // -- permeability
 volScalarField permGLViscG
 (
@@ -233,8 +205,22 @@ volScalarField permGLViscG
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    permGLViscGSc / nuG * kGForPerm,
+    permGLViscGSc / nuG,
     "zeroGradient"
+);
+
+// -- pores opening function
+volScalarField alpha
+(
+    IOobject
+    (
+        "alpha",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.14 + 0.5
 );
 
 // -- Darcy gas flux
@@ -246,7 +232,7 @@ volTensorField jGTilda
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        writeOption2
+        IOobject::NO_WRITE
     ),
     - rhoG * permGLViscG * Finv.T()
 );
@@ -265,33 +251,75 @@ volTensorField jDVTilda
     - rhoG * DEff * Finv.T()
 );
 
-surfaceScalarField gradPg
+volScalarField omegaAir
 (
     IOobject
     (
-        "gradPg",
+        "omegaAir",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    fvc::snGrad(pG)
+    1 - omegaV - omegaC
 );
 
+
+// volVectorField fluxG
+// (
+//     IOobject
+//     (
+//         "fluxG",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     - rhoG * permGLViscG * fvc::grad(pG)
+// );
+
+volScalarField alphaG
+(
+    IOobject
+    (
+        "alphaG",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    1 - alphaS - alphaL
+);
+
+volScalarField preCoef = - alphaG * rhoG * permGLViscG;
+
+// surfaceScalarField gradPg
+// (
+//     IOobject
+//     (
+//         "gradPg",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     fvc::snGrad(pG)
+// );
+// Info << "Here6" <<endl;
 
 // -- debug field of the vapor flow
-volVectorField vaporVel
-(
-    IOobject
-    (
-        "vaporVel",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    - omegaV * permGLViscG * (Finv.T() & fvc::grad(pG)) - DEff * (Finv.T() & fvc::grad(yV))
-);
+// volVectorField vaporVel
+// (
+//     IOobject
+//     (
+//         "vaporVel",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     - omegaV * permGLViscG * (Finv.T() & fvc::grad(pG)) - DEff * (Finv.T() & fvc::grad(yV))
+// );
 
 
 // -- basic info about initialization of the fields 

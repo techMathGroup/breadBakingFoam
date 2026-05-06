@@ -26,6 +26,7 @@ IOdictionary thermophysicalProperties
     )
 );
 
+// -- reactiveProperties dictionary
 IOdictionary reactiveProperties
 (
     IOobject
@@ -40,11 +41,11 @@ IOdictionary reactiveProperties
 
 // -- model transport parameters 
 dimensionedScalar univR, permGLViscGSc, kappaS;
-scalar withDeformation;
+scalar withDeformation, tort;
 transportProperties.subDict("genProps").readEntry("univR", univR); // -- universal gas constant
 transportProperties.readEntry("withDeformation", withDeformation);
-// transportProperties.readEntry("withEq", withEq);
 transportProperties.readEntry("permGLViscG",permGLViscGSc);
+transportProperties.readEntry("tort",tort);
 
 // -- model thermophysical parameters 
 dimensionedScalar rhoS, rhoL, CpS, CpL, CpVapor, CpCO2, molMC, molMV, lambdaS, lambdaL, DG;
@@ -60,16 +61,12 @@ thermophysicalProperties.subDict("vapor").readEntry("molM", molMV);
 thermophysicalProperties.subDict("CO2").readEntry("molM", molMC);
 thermophysicalProperties.subDict("mixture").subDict("transport").readEntry("D", DG);
 
-// dimensionedScalar kappaL (dimensionedScalar("kappaL", kappaA.dimensions(), 0.643));
-// dimensionedScalar kappaL (dimensionedScalar("kappaL", kappaA.dimensions(), 1.5));
-// dimensionedScalar kappaG (dimensionedScalar("kappaG", kappaA.dimensions(), 0.0189));
-// dimensionedScalar CpL("CpL", dimEnergy/dimMass/dimTemperature, 4200);
-// dimensionedScalar CpVapor ("CpVapor", CpL.dimensions(), 1930.55);
+dimensionedScalar molMAir (dimensionedScalar("molMAir", dimMass/dimMoles, 0.02897));
+dimensionedScalar CpAir = dimensionedScalar("CpAir", dimEnergy/dimMass/dimTemperature, 1005);
 
 // -- reaction
 dimensionedScalar dH, R0, kMPCOpen, kMPCClosed, TOpen, deltaTOpen, Tm, deltaT, evCoef1, evCoef2;
-// scalar nCoef, TGelatEv, alphaKept;
-scalar nCoef, TGelatEv;
+scalar nCoef, TGelatEv, alphaKept;
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("dH", dH);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("TOpen", TOpen);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("deltaTOpen", deltaTOpen);
@@ -79,26 +76,21 @@ reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoe
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef2", evCoef2);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("nCoef", nCoef);
 reactiveProperties.subDict("reactProps").subDict("gelatization").readEntry("TGelEv", TGelatEv);
-// reactiveProperties.subDict("reactProps").subDict("gelatization").readEntry("alphaKept", alphaKept);
+reactiveProperties.subDict("reactProps").subDict("gelatization").readEntry("alphaKept", alphaKept);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("Tm", Tm);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("R0", R0);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("deltaT", deltaT);
-// dimensionedScalar Tm ("Tm", dimTemperature, 313);
-// dimensionedScalar deltaT ("Tm", dimTemperature, 10);
-
-// scalar TOpen = 75;
-// scalar deltaTOpen = 10;
-// dimensionedScalar kMPCOpen ("kMPCOpen", dimless / dimTime, 0.5);
-// dimensionedScalar kMPCClosed ("kMPCClosed", dimless / dimTime, 10);
 
 // -- dummies
 dimensionedScalar dummyT (dimensionedScalar("dummyT", dimTemperature, 1));
 dimensionedScalar dummyP (dimensionedScalar("dummyp", dimPressure, 1));
 dimensionedScalar dummyCp (dimensionedScalar("dummyp", CpS.dimensions(), 1));
 dimensionedScalar dummyLamdba (dimensionedScalar("dummyLamdba", lambdaS.dimensions(), 1));
+dimensionedScalar dummyRho (dimensionedScalar("dummyRho", rhoS.dimensions(), 1));
 
 double pResidual = 1;
 double omegaVResidual = 1;
+double omegaCResidual = 1;
 double phiLResidual = 1;
 double TResidual = 1;
 

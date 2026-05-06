@@ -67,6 +67,9 @@ int main(int argc, char *argv[])
 
     while (runTime.run()){
 
+        SolverPerformance<scalar>::debug = 0;
+        SolverPerformance<vector>::debug = 0;
+
         // -- CO2 bookkeeping (initialized on first timestep)
         static bool co2Init = false;
         static double initialBreadMass = 0.0;  // total mass (solid + liquid + gas) at t0
@@ -100,54 +103,78 @@ int main(int argc, char *argv[])
 
         while (pimple.loop())
         {
+            // -- update moisture content for evaporation source calculation
+            moisture = (alphaL * rhoL) / (alphaS * rhoS);
+
+            // -- evaporation source calculation 
+            #include "compEvS.H"
+
+            // -- update of the effective diffusivity, heat conductivity and permeability
+            #include "compEffProps.H"
+
+            // -- fermentation source
+            mCO2 = R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2)) * rhoS / dummyRho * alphaS;
+            
+            // -- molar amount change
+            nCO2 = fvc::ddt(alphaG, rhoG, J)/Mg;
+            nCO2.correctBoundaryConditions();
+
+            // -- calculate pre-coefficients for flux calculations
+            jGTilda = - rhoG * permGLViscG * Finv.T();
+            jDVTilda = - rhoG * DEff * Finv.T();
+
+            // -- conservation of the water vapor
+            #include "concEqC5.H"
+            #include "concEqV5.H"
+            omegaAir = 1 - omegaV - omegaC;
+            omegaAir.correctBoundaryConditions();
+            // #include "concEqAir.H"
+
+            // -- gas molar mass
+            Mg = 1 / (omegaV / molMV + omegaC / molMC + (1 - omegaV - omegaC) / molMAir);
+            Mg.correctBoundaryConditions();
+
+            // -- energy conservation
+            #include "EEqn2.H"
+
+            // -- crust formation
+            #include "crustEq.H"
+            
             // -- if deformation allowed
             if (withDeformation == 1)
             {
-                // -- dilatation laws --> solids4foam with custom visco-elastic model
-                physics->evolve();
-                
-                // -- deformation gradient
-                F = I + physics->gradD().T();
+                for (int i = 0; i < 1; ++i)
+                {
+                    // -- dilatation laws --> solids4foam with custom visco-elastic model
+                    physics->evolve();
+                    
+                    // -- deformation gradient
+                    F = I + physics->gradD().T();
 
-                // -- deformation gradient inverse
-                Finv = inv(F);
-                Finv.correctBoundaryConditions();
+                    // -- deformation gradient inverse
+                    Finv = inv(F);
+                    Finv.correctBoundaryConditions();
 
-                // -- Jacobian of the deformation gradient
-                J = det(F);
-                J.correctBoundaryConditions();
+                    // -- Jacobian of the deformation gradient
+                    J = det(F);
+                    J.correctBoundaryConditions();
+                }
             }
 
+            
             // -- solid mass conservation
             #include "alphaSEq.H"
             
             // -- liquid water conservation
             #include "phiLEq.H"
 
-            // -- update of the effective diffusivity, heat conductivity and permeability
-            #include "compEffProps.H"
-            
-            // -- gas conservation 
+            alphaG = 1 - alphaS - alphaL;
+            alphaG.correctBoundaryConditions();
+
             #include "concEqG6.H"
-            
-            // -- gas density update
-            rhoG = pG * Mg / univR / T;
+
+            rhoG = Mg / univR / T * pG;
             rhoG.correctBoundaryConditions();
-
-            // -- conservation of the water vapor
-            #include "concEqV5.H"
-            
-            // -- energy conservation
-            #include "EEqn2.H"
-
-            // -- CO2 source by fermentation (Zhang Transport Processes and Large Deformation During Baking of Bread 2005)
-            mCO2 = R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2)) * rhoS / dimensionedScalar("dummyRho", dimMass/dimVolume, 1) * alphaS;
-
-            // -- moisture content -- kgLwater / kgS
-            moisture = (alphaL * rhoL + (1 - alphaL - alphaS) * rhoG * omegaV) / (alphaS * rhoS);
-
-            // -- evaporation source calculation 
-            #include "compEvS.H"
 
             // -- basic log
             if (debug >= 1)
@@ -156,6 +183,7 @@ int main(int argc, char *argv[])
                 Info << "pG     : res: " << pResidual    << " Min (pG): " << min(pG).value() << ", max (pG): " << max(pG).value() << "." << endl;
                 Info << "T      : res: " << TResidual    << " Min (T): " << min(T).value() << ", max (T): " << max(T).value() << "." << endl;
                 Info << "omV    : res: " << omegaVResidual << " Min (omegaV): " << min(omegaV).value() << ", max (omegaV): " << max(omegaV).value() << "." << endl;
+                Info << "omC    : res: " << omegaCResidual << " Min (omegaC): " << min(omegaC).value() << ", max (omegaC): " << max(omegaC).value() << "." << endl;
                 Info << "Min (J): " << min(J).value() << ", max (J): " << max(J).value() << "." << endl;
                 Info << "Min (permGLViscG): " << min(permGLViscG).value() << ", max (permGLViscG): " << max(permGLViscG) << "." << endl;
                 Info << endl;

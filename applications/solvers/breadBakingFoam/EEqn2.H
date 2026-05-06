@@ -2,7 +2,16 @@
     fvScalarMatrix EEqn
     (
         // -- bilance ktere muzu verit 
-        J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + (1 - omegaV) * CpCO2)) * fvm::ddt(T)
+        J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T)
+
+        // rhoS * CpS * fvm::ddt(J, alphaS, T)
+        // + rhoL * CpL * fvm::ddt(J, alphaL, T)
+        // - rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir) * fvm::ddt(J, alphaS, T)
+        // - rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir) * fvm::ddt(J, alphaL, T)
+        // + CpVapor * J * (1 - alphaS - alphaL) * T * fvc::ddt(rhoG, omegaV)
+        // + CpCO2 * J * (1 - alphaS - alphaL) * T * fvc::ddt(rhoG, omegaC)
+        // + CpAir * J * (1 - alphaS - alphaL) * T * fvc::ddt(rhoG, omegaAir)
+        
 
         // -- accumulation
         // J * (alphaS * rhoS * CpSVSF + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * thermo.Cp()) * fvm::ddt(T)
@@ -28,11 +37,31 @@
 
         ==
 
+        // - fvc::laplacian(J * Finv & jGTilda * omegaV * CpVapor * T, pG)
+        // - fvc::laplacian(J * Finv & jGTilda * omegaC * CpCO2 * T, pG)
+        // - fvc::laplacian(J * Finv & jGTilda * omegaAir * CpAir * T, pG)
+
+        // // // -- diffusion
+        // - fvc::laplacian(J * Finv & jDVTilda * CpVapor * T, omegaV)
+        // - fvc::laplacian(J * Finv & jDVTilda * omegaV / Mg * CpVapor * T, Mg)
+
+        // - fvc::laplacian(J * Finv & jDVTilda * CpCO2 * T, omegaC)
+        // - fvc::laplacian(J * Finv & jDVTilda * omegaC / Mg * CpCO2 * T, Mg)
+
+        // - fvc::laplacian(J * Finv & jDVTilda * CpAir * T, omegaAir)
+        // - fvc::laplacian(J * Finv & jDVTilda * omegaAir / Mg * CpAir * T, Mg)
+
         - (fvc::grad(T) & (omegaV * CpVapor * (jGTilda & fvc::grad(pG))))
         - (fvc::grad(T) & (CpVapor *  (jDVTilda & fvc::grad(omegaV))))   
+        - (fvc::grad(T) & (CpVapor * omegaV / Mg * (jDVTilda & fvc::grad(Mg))))   
         
-        - (fvc::grad(T) & ((1 - omegaV) * CpCO2 * (jGTilda & fvc::grad(pG))))
-        + (fvc::grad(T) & (CpCO2 *  (jDVTilda & fvc::grad(omegaV))))
+        - (fvc::grad(T) & (omegaC * CpCO2 * (jGTilda & fvc::grad(pG))))
+        - (fvc::grad(T) & (CpCO2 *  (jDVTilda & fvc::grad(omegaC))))
+        - (fvc::grad(T) & (CpCO2 * omegaC / Mg * (jDVTilda & fvc::grad(Mg))))   
+
+        - (fvc::grad(T) & (omegaAir * CpAir * (jGTilda & fvc::grad(pG))))
+        - (fvc::grad(T) & (CpAir *  (jDVTilda & fvc::grad(omegaAir))))
+        - (fvc::grad(T) & (CpAir * omegaAir / Mg * (jDVTilda & fvc::grad(Mg))))   
         // -- difusion
         // - (fvc::grad(T) & (omegaV * CpVapor * (jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(yV)) * CpVapor +  (1 - omegaV) * thermo.Cp() * (jGTilda & fvc::grad(pG)) - molMC / Mg * rhoG * DEff * thermo.Cp() * fvc::grad((1 - yV)) )) + 
 

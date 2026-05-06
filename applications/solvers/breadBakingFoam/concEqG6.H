@@ -2,9 +2,9 @@
 fvScalarMatrix pGEq
 (
     // -- accumulation
-    (1 - alphaS - alphaL) / univR / T * fvm::ddt(Mg, J, pG)
-    // + J * pG * Mg / univR * ((1 / T) * (- fvc::ddt(alphaS) - fvc::ddt(alphaL)) + (1 - alphaS - alphaL) * (- Foam::pow(T, - 2)) * fvc::ddt(T))
-    + fvm::Sp(J * Mg / univR * ((1 / T) * (- fvc::ddt(alphaS) - fvc::ddt(alphaL)) + (1 - alphaS - alphaL) * (- Foam::pow(T, - 2)) * fvc::ddt(T)), pG)
+    alphaG / univR / T * fvm::ddt(Mg, J, pG)
+    + fvm::Sp(J * Mg / univR * ((1 / T) * fvc::ddt(alphaG) + alphaG * (- Foam::pow(T, - 2)) * fvc::ddt(T)), pG)
+
     
     == 
 
@@ -16,17 +16,21 @@ fvScalarMatrix pGEq
 
     // -- water evaporation
     + J * evRate
+
+    - fvm::Sp(J * kMPC / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * yV * molMV, pG)
+    + J * kMPC / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * yV * molMV * pG
 );
 
 pGEq.relax();
 
+SolverPerformance<scalar>::debug = 1;
+
 pResidual = pGEq.solve().initialResidual();
+
+SolverPerformance<scalar>::debug = 0;
 
 pG.relax();
 
 pG.correctBoundaryConditions();
-
-// -- Darcy gas mass flux intensity 
-jGTilda = - rhoG * permGLViscG * Finv.T();
 
 // ************************************************************************* //

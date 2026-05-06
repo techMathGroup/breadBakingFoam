@@ -40,6 +40,20 @@ volScalarField omegaV
     physics->mesh()
 );
 
+// -- water vapor mass fraction
+volScalarField omegaC
+(
+    IOobject
+    (
+        "omegaC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
 // gas pressure
 volScalarField pG
 (
@@ -59,6 +73,19 @@ volScalarField T
     IOobject
     (
         "T",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
+volScalarField alphaCrust
+(
+    IOobject
+    (
+        "alphaCrust",
         runTime.timeName(),
         physics->mesh(),
         IOobject::MUST_READ,

@@ -1,64 +1,75 @@
 // -- calculation of the Darcy permeability, effective difusivity and effective heat conductivity
-kGForPerm = (1 - 1.1 * (alphaL / (1 - alphaS))); // -- relative permeability (Zhang Transport Processes and Large Deformation During Baking of Bread 2005)
-kGForPerm.correctBoundaryConditions();
 
-// -- CRUST FORMATION MODEL: reduce permeability when moisture drops
-// Parameters for crust transition
-// const scalar X_transition = 0.18;  // moisture content where crust starts forming
-// const scalar X_crust = 0.08;        // fully crusted moisture content
-// const scalar f_crust = 0.05;        // permeability reduction factor (5% of original)
-
-// volScalarField crustFactor = moisture * 0.0 + 1.0;  // Initialize to 1.0 everywhere
-// forAll(crustFactor, cellI)
-// {
-//     scalar X = moisture[cellI];
-//     if (X < X_transition)
-//     {
-//         if (X <= X_crust)
-//         {
-//             crustFactor[cellI] = f_crust;  // Fully crusted
-//         }
-//         else
-//         {
-//             // Linear transition from 1.0 to f_crust
-//             crustFactor[cellI] = f_crust + (1.0 - f_crust) * (X - X_crust) / (X_transition - X_crust);
-//         }
-//     }
-// }
-
-// // Apply crust factor to relative permeability
-// kGForPerm = kGForPerm * crustFactor;
-kGForPerm.correctBoundaryConditions();
 volScalarField D = DG * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
 D.correctBoundaryConditions();
-nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113);
+nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113); // -- gas viscosity at correct temperature
 nuG.correctBoundaryConditions();
 
-forAll(permGLViscG, cellI)
-{
-    // -- crop for low values of alphaG
-    if(kGForPerm[cellI] > 1e-2)
-    {
-        // permGLViscG[cellI] = permGLViscGSc.value() * kGForPerm[cellI] * (1 - alphaS[cellI] - alphaL[cellI]);
-        // DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333) * (1 - alphaS[cellI] - alphaL[cellI]);
-        permGLViscG[cellI] = permGLViscGSc.value() / nuG[cellI] * kGForPerm[cellI];
-        DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333);
-    }
-    // if((1 - alphaL[cellI] - alphaS[cellI]) > 0.75)
-    // {
-    //     permGLViscG[cellI] = permGLViscG[cellI] * 10;
-    // }
-}
+// -- effective diffusivity
+DEff = D * alphaG / tort;
+DEff.correctBoundaryConditions();
+
+// -- permiability MPC Zhang 2025
+permGLViscG = alpha * permGLViscGSc / nuG * Foam::pow(alphaG, 1.34); 
+permGLViscG.correctBoundaryConditions();
+
+// -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
+// lambdaEff = dummyLamdba * (0.421 - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
+lambdaEff.correctBoundaryConditions();
+
+
+// -- legacy from Zhang 2005
+// kGForPerm = (1 - 1.1 * (alphaL / (1 - alphaS))); // -- relative permeability (Zhang Transport Processes and Large Deformation During Baking of Bread 2005)
+// kGForPerm.correctBoundaryConditions();
+// forAll(permGLViscG, cellI)
+// {
+//     // -- crop for low values of alphaG
+//     // if(kGForPerm[cellI] > 1e-4)
+//     // if(alphaCrust[cellI] > 0.15)
+//     if ((alphaL[cellI] / (1 - alphaS[cellI])) < 0.9)
+//     {
+//         permGLViscG[cellI] = permGLViscGSc.value() / nuG[cellI] * kGForPerm[cellI];
+//     }
+//     else
+//     {
+//         permGLViscG[cellI] = 0;
+//     }
+//     // {
+//         // permGLViscG[cellI] = permGLViscGSc.value() * kGForPerm[cellI] * (1 - alphaS[cellI] - alphaL[cellI]);
+//         // DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333) * (1 - alphaS[cellI] - alphaL[cellI]);
+//         // permGLViscG[cellI] = permGLViscGSc.value() / nuG[cellI] * kGForPerm[cellI];
+//         // DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333);
+//         // DEff[cellI] = D[cellI] * 0.1;
+//     // }
+//     // else
+//     // {
+//     //     permGLViscG[cellI] = 1e-11 ;
+//     //     // DEff[cellI] = 1e-9;
+//     // }
+//     // if((1 - alphaL[cellI] - alphaS[cellI]) > 0.75)
+//     // {
+//     //     permGLViscG[cellI] = permGLViscG[cellI] * 10;
+//     // }
+// }
+
+// DEff = D * (1 - (Foam::atan(100*(alphaCrust-0.1))/(3.14/2) + 1)/2);
 
 // permGLViscG = permGLViscGSc / nuG * kGForPerm;
-// DEff = D * Foam::pow(kGForPerm * (1 - alphaS), 1.333);
+// DEff = D * (1 - alphaL - alphaS) * Foam::pow(kGForPerm * (1 - alphaS), 1.333);
+
 
 // DEff = D * (1 - alphaL - alphaS) / 3.5;
 // Info << "min(nuG) " << min(nuG).value() << endl;
 // Info << "min(permGLViscG) " << min(permGLViscG).value() << endl;
 
-permGLViscG.correctBoundaryConditions();
-DEff.correctBoundaryConditions();
+// permGLViscG = permGLViscGSc / nuG * (Foam::atan(T / dummyT - 323) / 3.14 + 0.5);
+
+// DEff = alphaCrust * dimensionedScalar("smallDEff", DEff.dimensions(), 1e-11) + (1 - alphaCrust) * D;
+
+// permGLViscG = permGLViscGSc / nuG;
+
+// permGLViscG *= (1 - alphaL - alphaS); 
 
 // -- effective heat conductivity 
 
@@ -90,36 +101,6 @@ DEff.correctBoundaryConditions();
 //     }
 // }
 
-//https://www.sciencedirect.com/science/article/pii/S0960308508000333
-// lambdaEff = dummyLamdba * (0.421 - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// volScalarField PhiL = alphaL / (alphaL + alphaS);
-// lambdaEff = dummyLamdba * 0.155 + lambdaEff / (0.615 * PhiL + 0.421 * (1-PhiL)) * PhiL;
-// lambdaEff = dummyLamdba * (lambdaS.value() / 0.607 * (-0.736+(0.734e-2)*T/dummyT-(0.95e-5)*Foam::pow(T/dummyT,2)) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// lambdaEff = dummyLamdba * ((alphaS / (alphaS + alphaL) * 0.15 + alphaL / (alphaS + alphaL) * 0.615) - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// Info << "max(lambdaEff)" << max(lambdaEff) <<endl;
 
-// forAll(lambdaEff, cellI)
-// {
-//     if(moisture[cellI] < 0.12 || T[cellI] > 373)
-//     {
-//         // lambdaEff[cellI] = 0.05;
-//         DEff[cellI] = DEff[cellI]*0.01;
-//     }
-// }
-lambdaEff.correctBoundaryConditions();
-
-// -- evaporation enthalpy
-volScalarField tau = 1 - T / dummyT / 647.126;
-volScalarField dHT = - dimensionedScalar("dummyDH", dH.dimensions(), 1)
-                    * (2419.53 * Foam::pow(tau, 0.333)
-                    - 795.21 * Foam::pow(tau,0.667)
-                    + 6102.03 * tau
-                    - 23771.6 * Foam::pow(tau, 1.667)
-                    + 19241 * Foam::pow(tau, 1.833)) * 1000;
-
-// dimensionedScalar dHConst("dummyDH", dH.dimensions(), -2430492.1);
-dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2257362.5);
-dimensionedScalar dHS("dummyDH", dH.dimensions(), 20.7e3);
 
 // ************************************************************************* //

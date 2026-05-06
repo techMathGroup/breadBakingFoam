@@ -24,7 +24,7 @@ volScalarField DEff
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    DG * Foam::pow((1 - 1.11 * (alphaL / (1 - alphaS))) * (1 - alphaS), 1.333),
+    DG * (1 - alphaS),
     "zeroGradient"
 );
 
