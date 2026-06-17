@@ -17,19 +17,47 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|D)"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D)"
     {
         solver          PBiCGStab;
-        preconditioner  DIC;
+        preconditioner  diagonal;
         tolerance       1e-10;
         relTol          0.001;
     }
  
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|D)Final"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D)Final"
+    {
+        solver          PBiCGStab;
+        preconditioner  diagonal;
+        tolerance       1e-12;
+    }
+    D
     {
         solver          PBiCGStab;
         preconditioner  DIC;
         tolerance       1e-12;
+        relTol          0.01;
+    }
+    DFinal
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
+        tolerance       1e-12;
+        // relTol          0.001;
+    }
+    pG
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
+        tolerance       1e-12;
+        relTol          0.01;
+    }
+    pG
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
+        tolerance       1e-12;
+        // relTol          0.001;
     }
 }
 
@@ -48,17 +76,17 @@ PIMPLE
     {
         omegaV        
         {
-            tolerance 1e-5;
+            tolerance 1e-7;
             relTol 0;
         }
         T           
         {
-            tolerance 1e-5;
+            tolerance 1e-7;
             relTol 0;
         }
         pG         
         {
-            tolerance 1e-5;
+            tolerance 1e-8;
             relTol 0;
         }
     }
@@ -71,7 +99,8 @@ relaxationFactors
         D 0.1;
         // DFinal 0.1;
         omegaV 0.1;
-        // T 0.1;
+        omegaC 0.1;
+        T 0.1;
         pG 0.1;
     }
     equations
@@ -81,9 +110,9 @@ relaxationFactors
         gammaSnGradCorr(T)_0 0.5;
         snGradCorr(D) 0.5;
         // omegaV 0.99;
-        // D 0.99;
-        // pG 0.99;
-        // DFinal 0.95;
+        // D 0.999;
+        // pG 0.9;
+        // DFinal 0.99;
     }
 }
 // ************************************************************************* //

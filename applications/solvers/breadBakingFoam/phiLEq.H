@@ -5,6 +5,9 @@
 volScalarField citatel = J * kMPC / univR * molMV * Foam::pow(100, 1.0 / nCoef) * Foam::pow((alphaL*rhoL)/(alphaS*rhoS*a), 1.0 / nCoef) * pSat;
 volScalarField zavorka = Foam::pow(100, 1.0 / nCoef) * Foam::pow((alphaL*rhoL)/(alphaS*rhoS*a), 1.0 / nCoef) + 1.0;
 
+// volScalarField citatel = J * kMPC / univR * molMV * Foam::pow(100, 1.0 / nCoef) * Foam::pow(availMois, 1.0 / nCoef) * pSat;
+// volScalarField zavorka = Foam::pow(100, 1.0 / nCoef) * Foam::pow(availMois, 1.0 / nCoef) + 1.0;
+
 // -- conservation of the liquid water
 fvScalarMatrix concEqL
 (
@@ -12,6 +15,8 @@ fvScalarMatrix concEqL
     rhoL * fvm::ddt(J, alphaL)
 
     ==
+
+    // - fvc::laplacian(J * Finv & Finv.T() & jGTilda * (1 - alpha) * alphaG * DG / univR / T * molMV, pSat)
 
     // -- evaporation source
     - J * evRate

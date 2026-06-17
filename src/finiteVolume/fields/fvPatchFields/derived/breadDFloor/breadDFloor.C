@@ -245,7 +245,7 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    if(this->db().objectRegistry::foundObject<volScalarField>("impK"))
+    if(this->db().objectRegistry::foundObject<volScalarField>("impK")&&this->db().objectRegistry::foundObject<volScalarField>("pG"))
     {
         const volScalarField& impK = this->db().objectRegistry::lookupObject<volScalarField>("impK");
         if (impK.boundaryField()[this->patch().index()].size() != 0)
@@ -254,6 +254,7 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
             const volTensorField& gradD = this->db().objectRegistry::lookupObject<volTensorField>("grad(D)");
             const volTensorField& F = this->db().objectRegistry::lookupObject<volTensorField>("F");
             const volScalarField& rImpK = this->db().objectRegistry::lookupObject<volScalarField>("(1|impK)");
+            const volScalarField& pG = this->db().objectRegistry::lookupObject<volScalarField>("pG");
             const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
             const surfaceVectorField& Cf = patch().boundaryMesh().mesh().Cf();
 
@@ -265,6 +266,9 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
             // vectorField DIntField = D.boundaryField()[patch().index()].internalField();
             vectorField DBound = D.boundaryField()[patch().index()];
             vectorField CfBound = Cf.boundaryField()[patch().index()];
+            // scalarField pressure = -(pG.boundaryField()[patch().index()]-1e5);
+            // scalarField pressure = (pG.boundaryField()[patch().index()]-pG.boundaryField()[patch().index()].internalField());
+            // scalarField pressure = -(pG.boundaryField()[patch().index()]);
 
             tensorField FinvBound = inv(FBound);
             vectorField n = patch().nf();
@@ -272,6 +276,7 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
             nCurrent /= mag(nCurrent);
 
             vectorField gradDForcedBound = (- (nCurrent & sigmaBound) + impKBound * (n & gradDBound)) * rImpKBound;
+            // vectorField gradDForcedBound = (-nCurrent * pressure - (nCurrent & sigmaBound) + impKBound * (n & gradDBound)) * rImpKBound;
 
             // vectorField DNew = DIntField + gradDForcedBound/patch().deltaCoeffs();
 
@@ -283,7 +288,7 @@ void Foam::breadDFloorFvPatchVectorField::evaluate(const Pstream::commsTypes)
                     this->valueFraction()[faceI] = 1;
                     this->refGrad()[faceI] = vector(0,0,0);
                     vector oprava = DBound[faceI];
-                    oprava[0] = floorPos_ - CfBound[faceI][0];
+                    oprava[0] = DBound[faceI][0] + (floorPos_ - CfBound[faceI][0] - DBound[faceI][0]) * 0.5;
                     this->refValue()[faceI] = oprava;
                 }
                 else

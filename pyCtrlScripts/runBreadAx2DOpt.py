@@ -90,10 +90,11 @@ def runSim(outFolderDir, pars):
     alphaG = 10 # -- external heat transfer coeficient 
 
     # -- update parameters from parameters of the called function
-    lambdaS, DFree = pars
+    initTemp, lenInit, decayRate = pars
 
     # -- update outFolder for optimization
-    outFolder = os.path.join(outFolderDir, "lambdaS_%g_DEff_%g"%(lambdaS, DFree))
+    # outFolder = os.path.join(outFolderDir, "lambdaS_%g_DEff_%g"%(lambdaS, DFree))
+    outFolder = os.path.join(outFolderDir, "initTemp_%g_lenInit_%g_decayRate_%g"%(initTemp, lenInit, decayRate))
 
     '''Post-processing'''
     fig, axs = plt.subplots(3, 1, figsize=(9, 16))  # figure with plots
@@ -118,6 +119,7 @@ def runSim(outFolderDir, pars):
     # CHANGE THE PARAMETERS IN OPENFOAM DICTIONARIES========================
     # 1) BOUNDARY CONDITIONS
     # -- change in tutorial case
+    time, bakingCurve = createBakingCurve(pars)
 
     # 2) constant/transportProperties
     baseCase.setParameters(

@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omegaC;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1e-3;
+
+boundaryField
+{
+    // Zhang experiment
+    "(wedgeZ0|wedgeZE)"
+	{
+		type wedge;
+	}   
+    "symmetryPatch"
+    {
+        type  symmetry;
+    }
+    
+    sides
+    {
+        // type fixedValue;
+        // value uniform 1e-3;
+        type breadOmegaVMixed;;
+        kM               1e-5; // -- mass transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaCInfTable";
+            outOfBounds warn;
+        }
+        // type calculated;
+        // type fixedValue;
+        // value $internalField;
+        // type zeroGradient;
+	}
+    bottom
+    {
+        // type fixedValue;
+        // value uniform 1e-3;
+        type breadOmegaVMixed;;
+        kM               1e-5; // -- mass transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaCInfTable";
+            outOfBounds warn;
+        }
+	}
+    bottom2
+    {
+        type breadOmegaVMixed;;
+        kM               1e-5; // -- mass transfer coefficient
+
+        // -- mixed BC mandatory entires
+        refValue        uniform 1e-3;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 1e-3;
+        omegaVInfTableDict   
+        {
+            file "$FOAM_CASE/constant/omegaCInfTable";
+            outOfBounds warn;
+        }
+	}
+}
+
+
+// ************************************************************************* //

@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    // Step 1: Create a faceSet from the source patch
+    {
+        name    selectedFaces;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        sourceInfo
+        {
+            patch   "sides";  // <-- Change to your source patch name
+        }
+    }
+    // {
+    //     name    selectedFaces;
+    //     type    faceSet;
+    //     action  add;
+    //     source  patchToFace;
+    //     sourceInfo
+    //     {
+    //         patch   "sides";  // <-- Change to your source patch name
+    //     }
+    // }
+
+    // Step 2: Subset the faceSet using a bounding box
+    {
+        name    selectedFaces;
+        type    faceSet;
+        action  subset;
+        source  boxToFace;
+        sourceInfo
+        {
+            // Define bounding box: (xMin yMin zMin) (xMax yMax zMax)
+            box     (-1 5.5e-2 -1) (1.5e-2 1 1);  // <-- Adjust coordinates
+        }
+    }
+
+    // Optional Step 3: Create a faceZone from the faceSet (if needed)
+    // {
+    //     name    selectedFacesZone;
+    //     type    faceZone;
+    //     action  new;
+    //     source  setToFaceZone;
+    //     sourceInfo
+    //     {
+    //         faceSet selectedFaces;
+    //     }
+    // }
+);
+
+// ************************************************************************* //

@@ -17,7 +17,7 @@ import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
-outFolder = '../ZZ_cases/00_breads/breadAx2D/'
+outFolder = '../ZZ_cases/00_breads/marekConsult_lam08_breadAx2D/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
@@ -36,7 +36,6 @@ hLoaf = 3.5e-2  # -- loaf height
 arcL = 0.008    # -- length of the arc at the side of the bread   
 
 '''Internal transport parameters'''
-
 DFree = 2e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
 tort = 10   # -- tortuosity
 
@@ -44,8 +43,10 @@ tort = 10   # -- tortuosity
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
 lambdaS = 0.55 
+lambdaS = 0.8 
 
-perm = 2.5e-12  # -- bread permeability (Zhang 2005)
+# perm = 5e-13  # -- bread permeability (Zhang 2005)
+perm = 1.7e-13 * 0.217  # -- bread permeability (Zhang 2005)
 
 # -- heat capacities for the individual phases
 CpS = 1450   # -- solid phase
@@ -73,7 +74,7 @@ n = 0.38
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
 R0 = 3e-4 
-R0 = 1.8e-4 
+R0 = 1e-4 
 Tm = 313    # -- kinetics from Zhang 2005
 tau0 = 1
 
@@ -185,12 +186,8 @@ baseCase.setParameters(
     [
         ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
         ['constant/mechanicalProperties', 'E', str(E), 'bread'],
-        ['constant/mechanicalProperties', 'tGelat', str(tGelat), '']
-    ]
-)
-baseCase.addToDictionary(
-    [
-        ['constant/mechanicalProperties','tau0 %g;\n'%tau0, ''],
+        ['constant/mechanicalProperties', 'tau0', str(tau0), 'bread'],
+        ['constant/mechanicalProperties', 'tGelat', str(tGelat), 'bread']
     ]
 )
 

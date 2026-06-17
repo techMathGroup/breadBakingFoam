@@ -17,7 +17,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// solidModel     unsBreadBakingSolid;
+solidModel     unsBreadBakingSolid;
 solidModel     breadBakingSolid;
 
 "unsBreadBakingSolidCoeffs|breadBakingSolidCoeffs"
@@ -27,13 +27,13 @@ solidModel     breadBakingSolid;
     nCorrectors           1;
 
     // Solution tolerance for displacement
-    solutionTolerance       1e-6;
+    solutionTolerance       1e-10;
 
     // Alternative solution tolerance for displacement
-    alternativeTolerance    1e-6;
+    alternativeTolerance    1e-10;
 
     // Material law solution tolerance
-    materialTolerance       1e-6;
+    materialTolerance       1e-10;
 
     // Write frequency for he residuals
     infoFrequency           1;

@@ -88,7 +88,8 @@ int main(int argc, char *argv[])
         // -----------------------------
         // bool probeFound = false;
         bool probeFoundThisProc = false;
-        point X_ref = X_phys;
+        // point X_ref = X_phys;
+        point X_ref = point(1e-2, 1e-2, 0);
 
         for (int iter=0; iter<maxIter; iter++)
         {
@@ -124,7 +125,8 @@ int main(int argc, char *argv[])
             {
                 break;
             }
-            X_ref -= globalDeltaX;
+            X_ref -= 0.2*globalDeltaX;
+            // Info << "Iter " << iter << ": X_ref = " << X_ref << ", F = " << F << ", globalDeltaX = " << globalDeltaX << endl;
         }
 
         label cellI = mesh.findCell(X_ref);

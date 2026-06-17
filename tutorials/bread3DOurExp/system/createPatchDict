@@ -1,0 +1,49 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2312                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Do a synchronisation of coupled points after creation of any patches.
+pointSync false;
+
+// Write mesh after processing
+writeCyclicMatch false;
+
+// Patches to create
+patches
+(
+    {
+        // Name of the new patch
+        name    bottom2;
+
+        // Type of the new patch
+        patchInfo
+        {
+            type    patch;
+            // For coupled patches you might use:
+            // type    mappedWall;
+            // sampleMode  nearestPatchFace;
+            // sampleRegion vlozka;
+            // samplePatch vlozka_to_tekutina;
+        }
+
+        // How to construct: from a faceSet created by topoSet
+        constructFrom set;
+
+        // Name of the faceSet (must match the one in topoSetDict)
+        set     selectedFaces;
+    }
+);
+
+// ************************************************************************* //

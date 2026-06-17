@@ -274,23 +274,45 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             const volScalarField& Mg = this->db().objectRegistry::lookupObject<volScalarField>("Mg");
             const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
             const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
+            const volVectorField& sumDiffFlux = this->db().objectRegistry::lookupObject<volVectorField>("sumDiffFlux");
 
             scalarField rhoGBound = rhoG.boundaryField()[patch().index()];
             scalarField permBound = perm.boundaryField()[patch().index()];
             scalarField MgBound = Mg.boundaryField()[patch().index()];
             scalarField TBound = T.boundaryField()[patch().index()];
+            // vectorField sumDiffFluxBound = sumDiffFlux.boundaryField()[patch().index()];
+
+            // const fvMesh& mesh = patch().boundaryMesh().mesh();
+            // const surfaceVectorField& Sf = mesh.Sf();
+            // vectorField SfBound = Sf.boundaryField()[this->patch().index()];
+
+            // scalarField sumDiffFluxFaceBound = sumDiffFluxBound & SfBound;
             
             scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
             scalarField K1Bound = rhoGBound * permBound * patch().deltaCoeffs();
             scalarField TInf = TBound;
 
+            // // scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound * alphaGBound;
+            // scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound;
+            // scalarField f = 1 - (K1Bound ) / denominator;
+            // // scalarField a = (kM_ * MgBound * pGInf_ / (univR.value() * TInf) - sumDiffFluxFaceBound) / denominator;
+            // scalarField a = (kM_ * MgBound * pGInf_ / (univR.value() * TInf) ) / denominator;
+
             // scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound * alphaGBound;
             scalarField denominator = K1Bound + kM_ * MgBound / univR.value() / TBound;
-            scalarField f = 1 - K1Bound / denominator;
+            scalarField f = 1 - (K1Bound ) / denominator;
+            // scalarField a = (kM_ * MgBound * pGInf_ / (univR.value() * TInf) - sumDiffFluxFaceBound) / denominator;
             scalarField a = (kM_ * MgBound * pGInf_ / (univR.value() * TInf)) / denominator;
+            // scalarField a = (kM_ * 0.044 * pGInf_ / (univR.value() * TInf) ) / denominator;
+
+            Info << " min ref value" << min(a/f) << " max ref value" << max(a/f) << endl;
+            Info << " min ref fraction" << min(f) << " max ref fraction" << max(f) << endl;
 
             this->valueFraction() = f;
-            this->refValue() = a / f;
+            // this->valueFraction() = 1;
+            // this->refValue() = pGInf_ / alphaGBound;
+            this->refValue() = pGInf_;
+            this->refGrad() = 0;
         }
     }
 

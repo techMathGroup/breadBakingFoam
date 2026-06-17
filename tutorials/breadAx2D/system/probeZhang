@@ -22,5 +22,5 @@ probeZhang
     type                probes;
     libs                (sampling);
     probeLocations      ((0.0 0 0) (0.0 0.034 0) (17e-3 0 0));
-    fields              (T D);
+    fields              (T D pG);
 }

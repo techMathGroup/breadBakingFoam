@@ -31,10 +31,10 @@ boundaryField
     top
 	{
         type breadTMixed;
-        refValue        uniform 302;
+        refValue        uniform 300;
         refGradient     uniform 0;
         valueFraction   uniform 0;
-        value           uniform 302;
+        value           uniform 300;
         alpha           9.5;
         TInfTableDict   
         {
@@ -46,10 +46,10 @@ boundaryField
     sides
 	{
         type breadTMixed;
-        refValue        uniform 302;
+        refValue        uniform 300;
         refGradient     uniform 0;
         valueFraction   uniform 0;
-        value           uniform 302;
+        value           uniform 300;
         alpha           9.5;
         TInfTableDict   
         {
@@ -61,14 +61,28 @@ boundaryField
     bottom
 	{
         type breadTMixed;
-        refValue        uniform 302;
+        refValue        uniform 300;
         refGradient     uniform 0;
         valueFraction   uniform 0;
-        value           uniform 302;
+        value           uniform 300;
         alpha           9.5;
         TInfTableDict   
         {
-            file "$FOAM_CASE/constant/TInfTable";
+            file "$FOAM_CASE/constant/TInfTableBottom";
+            outOfBounds warn;
+        }
+	}
+    bottom2
+	{
+        type breadTMixed;
+        refValue        uniform 300;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 300;
+        alpha           9.5;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTableBottom";
             outOfBounds warn;
         }
 	}

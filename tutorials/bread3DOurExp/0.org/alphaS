@@ -20,7 +20,7 @@ internalField   uniform 0.228;
 
 boundaryField
 {
-	"(sides|bottom|top)"
+	"(sides|bottom|bottom2|top)"
 	{
         type zeroGradient;
 	}

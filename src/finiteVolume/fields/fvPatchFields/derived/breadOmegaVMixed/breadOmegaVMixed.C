@@ -281,6 +281,9 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
             const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
             const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
             const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
+            const volScalarField& alpha = this->db().objectRegistry::lookupObject<volScalarField>("alpha");
+            // const volVectorField& sumDiffFlux = this->db().objectRegistry::lookupObject<volVectorField>("sumDiffFlux");
+
             // const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
             // const surfaceVectorField& Sf = mesh.Sf();
 
@@ -292,6 +295,7 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
             // Pout << "min Dmag" <<min(Dmag) << "max(Dmag)" << max(Dmag) <<endl;
 
             scalarField rhoGBound = rhoG.boundaryField()[this->patch().index()];
+            scalarField alphaBound = alpha.boundaryField()[this->patch().index()];
             scalarField permBound = perm.boundaryField()[this->patch().index()];
             scalarField DEffmBound = DEff.boundaryField()[this->patch().index()];
             scalarField MgBound = Mg.boundaryField()[this->patch().index()];
@@ -299,6 +303,13 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
             scalarField TBound = T.boundaryField()[this->patch().index()];
             scalarField pGBound = pG.boundaryField()[this->patch().index()];
             scalarField pGCells = pG.boundaryField()[this->patch().index()].patchInternalField();
+            // vectorField sumDiffFluxBound = sumDiffFlux.boundaryField()[patch().index()];
+
+            // const fvMesh& mesh = patch().boundaryMesh().mesh();
+            // const surfaceVectorField& Sf = mesh.Sf();
+            // vectorField SfBound = Sf.boundaryField()[this->patch().index()];
+
+            // scalarField sumDiffFluxFaceBound = sumDiffFluxBound & SfBound / mag(SfBound);
                     
             scalarField alphaGBound = 1 - alphaS.boundaryField()[this->patch().index()] - alphaL.boundaryField()[this->patch().index()];
             scalarField K1Bound = rhoGBound * permBound * this->patch().deltaCoeffs();
@@ -308,8 +319,17 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
 
             // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound * alphaGBound;
             // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound;
-            scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound;
+            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound - sumDiffFluxFaceBound;
+            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound * alphaGBound + K2Bound /MgBound * (MgBound - MgCells);
+            scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound + K2Bound /MgBound * (MgBound - MgCells);
+
+            // Info << "min (A): " << min(K1Bound * (pGBound - pGCells)) << " max (A): " << max(K1Bound * (pGBound - pGCells)) << endl;
+            // Info << "min (B): " << min(K2Bound) << " max (B): " << max(K2Bound) << endl;
+            // Info << "min (C): " << min(K2Bound /MgBound * (MgBound - MgCells)) << " max (C): " << max(K2Bound /MgBound * (MgBound - MgCells)) << endl;
+            // Info << "min (D): " << min(kM_ * rhoGBound) << " max (D): " << max(kM_ * rhoGBound) << endl;
+            // scalarField denominator = K1Bound * (pGBound - pGCells) + kM_ * rhoGBound;
             scalarField f = 1.0 - K2Bound / denominator;
+            // scalar f = 1.0;
             scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t)) / denominator;
 
             this->valueFraction() = f;

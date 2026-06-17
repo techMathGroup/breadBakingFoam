@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/00_breads/breadAx2DOurExp/'
+outFolder = '../ZZ_cases/01_ourBreads/breadAx2DOurExp/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
@@ -64,6 +64,7 @@ kMPC = 0.04
 evCoef1 = -0.0071
 evCoef2 = 4.5
 n = 0.38
+alphaKept = 0.25
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
@@ -96,8 +97,7 @@ kMBottom = 3e-4   # -- external mass transfer coeficient
 kMTop = 3e-3   # -- external mass transfer coeficient
 alphaG = 10 # -- external heat transfer coeficient 
 
-# outFolder = '../ZZ_cases/01_ourBreads/00_alphaG_%g_kmsides%g_kmbottom%g_kmtop%g_r0_%g_perm_%g_dfree_%g_kmpc_%g/' % (alphaG, kMSides, kMBottom, kMTop, R0, perm, DFree, 
-kMPC)
+# outFolder = '../ZZ_cases/01_ourBreads/00_alphaG_%g_kmsides%g_kmbottom%g_kmtop%g_r0_%g_perm_%g_dfree_%g_kmpc_%g/' % (alphaG, kMSides, kMBottom, kMTop, R0, perm, DFree, kMPC)
 
 '''Post-processing'''
 fig, axs = plt.subplots(3, 1, figsize=(9, 16))  # figure with plots
@@ -177,7 +177,8 @@ baseCase.setParameters(
         ['constant/reactiveProperties', 'R0', str(R0), 'fermentation'],
         ['constant/reactiveProperties', 'Tm', str(Tm), 'fermentation'],
         ['constant/reactiveProperties', 'nCoef', str(n), 'evaporation'],
-        ['constant/reactiveProperties', 'TGelEv', str(tGelatEv), 'gelatization']
+        ['constant/reactiveProperties', 'TGelEv', str(tGelatEv), 'gelatization'],
+        ['constant/reactiveProperties', 'alphaKept', str(alphaKept), 'gelatization']
     ]
 )
         

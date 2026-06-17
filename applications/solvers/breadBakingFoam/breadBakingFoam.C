@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
             co2Init = true;
         }
 
+        pG.storePrevIter();
+
         while (pimple.loop())
         {
             // -- update moisture content for evaporation source calculation
@@ -138,8 +140,8 @@ int main(int argc, char *argv[])
             #include "EEqn2.H"
 
             // -- crust formation
-            #include "crustEq.H"
-            
+            // #include "crustEq.H"
+
             // -- if deformation allowed
             if (withDeformation == 1)
             {
@@ -152,16 +154,16 @@ int main(int argc, char *argv[])
                     F = I + physics->gradD().T();
 
                     // -- deformation gradient inverse
-                    Finv = inv(F);
+                    Finv = physics->mesh().lookupObject<volTensorField>("Finv");;
                     Finv.correctBoundaryConditions();
 
                     // -- Jacobian of the deformation gradient
-                    J = det(F);
+                    J = physics->mesh().lookupObject<volScalarField>("J");
                     J.correctBoundaryConditions();
                 }
             }
 
-            
+
             // -- solid mass conservation
             #include "alphaSEq.H"
             
@@ -191,6 +193,7 @@ int main(int argc, char *argv[])
                 Info << "T      : res: " << TResidual    << " Min (T): " << min(T).value() << ", max (T): " << max(T).value() << "." << endl;
                 Info << "omV    : res: " << omegaVResidual << " Min (omegaV): " << min(omegaV).value() << ", max (omegaV): " << max(omegaV).value() << "." << endl;
                 Info << "omC    : res: " << omegaCResidual << " Min (omegaC): " << min(omegaC).value() << ", max (omegaC): " << max(omegaC).value() << "." << endl;
+                Info << "Min (alphaG): " << min(alphaG).value() << ", max (alphaG): " << max(alphaG).value() << "." << endl;
                 Info << "Min (J): " << min(J).value() << ", max (J): " << max(J).value() << "." << endl;
                 Info << "Min (permGLViscG): " << min(permGLViscG).value() << ", max (permGLViscG): " << max(permGLViscG) << "." << endl;
                 Info << endl;

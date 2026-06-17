@@ -3,5 +3,6 @@ fields/fvPatchFields/derived/breadPGMixed/breadPGMixed.C
 fields/fvPatchFields/derived/breadOmegaVMixed/breadOmegaVMixed.C
 fields/fvPatchFields/derived/breadDFloor/breadDFloor.C
 fields/fvPatchFields/derived/breadDSide/breadDSide.C
+fields/fvPatchFields/derived/breadDSideSedge/breadDSideSedge.C
 
 LIB = $(FOAM_USER_LIBBIN)/libbreadMixedBCs

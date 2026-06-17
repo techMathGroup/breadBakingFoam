@@ -12,7 +12,7 @@ fvScalarMatrix omegaCEq
 
     // -- diffusion
     - fvm::laplacian(J * Finv & jDVTilda, omegaC)
-    + fvc::laplacian(J * Finv & jDVTilda * omegaC / Mg, Mg)
+    - fvc::laplacian(J * Finv & jDVTilda * omegaC / Mg, Mg)
     
     // -- CO2 generation 
     + J * mCO2

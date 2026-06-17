@@ -26,7 +26,19 @@ mechanical
         rho             rho [ 1 -3 0 0 0 0 0 ] 300; // -- NOTE: not used (calculated in solids4foam)
         E               E [ 1 -1 -2 0 0 0 0 ] 12000;
         nu              nu [ 0 0 0 0 0 0 0 ] 0.15;
+        mu0Raw          mu0Raw [ 1 -1 -2 0 0 0 0 ] 300;
+        kappa0Raw       kappa0Raw [ 1 -1 -2 0 0 0 0 ] 1000;
+        muVRaw          muVRaw [ 1 -1 -2 0 0 0 0 ] 3000;
+        lambdaVRaw      lambdaVRaw [ 1 -1 -2 0 0 0 0 ] 6000;
+        mu0Baked        mu0Baked [ 1 -1 -2 0 0 0 0 ] 12500;
+        kappa0Baked     kappa0Baked [ 1 -1 -2 0 0 0 0 ] 40000;
+        tau0 1;
+        tGelat 65;
+        alphaBiot 1;
     }
 );
+
+hardeningCoeff 1;
+// hardeningExp 2;
 
 // ************************************************************************* //

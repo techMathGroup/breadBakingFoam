@@ -48,8 +48,8 @@ transportProperties.readEntry("permGLViscG",permGLViscGSc);
 transportProperties.readEntry("tort",tort);
 
 // -- model thermophysical parameters 
-dimensionedScalar rhoS, rhoL, CpS, CpL, CpVapor, CpCO2, molMC, molMV, lambdaS, lambdaL, DG;
-thermophysicalProperties.subDict("solid").readEntry("rho", rhoS);
+dimensionedScalar rhoSScalar, rhoL, CpS, CpL, CpVapor, CpCO2, molMC, molMV, lambdaS, lambdaL, DG;
+thermophysicalProperties.subDict("solid").readEntry("rho", rhoSScalar);
 thermophysicalProperties.subDict("liquid").readEntry("rho", rhoL);
 thermophysicalProperties.subDict("solid").readEntry("Cp", CpS);
 thermophysicalProperties.subDict("liquid").readEntry("Cp", CpL);
@@ -75,6 +75,7 @@ reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("kMPCC
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef1", evCoef1);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("evCoef2", evCoef2);
 reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("nCoef", nCoef);
+reactiveProperties.subDict("reactProps").subDict("evaporation").readEntry("nCoef", nCoef);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("Tm", Tm);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("R0", R0);
 reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("deltaT", deltaT);
@@ -84,7 +85,7 @@ dimensionedScalar dummyT (dimensionedScalar("dummyT", dimTemperature, 1));
 dimensionedScalar dummyP (dimensionedScalar("dummyp", dimPressure, 1));
 dimensionedScalar dummyCp (dimensionedScalar("dummyp", CpS.dimensions(), 1));
 dimensionedScalar dummyLamdba (dimensionedScalar("dummyLamdba", lambdaS.dimensions(), 1));
-dimensionedScalar dummyRho (dimensionedScalar("dummyRho", rhoS.dimensions(), 1));
+dimensionedScalar dummyRho (dimensionedScalar("dummyRho", rhoSScalar.dimensions(), 1));
 
 double pResidual = 1;
 double omegaVResidual = 1;

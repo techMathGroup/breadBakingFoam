@@ -17,9 +17,13 @@ tutorials/*/all*
 *__pycache__*
 
 applications/solvers/*Test
+applications/solvers/*Molar
+applications/solvers/rhoPimpleFoam
 pyCtrlScripts/runBread*Test*
 # pyCtrlScripts/*Opt.py
 tutorials/*Test
 
 pyCtrlScripts/*swin*
 pyCtrlScripts/*GAB*
+pyCtrlScripts/bakingCurves*
+Experiments*

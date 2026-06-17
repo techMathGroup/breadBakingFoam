@@ -279,13 +279,21 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
 
             // scalarField Dmag = (DBound - DCells) & SfBound / mag(SfBound);
 
+            surfaceScalarField sumJiHi = this->db().objectRegistry::lookupObject<surfaceScalarField>("sumJiHi");
+            scalarField sumJiHiBound = sumJiHi.boundaryField()[this->patch().index()];
+
             // scalarField DCorrect = (DBound - DCells) & mesh
             const scalar t = this->db().time().timeOutputValue();
             scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
             // scalarField f = 1.0 / (1.0 + (lambdaEffBound / (mag(this->patch().delta() + (DBound - DCells)))) / (alpha_));
-            scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
+            // scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
+            scalarField f = alpha_ / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
+            scalarField a = (alpha_ * TInfTable_(t) + sumJiHiBound) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
+
+
             this->valueFraction() = f;
             this->refValue() = TInfTable_(t);
+            // this->refValue() = a / f;
         }
     }
 

@@ -38,6 +38,7 @@ reactProps
 
         // effectively not used (same kMPC for all temperatures)
         TOpen TOpen [0 0 0 0 0 0 0] 75;
+        // TOpen TOpen [0 0 0 0 0 0 0] 50;
         deltaTOpen deltaTOpen [0 0 0 0 0 0 0] 10;
 	}
     fermentation
@@ -49,7 +50,7 @@ reactProps
     gelatization
 	{
 		kGel0 kGel0 [0 0 -1 0 0 0 0] 2.8e18;
-		alphaLKept  0.035;
+		alphaKept  0.035;
         TGelEv  60;
         EAGel 100000;
 	}

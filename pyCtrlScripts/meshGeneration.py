@@ -381,65 +381,126 @@ def prep2DMeshZhang(obloukL, rLoaf, hLoaf, x0, y0, z0, dA, dX, dY, dZ, grX, grY,
     else:
         raise ValueError('Dough arc length cannot be 0.')
 
-def prep2DMeshOurExp(rLoaf, hLoaf, x0, y0, z0, dA, dX, dY, dZ, grX, grY, grZ, baseCase):
-    wAng = 5
-    # -- preparation of the blockMeshDictFile for geometry generation
-    yMax = dZ/math.atan(wAng/180*math.pi*0.5)                   # -- yMax from wedge angle
-    fvMesh = mesh()                                             # -- create mesh
-    nCZ = 1                                                     # -- wedge
+def prep2DMeshOurExp(rLoaf, hLoaf, x0, y0, z0, dA, dX, dY, dZ, grX, grY, grZ, baseCase, for3D=False):
+    if not for3D:
+        wAng = 5
+        # -- preparation of the blockMeshDictFile for geometry generation
+        yMax = dZ/math.atan(wAng/180*math.pi*0.5)                   # -- yMax from wedge angle
+        fvMesh = mesh()                                             # -- create mesh
+        nCZ = 1                                                     # -- wedge
 
-    # -- firstBlock
-    xC, yC = x0, y0
-    xE, yE = xC+hLoaf, yC+rLoaf
+        # -- firstBlock
+        xC, yC = x0, y0
+        xE, yE = xC+hLoaf, yC+rLoaf
 
-    # vertices
-    vertices = [
-        [xC, yC, z0-yC/yMax*dZ],
-        [xE, yC, z0-yC/yMax*dZ],
-        [xE, yE, z0-yE/yMax*dZ],
-        [xC, yE, z0-yE/yMax*dZ],
-        [xC, yC, z0+yC/yMax*dZ],
-        [xE, yC, z0+yC/yMax*dZ],
-        [xE, yE, z0+yE/yMax*dZ],
-        [xC, yE, z0+yE/yMax*dZ],
-    ]
+        # vertices
+        vertices = [
+            [xC, yC, z0-yC/yMax*dZ],
+            [xE, yC, z0-yC/yMax*dZ],
+            [xE, yE, z0-yE/yMax*dZ],
+            [xC, yE, z0-yE/yMax*dZ],
+            [xC, yC, z0+yC/yMax*dZ],
+            [xE, yC, z0+yC/yMax*dZ],
+            [xE, yE, z0+yE/yMax*dZ],
+            [xC, yE, z0+yE/yMax*dZ],
+        ]
 
-    # neighbouring blocks
-    neighbours = []
+        # neighbouring blocks
+        neighbours = []
 
-    # number of cells
-    nCX = int(round(abs(xE-xC)/dX))
-    nCY = int(round(abs(yE-yC)/dY))
-    nCells = [nCX, nCY, nCZ]
+        # number of cells
+        nCX = int(round(abs(xE-xC)/dX))
+        nCY = int(round(abs(yE-yC)/dY))
+        nCells = [nCX, nCY, nCZ]
 
-    # grading
-    grading = [grX, grY, grZ]
+        # grading
+        grading = [grX, grY, grZ]
 
-    # create the block
-    first = fvMesh.addBlock(vertices, neighbours, nCells, grading) 
-    
-    top = list()
-    top.append(first.retFYZE())
-    fvMesh.addPatch("top", "patch", top)
-
-    sides = list()
-    sides.append(first.retFXZE())
-    fvMesh.addPatch("sides", "patch", sides)
-    
-    bottom = list()
-    bottom.append(first.retFYZ0())
-    fvMesh.addPatch("bottom", "patch", bottom)
+        # create the block
+        first = fvMesh.addBlock(vertices, neighbours, nCells, grading) 
         
-    wedgeZ0 = list()
-    for block in fvMesh.blocks:
-        wedgeZ0.append(block.retFXY0())
+        top = list()
+        top.append(first.retFYZE())
+        fvMesh.addPatch("top", "patch", top)
 
-    fvMesh.addPatch("wedgeZ0", "wedge", wedgeZ0)
-    wedgeZE = list()
-    for block in fvMesh.blocks:
-        wedgeZE.append(block.retFXYE())
+        sides = list()
+        sides.append(first.retFXZE())
+        fvMesh.addPatch("sides", "patch", sides)
+        
+        bottom = list()
+        bottom.append(first.retFYZ0())
+        fvMesh.addPatch("bottom", "patch", bottom)
+            
+        wedgeZ0 = list()
+        for block in fvMesh.blocks:
+            wedgeZ0.append(block.retFXY0())
 
-    fvMesh.addPatch("wedgeZE", "wedge", wedgeZE)
+        fvMesh.addPatch("wedgeZ0", "wedge", wedgeZ0)
+        wedgeZE = list()
+        for block in fvMesh.blocks:
+            wedgeZE.append(block.retFXYE())
+
+        fvMesh.addPatch("wedgeZE", "wedge", wedgeZE)
+
+    else:
+        fvMesh = mesh()                                             # -- create mesh
+        nCZ = 1                                                     # -- wedge
+
+        # -- firstBlock
+        xC, yC = x0, y0
+        xE, yE = xC+hLoaf, yC+rLoaf
+        zL=1e-2
+        # dZ = 1e-5
+
+        # vertices
+        vertices = [
+            [xC, yC, z0],
+            [xE, yC, z0],
+            [xE, yE, z0],
+            [xC, yE, z0],
+            [xC, yC, zL],
+            [xE, yC, zL],
+            [xE, yE, zL],
+            [xC, yE, zL],
+        ]
+
+        # neighbouring blocks
+        neighbours = []
+
+        # number of cells
+        nCX = int(round(abs(xE-xC)/dX))
+        nCY = int(round(abs(yE-yC)/dY))
+        nCZ = int(round(abs(zL-z0)/dZ))
+        nCells = [nCX, nCY, nCZ]
+
+        # grading
+        grading = [grX, grY, grZ]
+
+        # create the block
+        first = fvMesh.addBlock(vertices, neighbours, nCells, grading) 
+        
+        top = list()
+        top.append(first.retFYZE())
+        fvMesh.addPatch("top", "patch", top)
+
+        sides = list()
+        sides.append(first.retFXZE())
+        fvMesh.addPatch("sides", "patch", sides)
+        
+        bottom = list()
+        bottom.append(first.retFYZ0())
+        fvMesh.addPatch("bottom", "patch", bottom)
+            
+        wedgeZ0 = list()
+        for block in fvMesh.blocks:
+            wedgeZ0.append(block.retFXY0())
+
+        fvMesh.addPatch("wedgeZ0", "empty", wedgeZ0)
+        wedgeZE = list()
+        for block in fvMesh.blocks:
+            wedgeZE.append(block.retFXYE())
+
+        fvMesh.addPatch("wedgeZE", "empty", wedgeZE)
 
     ### WRITE ###
     fvMesh.writeBMD("%s/system/" % baseCase.dir)
@@ -453,21 +514,31 @@ def z(x, y, hLoaf, rLoaf1,rLoaf2, up=0):
 def x(y, z, hLoaf, rLoaf1,rLoaf2, up=0):
     return (((1 - z**2 / rLoaf2**2 - y**2 / rLoaf1**2) * hLoaf**2)**0.5 + up)
 
-def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase, for2DExtrude=False, up=0):
+def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase, for2DExtrude=False, up=0, nonDeform=False):
     # -- preparation of the blockMeshDictFile for geometry generation
     fvMesh = mesh()
     hLoaf = hLoaf - up
 
     nPointsForEdge = 100
-    impGr = "5"
-    invImpGr = "0.2"
 
-    p1 = 0.4
-    p2 = 0.7
-    p3 = 0.6
-    p4 = 0.57
 
-    nasobekX = 1.5
+
+    p1 = 0.45
+    if not nonDeform:
+        p2 = 0.7
+        p3 = 0.7
+        p4 = 0.57
+        impGr = "2"
+        invImpGr = "0.5"
+    else:
+        p2 = 0.6
+        p3 = 0.8
+        p4 = 0.4
+        impGr = "6"
+        invImpGr = "0.1667"
+
+
+    nasobekX = 1.4
 
     rInZ = p1 * rLoaf2
     rInY = p1 * rLoaf1

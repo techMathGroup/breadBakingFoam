@@ -65,34 +65,24 @@ volScalarField nCO2
 );
 
 // -- deformarion gradient
-volTensorField F 
-(
-    IOobject
-    (
-        "solverF",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    physics->gradD().T() + I
-);
+// volTensorField F 
+// (
+//     IOobject
+//     (
+//         "solverF",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::NO_WRITE
+//     ),
+//     physics->gradD().T() + I
+// );
+volTensorField F = physics->mesh().lookupObject<volTensorField>("F");
 
-volTensorField Finv = inv(F);
+volTensorField Finv = physics->mesh().lookupObject<volTensorField>("Finv");
 
 // -- Jacobian
-volScalarField J
-(
-    IOobject
-    (
-        "solverJ",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    Foam::det(F)
-);
+volScalarField J = physics->mesh().lookupObject<volScalarField>("J");
 
 // -- density of the gas in pores
 volScalarField rhoG
@@ -147,7 +137,7 @@ volScalarField moisture
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    alphaL * rhoL / (alphaS * rhoS)
+    alphaL * rhoL / (alphaS * rhoSScalar)
 );
 
 // -- evaporation rate
@@ -286,7 +276,7 @@ volScalarField alphaG
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        writeOption2
+        IOobject::AUTO_WRITE
     ),
     1 - alphaS - alphaL
 );
@@ -304,6 +294,144 @@ surfaceScalarField CO2Flux
         writeOption1
     ),
     ((fvc::interpolate(preCoef * J) / mag(physics->mesh().Sf()))) * (fvc::interpolate(fvc::grad(pG)) & (fvc::interpolate(Finv.T()) & physics->mesh().Sf()))
+);
+
+
+volScalarField rhoS
+(
+    IOobject
+    (
+        "rhoS",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    physics->mesh(),
+    rhoSScalar
+    // "zeroGradient"
+);
+
+
+volScalarField artP
+(
+    IOobject
+    (
+        "artP",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    1e3 * rhoS / rhoSScalar * dummyP
+);
+
+volScalarField yield
+(
+    IOobject
+    (
+        "yield",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh(),
+    dimensionedScalar("yield", dimless, 0)
+);
+
+volScalarField awPSat
+(
+    IOobject
+    (
+        "awPSat",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    pSat
+);
+
+volScalarField availSurf
+(
+    IOobject
+    (
+        "availSurf",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh(),
+    dimensionedScalar("availSurf", dimless, 0)
+);
+
+volVectorField jDiffNow
+(
+    IOobject
+    (
+        "jDiffNow",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaV))))
+);
+
+
+
+volScalarField pV
+(
+    IOobject
+    (
+        "pV",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    pG * yV
+);
+
+volScalarField delta
+(
+    IOobject
+    (
+        "delta",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    1 - Foam::pow((alphaG), 1.0/3.0)
+);
+
+volVectorField jDiffNew
+(
+    IOobject
+    (
+        "jDiffNew",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG))) + ( (alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / DG) + delta * dH / lambdaS * rhoG * univR * omegaV / molMV )) * Finv.T() & fvc::grad(pV))))
+);
+
+surfaceScalarField sumJiHi
+(
+    IOobject
+    (
+        "sumJiHi",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    0 * fvc::interpolate((jDiffNew * (CpVapor * (T)))) & physics->mesh().Sf() / mag(physics->mesh().Sf())
 );
 
 

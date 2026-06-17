@@ -16,7 +16,8 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 7.7e-3;
+internalField   uniform 8e-3;
+// internalField   uniform 0.02;
 
 boundaryField
 {
@@ -41,6 +42,9 @@ boundaryField
             file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
+        // type fixedValue;
+        // value $internalField;
+        // type zeroGradient;
 	}
 }
 
