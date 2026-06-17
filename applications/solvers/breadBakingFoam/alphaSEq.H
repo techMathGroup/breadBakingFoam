@@ -3,6 +3,10 @@ fvScalarMatrix alphaSEq
 (
     // -- accumulation
     rhoS * fvm::ddt(J, alphaS)
+
+    ==
+
+    - J * mCO2
 );
 
 alphaSEq.relax();
