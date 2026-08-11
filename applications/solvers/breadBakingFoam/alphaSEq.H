@@ -1,20 +1,16 @@
 // -- conservation of the solid in bread
 fvScalarMatrix alphaSEq
 (
-    // -- accumulation
-    rhoS * fvm::ddt(J, alphaS)
-
-    ==
-
-    - J * mCO2
+    // -- accumulation of the solid part of the dough matrix phase
+    alphaD0 * fvm::ddt(rhoD, omegaS)
 );
 
 alphaSEq.relax();
 
 alphaSEq.solve();
 
-alphaS.correctBoundaryConditions();
+omegaS.correctBoundaryConditions();
 
-alphaS.relax();
+omegaS.relax();
 
 // ************************************************************************* //

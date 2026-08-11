@@ -1,31 +1,3 @@
-// -- vol fraction solid
-volScalarField alphaS
-(
-    IOobject
-    (
-        "alphaS",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh()
-);
-
-// -- vol fraction fluid
-volScalarField alphaL
-(
-    IOobject
-    (
-        "alphaL",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh()
-);
-
 // -- water vapor mass fraction
 volScalarField omegaV
 (
@@ -41,11 +13,39 @@ volScalarField omegaV
 );
 
 // -- water vapor mass fraction
+// volScalarField omegaC
+// (
+//     IOobject
+//     (
+//         "omegaC",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::MUST_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh()
+// );
+
 volScalarField omegaC
 (
     IOobject
     (
         "omegaC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    1.0 - omegaV,
+    "calculated"
+);
+
+// -- solid mass fraction
+volScalarField omegaS
+(
+    IOobject
+    (
+        "omegaS",
         runTime.timeName(),
         physics->mesh(),
         IOobject::MUST_READ,
@@ -54,7 +54,21 @@ volScalarField omegaC
     physics->mesh()
 );
 
-// gas pressure
+// -- dough matrix density
+volScalarField rhoD
+(
+    IOobject
+    (
+        "rhoD",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
+// -- gas pressure
 volScalarField pG
 (
     IOobject
@@ -68,6 +82,7 @@ volScalarField pG
     physics->mesh()
 );
 
+// -- temperature
 volScalarField T
 (
     IOobject
@@ -81,6 +96,7 @@ volScalarField T
     physics->mesh()
 );
 
+// -- crust of bread
 volScalarField alphaCrust
 (
     IOobject

@@ -205,37 +205,78 @@
     //     // + J * mCO2 * ( (T) * (CpCO2 - CpS))
     // );
 
+    // volScalarField CpRef = dummyCp * (1132 + 5.8 * (T / dummyT - 273) + 3700 * moisture - 2310 * moisture * moisture);
+// surfaceScalarField jCCorr = 0 * fvc::interpolate(J * dKoeffLucas * (Finv & (Finv.T() & fvc::grad(pV)))) & physics->mesh().Sf();
+// surfaceScalarField SfMag = physics->mesh().magSf();
+// forAll(jCCorr.boundaryField(), patchI)
+// {
+//     scalarField& jCCorrP = jCCorr.boundaryFieldRef()[patchI];
+//     scalarField& omegaVP = omegaV.boundaryFieldRef()[patchI];
+//     scalarField& rhoGP = rhoG.boundaryFieldRef()[patchI];
+//     const scalarField& magSfP = SfMag.boundaryFieldRef()[patchI];
+
+//     forAll(jCCorrP, faceI)
+//     {
+//         jCCorrP[faceI] = -0.1 * rhoGP[faceI] * (omegaVP[faceI]  - 7e-3)*magSfP[faceI];
+//     }
+// }
+
+
     fvScalarMatrix EEqn
     (
         // -- bilance ktere muzu verit 
-        J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T)
+        // J * (alphaS * rhoS * CpS + alphaL * rhoL * CpL + (1 - alphaS - alphaL) * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T)
+        // J * (alphaD * rhoD * (omegaS * CpS + omegaL * CpL) + alphaG * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T)
+        (alphaD0 * rhoD * (omegaS * CpS + omegaL * CpL) + J * alphaG * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T)
+        // alphaD0 * rhoD * CpRef * fvm::ddt(T)
 
 
         ==
 
         - (fvc::grad(T) & (omegaV * CpVapor * (jGTilda & fvc::grad(pG))))
-        - (fvc::grad(T) & (CpVapor *  (jDVTilda & fvc::grad(omegaV))))   
-        - (fvc::grad(T) & (CpVapor * omegaV / Mg * (jDVTilda & fvc::grad(Mg))))   
+        - (fvc::grad(T) & (CpVapor *  (jDVTilda & fvc::grad(omegaV))))
+        // + (fvc::grad(T) & (CpVapor *  (omegaV * jC)))   
+        // - (fvc::grad(T) & (CpVapor * omegaV / Mg * (jDVTilda & fvc::grad(Mg))))   
         
         - (fvc::grad(T) & (omegaC * CpCO2 * (jGTilda & fvc::grad(pG))))
-        - (fvc::grad(T) & (CpCO2 *  (jDVTilda & fvc::grad(omegaC))))
-        - (fvc::grad(T) & (CpCO2 * omegaC / Mg * (jDVTilda & fvc::grad(Mg))))   
+        - (fvc::grad(T) & (CpCO2 *  (jDCTilda & fvc::grad(omegaC))))
+        // + (fvc::grad(T) & (CpCO2 *  (omegaC * jC)))   
+        // - (fvc::grad(T) & (CpCO2 * omegaC / Mg * (jDVTilda & fvc::grad(Mg))))   
 
         - (fvc::grad(T) & (omegaAir * CpAir * (jGTilda & fvc::grad(pG))))
-        - (fvc::grad(T) & (CpAir *  (jDVTilda & fvc::grad(omegaAir))))
-        - (fvc::grad(T) & (CpAir * omegaAir / Mg * (jDVTilda & fvc::grad(Mg))))  
+        - (fvc::grad(T) & (CpAir *  (jDATilda & fvc::grad(omegaAir))))
+
+        + (fvc::grad(T) & ((CpVapor + CpAir + CpCO2) * omegaV * (jDVTilda) & fvc::grad(omegaV)))
+        + (fvc::grad(T) & ((CpVapor + CpAir + CpCO2) * omegaC * (jDCTilda) & fvc::grad(omegaV)))
+        + (fvc::grad(T) & ((CpVapor + CpAir + CpCO2) * omegaAir * (jDATilda) & fvc::grad(omegaAir)))   
+
+        // + fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas * (dHConst), pV)
+
+        // + (fvc::grad(T) & (CpAir *  (omegaAir * jC)))   
+        // - (fvc::grad(T) & (CpAir * omegaAir / Mg * (jDVTilda & fvc::grad(Mg))))  
+
+        + (fvc::grad(T) & (CpL * dKoeffLucas * (Finv.T() & fvc::grad(pV))))
+
+        // + fvc::div(dHConst * jCCorr)
+        // + fvc::div(dHConst * dKoeffLucas * (J * Finv & Finv.T() & fvc::grad(pV)))
+        // + fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas * dHConst, pV)
+        // + fvc::div(jCCorr * dHConst)
         
         // - (fvc::grad(T) & (CpVapor *  (1 - alpha) * J * (Finv & (((alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / DG) + delta * dHConst / lambdaS * rhoG * univR * omegaV / molMV )) * Finv.T() ))) & fvc::grad(pV)))  
 
         // -- heat conduction
+        // + fvm::laplacian(lambdaEff * J * Finv & Finv.T(), T)
         + fvm::laplacian(lambdaEff * J * Finv & Finv.T(), T)
         + J * evRate * dHT
-        + J * evRate * dHS
+        // + J * mCO2 * dHS
 
     );
 
-    // volVectorField jDiffNowCO2 = -(((J * (Finv & (omegaC * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaC)))))) );
-    // volVectorField jDiffNowAir = -(((J * (Finv & (omegaAir * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaAir)))))) );
+    // volTensorField jDATilda = - rhoG * DEffaM * Finv.T();
+
+    // volVectorField jDiffNowCO2 = -((J * (Finv & (omegaC * ((jGTilda & fvc::grad(pG)) + (jDCTilda & fvc::grad(omegaC)))))) );
+    // volVectorField jDiffNowVap = -((J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(omegaV)))))) );
+    // volVectorField jDiffNowAir = -(((J * (Finv & (omegaAir * ((jGTilda & fvc::grad(pG)) + (jDATilda & fvc::grad(omegaAir)))))) ));
     // jDiffNow = - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaV))));
 
     // dimensionedScalar Tref("Tref", dimTemperature, 300);
@@ -243,13 +284,20 @@
     // // dimensionedScalar dHV("dHV", dH.dimensions(), 2300000);
 
 
+    // dimensionedScalar Tref("Tref", dimTemperature, 300);
+    sumJiHi = 0 * sumJiHi;
+    dimensionedScalar TRef("TRef", dimTemperature, 300);
 
-    // sumJiHi = 0 * sumJiHi;
-    // sumJiHi += fvc::interpolate((jDiffNew * (CpVapor * (T - Tref)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
-    // sumJiHi += fvc::interpolate((jDiffNowCO2 * (CpCO2 * (T - Tref)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
-    // sumJiHi += fvc::interpolate((jDiffNowAir * (CpAir * (T - Tref)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
 
-    // sumJiHi.correctBoundaryConditions();
+    // volVectorField jVE = omegaV * (jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(omegaV)) + jC; 
+    // volVectorField jCE = omegaC * (jGTilda & fvc::grad(pG)) + (jDCTilda & fvc::grad(omegaC)) + jC; 
+    // volVectorField jAE = omegaAir * (jGTilda & fvc::grad(pG)) + (jDATilda & fvc::grad(omegaAir)) + jC; 
+    // sumJiHi += fvc::interpolate((jVE * (CpVapor * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
+    // sumJiHi += fvc::interpolate((jCE * (CpCO2 * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
+    // sumJiHi += fvc::interpolate((jAE * (CpAir * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf());
+    
+
+    sumJiHi.correctBoundaryConditions();
 
     EEqn.relax();
 

@@ -20,6 +20,33 @@ if (debug == 2)
 
 #include "createEffProp.H"
 
+volScalarField omegaAir
+(
+    IOobject
+    (
+        "omegaAir",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    1 - omegaV - omegaC,
+    "calculated"
+);
+omegaAir.correctBoundaryConditions();
+
+// forAll(omegaAir.boundaryField(), patchI)
+// {
+//     scalarField& omegaAirP = omegaAir.boundaryFieldRef()[patchI];
+//     scalarField& omegaCP = omegaC.boundaryFieldRef()[patchI];
+//     scalarField& omegaVP = omegaV.boundaryFieldRef()[patchI];
+
+//     forAll(omegaAirP, faceI)
+//     {
+//         omegaAirP[faceI] = 1 - omegaVP[faceI] - omegaCP[faceI];
+//     }
+// }
+
 // -- gas molar mass
 volScalarField Mg 
 (
@@ -31,8 +58,13 @@ volScalarField Mg
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    1 / (omegaV / molMV + (1 - omegaV) / molMC)
+    1.0 / (omegaV / molMV + omegaC / molMC + omegaAir / molMAir),
+    "calculated"
 );
+Mg.correctBoundaryConditions();
+
+// Info << "molMV: " << molMV << ", molMC: " << molMC << ", molMAir: " << molMAir << endl;
+
 
 // -- generation CO2 rate
 volScalarField mCO2
@@ -45,38 +77,11 @@ volScalarField mCO2
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    R0 * Foam::exp(-(T - Tm) / deltaT)
+    R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2)) * alphaD0 * rhoD * omegaS / dummyRho,
+    "calculated"
 );
+mCO2.correctBoundaryConditions();
 
-
-// -- generation CO2 rate
-volScalarField nCO2
-(
-    IOobject
-    (
-        "nCO2",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    mCO2 / molMC
-    // mCO2
-);
-
-// -- deformarion gradient
-// volTensorField F 
-// (
-//     IOobject
-//     (
-//         "solverF",
-//         runTime.timeName(),
-//         physics->mesh(),
-//         IOobject::READ_IF_PRESENT,
-//         IOobject::NO_WRITE
-//     ),
-//     physics->gradD().T() + I
-// );
 volTensorField F = physics->mesh().lookupObject<volTensorField>("F");
 
 volTensorField Finv = physics->mesh().lookupObject<volTensorField>("Finv");
@@ -95,8 +100,10 @@ volScalarField rhoG
         IOobject::NO_READ,
         writeOption1
     ),
-    pG * Mg / univR / T
+    pG * Mg / univR / T,
+    "calculated"
 );
+rhoG.correctBoundaryConditions();
 
 // -- density of the gas in pores
 volScalarField yV
@@ -109,8 +116,40 @@ volScalarField yV
         IOobject::NO_READ,
         writeOption2
     ),
-    omegaV
+    omegaV / molMV * Mg,
+    "calculated"
 );
+yV.correctBoundaryConditions();
+
+volScalarField yC
+(
+    IOobject
+    (
+        "yC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::NO_READ,
+        writeOption2
+    ),
+    omegaC / molMC * Mg,
+    "calculated"
+);
+yC.correctBoundaryConditions();
+
+volScalarField yA
+(
+    IOobject
+    (
+        "yA",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::NO_READ,
+        writeOption2
+    ),
+    omegaAir / molMAir * Mg,
+    "calculated"
+);
+yA.correctBoundaryConditions();
 
 // -- saturated pressure
 volScalarField pSat
@@ -123,8 +162,26 @@ volScalarField pSat
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    dummyP * 1e3 * Foam::exp(16.2886 - 3816.44 / (T / dummyT - 46.13))
+    dummyP * 1e3 * Foam::exp(16.2886 - 3816.44 / (T / dummyT - 46.13)),
+    "calculated"
 );
+pSat.correctBoundaryConditions();
+
+// -- water vapor mass fraction
+volScalarField omegaL
+(
+    IOobject
+    (
+        "omegaL",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    1 - omegaS,
+    "calculated"
+);
+omegaL.correctBoundaryConditions();
 
 // -- moisture content kgLwater/kGS
 volScalarField moisture
@@ -137,8 +194,10 @@ volScalarField moisture
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    alphaL * rhoL / (alphaS * rhoSScalar)
+    omegaL / omegaS,
+    "calculated"
 );
+moisture.correctBoundaryConditions();
 
 // -- evaporation rate
 volScalarField evRate
@@ -151,8 +210,10 @@ volScalarField evRate
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    kMPCOpen * (1 - alphaS) * molMC / univR / T * (pG) * 0
+    kMPCOpen * molMC / univR / T * (pG) * 0,
+    "calculated"
 );
+evRate.correctBoundaryConditions();
 
 // -- permeability
 // -- legacy from Zhang
@@ -178,11 +239,12 @@ volScalarField nuG
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        writeOption2
+        IOobject::NO_WRITE
     ),
     1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113),
-    "zeroGradient"
+    "calculated"
 );
+nuG.correctBoundaryConditions();
 
 // -- permeability
 volScalarField permGLViscG
@@ -196,8 +258,9 @@ volScalarField permGLViscG
         writeOption2
     ),
     permGLViscGSc / nuG,
-    "zeroGradient"
+    "calculated"
 );
+permGLViscG.correctBoundaryConditions();
 
 // -- pores opening function
 volScalarField alpha
@@ -210,8 +273,25 @@ volScalarField alpha
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.14 + 0.5
+    Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5,
+    "calculated"
 );
+alpha.correctBoundaryConditions();
+
+volScalarField tortField 
+(
+    IOobject
+    (
+        "tortField", 
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    tortOpen * alpha + (1 - alpha) * tortClosed,
+    "calculated"
+);
+tortField.correctBoundaryConditions();
 
 // -- Darcy gas flux
 volTensorField jGTilda
@@ -224,8 +304,10 @@ volTensorField jGTilda
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE
     ),
-    - rhoG * permGLViscG * Finv.T()
+    - rhoG * permGLViscG * Finv.T(),
+    "calculated"
 );
+jGTilda.correctBoundaryConditions();
 
 // -- water vapor diffusive flux
 volTensorField jDVTilda
@@ -238,21 +320,57 @@ volTensorField jDVTilda
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE
     ),
-    - rhoG * DEff * Finv.T()
+    - rhoG * DEffvM * Finv.T(),
+    "calculated"
 );
+jDVTilda.correctBoundaryConditions();
 
-volScalarField omegaAir
+volTensorField jDCTilda
 (
     IOobject
     (
-        "omegaAir",
+        "jDCTilda",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    - rhoG * DEffcM * Finv.T(),
+    "calculated"
+);
+jDCTilda.correctBoundaryConditions();
+
+
+volTensorField jDATilda
+(
+    IOobject
+    (
+        "jDATilda",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    - rhoG * DEffaM * Finv.T(),
+    "calculated"
+);
+jDATilda.correctBoundaryConditions();
+
+volVectorField jC
+(
+    IOobject
+    (
+        "jC",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    1 - omegaV - omegaC
+    // physics->mesh(),
+    (omegaV * (jDVTilda & fvc::grad(omegaV)) + (omegaC * jDCTilda & fvc::grad(omegaC)) + (omegaAir * jDATilda & fvc::grad(omegaAir))),
+    "calculated"
 );
+jC.correctBoundaryConditions();
 
 
 // volVectorField fluxG
@@ -268,6 +386,21 @@ volScalarField omegaAir
 //     - rhoG * permGLViscG * fvc::grad(pG)
 // );
 
+volScalarField alphaD
+(
+    IOobject
+    (
+        "alphaD",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    alphaD0 / J,
+    "calculated"
+);
+alphaD.correctBoundaryConditions();
+
 volScalarField alphaG
 (
     IOobject
@@ -278,67 +411,68 @@ volScalarField alphaG
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    1 - alphaS - alphaL
+    1 - alphaD,
+    "calculated"
 );
+alphaG.correctBoundaryConditions();
 
-volScalarField preCoef = - alphaG * rhoG * permGLViscG;
+// volScalarField preCoef = - alphaG * rhoG * permGLViscG;
 
-surfaceScalarField CO2Flux
-(
-    IOobject
-    (
-        "CO2Flux",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption1
-    ),
-    ((fvc::interpolate(preCoef * J) / mag(physics->mesh().Sf()))) * (fvc::interpolate(fvc::grad(pG)) & (fvc::interpolate(Finv.T()) & physics->mesh().Sf()))
-);
-
-
-volScalarField rhoS
-(
-    IOobject
-    (
-        "rhoS",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    physics->mesh(),
-    rhoSScalar
-    // "zeroGradient"
-);
+// surfaceScalarField CO2Flux
+// (
+//     IOobject
+//     (
+//         "CO2Flux",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption1
+//     ),
+//     ((fvc::interpolate(preCoef * J) / mag(physics->mesh().Sf()))) * (fvc::interpolate(fvc::grad(pG)) & (fvc::interpolate(Finv.T()) & physics->mesh().Sf()))
+// );
 
 
-volScalarField artP
-(
-    IOobject
-    (
-        "artP",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    1e3 * rhoS / rhoSScalar * dummyP
-);
+// volScalarField rhoS
+// (
+//     IOobject
+//     (
+//         "rhoS",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     physics->mesh(),
+//     rhoSScalar,
+// );
 
-volScalarField yield
-(
-    IOobject
-    (
-        "yield",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh(),
-    dimensionedScalar("yield", dimless, 0)
-);
+
+// volScalarField artP
+// (
+//     IOobject
+//     (
+//         "artP",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::AUTO_WRITE
+//     ),
+//     1e3 * rhoS / rhoSScalar * dummyP
+// );
+
+// volScalarField yield
+// (
+//     IOobject
+//     (
+//         "yield",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh(),
+//     dimensionedScalar("yield", dimless, 0)
+// );
 
 volScalarField awPSat
 (
@@ -348,10 +482,12 @@ volScalarField awPSat
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        writeOption2
     ),
-    pSat
+    aw * pSat,
+    "calculated"
 );
+awPSat.correctBoundaryConditions();
 
 volScalarField availSurf
 (
@@ -361,24 +497,26 @@ volScalarField availSurf
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        writeOption2
     ),
     physics->mesh(),
-    dimensionedScalar("availSurf", dimless, 0)
+    dimensionedScalar("availSurf", dimless, 0),
+    "calculated"
 );
+availSurf.correctBoundaryConditions();
 
-volVectorField jDiffNow
-(
-    IOobject
-    (
-        "jDiffNow",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaV))))
-);
+// volVectorField jDiffNow
+// (
+//     IOobject
+//     (
+//         "jDiffNow",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::AUTO_WRITE
+//     ),
+//     - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaV))))
+// );
 
 
 
@@ -390,10 +528,12 @@ volScalarField pV
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        writeOption2
     ),
-    pG * yV
+    pG * yV,
+    "calculated"
 );
+pV.correctBoundaryConditions();
 
 volScalarField delta
 (
@@ -403,23 +543,57 @@ volScalarField delta
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        writeOption2
     ),
-    1 - Foam::pow((alphaG), 1.0/3.0)
+    1 - Foam::pow((alphaG), 1.0/3.0),
+    "calculated"
 );
+delta.correctBoundaryConditions();
 
-volVectorField jDiffNew
+volVectorField jVE
 (
     IOobject
     (
-        "jDiffNew",
+        "jVE",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE
     ),
-    - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG))) + ( (alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / DG) + delta * dH / lambdaS * rhoG * univR * omegaV / molMV )) * Finv.T() & fvc::grad(pV))))
+    omegaV * (jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(omegaV)) + jC,
+    "calculated"
 );
+jVE.correctBoundaryConditions();
+
+volVectorField jCE
+(
+    IOobject
+    (
+        "jCE",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    omegaC * (jGTilda & fvc::grad(pG)) + (jDCTilda & fvc::grad(omegaC)) + jC,
+    "calculated"
+);
+jCE.correctBoundaryConditions();
+
+volVectorField jAE
+(
+    IOobject
+    (
+        "jAE",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    omegaAir * (jGTilda & fvc::grad(pG)) + (jDATilda & fvc::grad(omegaAir)) + jC,
+    "calculated"
+);
+jAE.correctBoundaryConditions();
 
 surfaceScalarField sumJiHi
 (
@@ -429,39 +603,118 @@ surfaceScalarField sumJiHi
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE
     ),
-    0 * fvc::interpolate((jDiffNew * (CpVapor * (T)))) & physics->mesh().Sf() / mag(physics->mesh().Sf())
+    0 * (fvc::interpolate((jVE * (CpVapor * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf())),
+    "calculated"
+);
+sumJiHi.correctBoundaryConditions();
+
+volScalarField dPWdX
+(
+    IOobject
+    (
+        "dPWdX",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat,
+    "calculated"
+);
+dPWdX.correctBoundaryConditions();
+
+volScalarField dPSatdT
+(
+    IOobject
+    (
+        "dPSatdT",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT,
+    "calculated"
+);
+dPSatdT.correctBoundaryConditions();
+
+volScalarField dKoeffLucas
+(
+    IOobject
+    (
+        "dKoeffLucas",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPWdX + dHConst / lambdaS * dPSatdT) ),
+    "calculated"
+);
+dKoeffLucas.correctBoundaryConditions();
+
+volScalarField kMPC
+(
+    IOobject
+    (
+        "kMPC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    alpha * kMPCOpen + (1 - alpha) * kMPCClosed,
+    "calculated"
+);
+kMPC.correctBoundaryConditions();
+
+
+volScalarField Sl
+(
+    IOobject
+    (
+        "Sl",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    alphaG*0,
+    "calculated"
+);
+Sl.correctBoundaryConditions();
+
+volVectorField jL
+(
+    IOobject
+    (
+        "jL",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    - dKoeffLucas * ((Finv.T() & fvc::grad(pV)))
+);
+jL.correctBoundaryConditions();
+
+surfaceScalarField jLCorr
+(
+    IOobject
+    (
+        "jLCorr",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        IOobject::NO_WRITE
+    ),
+    fvc::interpolate(Finv & jL) & physics->mesh().Sf()
 );
 
+surfaceScalarField jLCorrIntoLiquid = 0*jLCorr;
 
-// surfaceScalarField gradPg
-// (
-//     IOobject
-//     (
-//         "gradPg",
-//         runTime.timeName(),
-//         physics->mesh(),
-//         IOobject::READ_IF_PRESENT,
-//         writeOption2
-//     ),
-//     fvc::snGrad(pG)
-// );
-// Info << "Here6" <<endl;
-
-// -- debug field of the vapor flow
-// volVectorField vaporVel
-// (
-//     IOobject
-//     (
-//         "vaporVel",
-//         runTime.timeName(),
-//         physics->mesh(),
-//         IOobject::READ_IF_PRESENT,
-//         writeOption2
-//     ),
-//     - omegaV * permGLViscG * (Finv.T() & fvc::grad(pG)) - DEff * (Finv.T() & fvc::grad(yV))
-// );
 
 
 // -- basic info about initialization of the fields 

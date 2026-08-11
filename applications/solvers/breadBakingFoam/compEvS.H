@@ -1,31 +1,39 @@
 // -- saturated water pressure
 pSat = dummyP * 1e3 * Foam::exp(16.2886 - 3816.44 / (T / dummyT - 46.13));
-
-// -- vapor molar fraction
-yV = omegaV / molMV * Mg;
-
+pSat.correctBoundaryConditions();
 
 
 // -- Oswin model for water activity
-volScalarField a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
-// volScalarField availMois = max(moisture - 0.3, SMALL);
-volScalarField aw = Foam::pow(moisture * 100 / a, (1.0 / nCoef)) / (Foam::pow(moisture * 100/ a, (1.0 / nCoef)) + 1); 
-// volScalarField aw = Foam::pow(availMois * 100 / a, (1.0 / nCoef)) / (Foam::pow(availMois * 100/ a, (1.0 / nCoef)) + 1); 
+a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
+a.correctBoundaryConditions();
 
-alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.14 + 0.5;
-volScalarField kMPC = alpha * kMPCOpen + (1 - alpha) * kMPCClosed;
+aw = Foam::pow(moisture * 100.0 / a, invNCoeff) / (Foam::pow(moisture * 100.0 / a, invNCoeff) + 1.0); 
+aw.correctBoundaryConditions();
+
+// -- calculation of free effective
+volScalarField alphaL = alphaD * omegaL * rhoD / rhoL;
+Sl = alphaL / (alphaL + alphaG);
+Sl.correctBoundaryConditions();
+
+alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
+// alpha = - Foam::atan((moisture-0.1) / 0.01) / 3.1415 + 0.5;
+// alpha = - Foam::atan((Sl-0.02) / 0.001) / 3.1415 + 0.5;
+alpha.correctBoundaryConditions();
+
+kMPC = alpha * kMPCOpen + (1 - alpha) * kMPCClosed;
+kMPC.correctBoundaryConditions();
 
 awPSat = aw * pSat;
+awPSat.correctBoundaryConditions();
 pV = pG * yV;
+pV.correctBoundaryConditions();
 
-// dimensionedScalar Slr("Slr", dimless, 0.05);
-// dimensionedScalar Sgr("Sgr", dimless, 0.02);
-// volScalarField Sl = alphaL / (alphaL + alphaG);
-// volScalarField Se = (Sl - Slr) / (1 - Slr - Sgr);
-// availSurf = 4 * Se * (1 - Se);
+availSurf = -16 * (Foam::pow(Sl - 0.5, 4)) + 1;
+availSurf.correctBoundaryConditions();
 
 // evaporation rate
-evRate = kMPC / univR / Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 1), 0.5) / dimensionedScalar("dummyT", dimTemperature, 1) * (aw * pSat - pG * yV) * molMV;
+evRate = kMPC * availSurf / univR / Foam::pow(T / dummyT, 0.5) / dummyT * (awPSat - pV) * molMV;
+evRate.correctBoundaryConditions();
 
 // -- evaporation enthalpy
 volScalarField tau = 1 - T / dummyT / 647.126;
@@ -38,19 +46,7 @@ volScalarField dHT = - dimensionedScalar("dummyDH", dH.dimensions(), 1)
 
 // dimensionedScalar dHConst("dummyDH", dH.dimensions(), -2430492.1);
 // dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2257362.5);
-dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2300000);
+// dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2300000);
 // dimensionedScalar dHS("dummyDH", dH.dimensions(), 20.7e3);
 dimensionedScalar dHS("dummyDH", dH.dimensions(), 573e3);
-
-
-// jDiffNow = - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG)) + (jDVTilda & fvc::grad(Mg) / Mg)) + (jDVTilda & fvc::grad(omegaV))));
-// jDiffNow.correctBoundaryConditions();
-// delta = 1 - Foam::pow((alphaG), 1.0/3.0);   
-// delta.correctBoundaryConditions();
-// pV.correctBoundaryConditions();
-
-// // volScalarField dPSatdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT;
-
-// jDiffNew = - J * (Finv & (omegaV * ((jGTilda & fvc::grad(pG))) + ( (alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / DG) + delta * dHConst / lambdaS * rhoG * univR * omegaV / molMV * aw )) * Finv.T() & fvc::grad(pV))));
-// jDiffNew.correctBoundaryConditions();
 // ************************************************************************* //
