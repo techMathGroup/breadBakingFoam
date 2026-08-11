@@ -37,9 +37,11 @@ reactProps
         nCoef  0.38;
 
         // effectively not used (same kMPC for all temperatures)
-        TOpen TOpen [0 0 0 0 0 0 0] 75;
+        // TOpen TOpen [0 0 0 0 0 0 0] 75;
+        TOpen TOpen [0 0 0 0 0 0 0] 100;
         // TOpen TOpen [0 0 0 0 0 0 0] 50;
-        deltaTOpen deltaTOpen [0 0 0 0 0 0 0] 10;
+        // deltaTOpen deltaTOpen [0 0 0 0 0 0 0] 16;
+        deltaTOpen deltaTOpen [0 0 0 0 0 0 0] 2;
 	}
     fermentation
 	{

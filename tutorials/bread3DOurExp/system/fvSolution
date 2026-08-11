@@ -17,15 +17,15 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D)"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D|rhoD|omegaS|omegaL)"
     {
         solver          PBiCGStab;
         preconditioner  diagonal;
         tolerance       1e-10;
-        relTol          0.001;
+        relTol          0.01;
     }
  
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D)Final"
+    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D|rhoD|omegaS|omegaL)Final"
     {
         solver          PBiCGStab;
         preconditioner  diagonal;
@@ -99,9 +99,9 @@ relaxationFactors
         D 0.1;
         // DFinal 0.1;
         omegaV 0.1;
-        omegaC 0.1;
-        T 0.1;
-        pG 0.1;
+        // omegaC 0.05;
+        // T 0.5;
+        pG 0.02;
     }
     equations
     {

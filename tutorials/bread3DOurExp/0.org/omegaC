@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 1e-3;
+internalField   uniform 0.25;
 
 boundaryField
 {
@@ -47,10 +47,13 @@ boundaryField
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
+        DFieldName      DEffcM;
+        type fixedValue;
+        value $internalField;
         // type calculated;
         // type fixedValue;
         // value $internalField;
-        // type zeroGradient;
+        type zeroGradient;
 	}
     bottom
     {
@@ -69,6 +72,10 @@ boundaryField
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
+        DFieldName      DEffcM;
+        type fixedValue;
+        value $internalField;
+        type zeroGradient;
 	}
     bottom2
     {
@@ -85,6 +92,11 @@ boundaryField
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
+        DFieldName      DEffcM;
+        type fixedValue;
+        value $internalField;
+                type zeroGradient;
+
 	}
 }
 
