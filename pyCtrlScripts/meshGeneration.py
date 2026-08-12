@@ -528,14 +528,17 @@ def prep3DMeshOurExp(rLoaf1, rLoaf2, hLoaf, dX, dY, dZ, grX, grY, grZ, baseCase,
         p2 = 0.7
         p3 = 0.7
         p4 = 0.57
-        impGr = "2"
-        invImpGr = "0.5"
+        # impGr = "6"
+        impGr = "3"
+        # invImpGr = "0.16666"
+        invImpGr = "0.333"
     else:
         p2 = 0.6
         p3 = 0.8
         p4 = 0.4
-        impGr = "6"
-        invImpGr = "0.1667"
+        # impGr = "6"
+        impGr = "0.16666"
+        invImpGr = "6"
 
 
     nasobekX = 1.4

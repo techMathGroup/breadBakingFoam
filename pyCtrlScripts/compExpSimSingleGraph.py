@@ -31,9 +31,10 @@ def saveFigPostProcess(simDir):
 
     mLInit = 159.9/2
     mSInit = 336.6/2
-    V = 7.30047E-06 * 36
+    # V = 7.30047E-06 * 36
     # alphaD0 = 0.91
-    alphaD0 = 0.9
+    # alphaD0 = 0.9
+    alphaD0 = 0.84
 
     expDir = os.path.join('..', 'Experiments2026')
     columnWhereDataStarts = 11
@@ -73,6 +74,8 @@ def saveFigPostProcess(simDir):
         simData[f'sim{j+1}'] = TPoint
         
     simData['weight'] = readDataFromLogFile("%s/log.intWeigth" %simDir)
+    simData['moisture'] = readDataFromLogFile("%s/log.intMoisture" %simDir)
+
 
     # Directory to save latex data
     out_dir = 'latex_data/' + simDir.split('/')[-2]
@@ -113,13 +116,17 @@ def saveFigPostProcess(simDir):
 
     rhoData = simData['weight'][:,1]
     x_sim_w = simData['weight'][:,0] / 60 - kynuti / 60
-    weight_sim_data = rhoData * V * alphaD0 * 1000
+    weight_sim_data = rhoData * 36  * 1000
     print(simData['weight'])
     print(simData['weight'].shape)
+    # print(simData['moisture'])
+    # print(simData['moisture'].shape)
     # loss_sim = (weight_sim_data[110] - weight_sim_data)
-    loss_sim = (weight_sim_data[12] - weight_sim_data)
+    # loss_sim = (weight_sim_data[10] - weight_sim_data)
+    loss_sim = (weight_sim_data[0] - weight_sim_data)
     y_sim_w = (mLInit - loss_sim) / mSInit
     ax2.plot(x_sim_w, y_sim_w, '--', color='k', linewidth=2, label='Sim Moisture')
+    # ax2.plot(simData['weight'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1], '--', color='k', linewidth=2, label='Sim Moisture')
     save_for_latex(os.path.join(out_dir, 'moisture_sim.dat'), x_sim_w, y_sim_w, "Time(min)\tMoistureRatio")
 
     ax2.set_xlabel('Time (min)', fontsize=12)
@@ -127,7 +134,7 @@ def saveFigPostProcess(simDir):
     ax2.set_title(f"Moisture Content", fontsize=14, fontweight='bold')
     ax2.grid(True, alpha=0.3)
     ax2.set_ylim(0.3, 0.5)
-    ax2.set_xlim(0, 35)
+    # ax2.set_xlim(0, 35)
     ax2.legend()
     
     # --- Create unified dataset ---
@@ -151,18 +158,26 @@ def saveFigPostProcess(simDir):
             y_e = e[f'data{j+1}'][:,1]
             y_exp_all_interp.append(np.interp(t_unified, x_e, y_e))
         
-        y_exp_mean = np.mean(y_exp_all_interp, axis=0)
+        
+        
+
+
+        
         if j == 2:
             inds = 0,1,3,4
+            y_exp_mean = np.mean([y_exp_all_interp[x] for x in inds], axis=0)
             # y_exp_std = np.std(y_exp_all_interp[*inds], axis=0)
             y_exp_std = np.std([y_exp_all_interp[x] for x in inds], axis=0)
         else:
+            y_exp_mean = np.mean(y_exp_all_interp, axis=0)
             y_exp_std = np.std(y_exp_all_interp, axis=0)
 
         unified_data.extend([y_sim_interp, y_exp_interp, y_exp_mean, y_exp_std])
         header.extend([f"Sim_TC{j+1}", f"Exp_TC{j+1}", f"Exp_Mean_TC{j+1}", f"Exp_Std_TC{j+1}"])
 
-    y_sim_w_interp = np.interp(t_unified, x_sim_w, y_sim_w)
+    t_unifiedHere = simData['weight'][:,0] / 60 - kynuti / 60
+
+    y_sim_w_interp = np.interp(t_unified, simData['weight'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1])
     y_exp_w_interp = np.interp(t_unified, x_exp_w, y_exp_w)
     
     # Calculate mean and std across all experiments for moisture
@@ -189,8 +204,8 @@ def saveFigPostProcess(simDir):
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(os.path.join(simDir, 'exp_vs_sim.png'))
+    plt.savefig(os.path.join(simDir, 'exp_vs_sim4.png'))
 
 
-# simDir = '../ZZ_cases/2026/V26/exp0_nonDef_False/V14_lowalphag_lowDl_TConst_0.05_Close_0.05_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_10_lambda_0.42_tau_10_alphaG_7_alphaGBottom_7_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_1.5e-15/'
-# saveFigPostProcess(simDir)
+simDir = '../ZZ_cases/2026/V27/exp0_nonDef_False/V71_pG_ZG_FINE_optNum_0.2_Close_0.2_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_70_lambda_0.42_tau_10_alphaG_18_alphaGBottom_8_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_1.5e-15/'
+saveFigPostProcess(simDir)

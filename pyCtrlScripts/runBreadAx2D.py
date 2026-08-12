@@ -17,7 +17,7 @@ import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
-outFolder = '../ZZ_cases/00_breads/marekConsult_lam08_breadAx2D/'
+# outFolder = '../ZZ_cases/00_breads/newImpl_lambda04const_tortClo40_tortOpen10_3_kmpClosed1_open02_newKin/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
@@ -36,61 +36,102 @@ hLoaf = 3.5e-2  # -- loaf height
 arcL = 0.008    # -- length of the arc at the side of the bread   
 
 '''Internal transport parameters'''
-DFree = 2e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-tort = 10   # -- tortuosity
+DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
+tortOpen = 3   # -- tortuosity
+tortClosed = 70   # -- tortuosity
+
+# tortOpen = 10   # -- tortuosity
+# tortClosed = 10   # -- tortuosity
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
-lambdaS = 0.55 
-lambdaS = 0.8 
+lambdaS = 0.55
+lambdaS = 0.42
+# lambdaS = 0.35
 
 # perm = 5e-13  # -- bread permeability (Zhang 2005)
-perm = 1.7e-13 * 0.217  # -- bread permeability (Zhang 2005)
+# perm = 1.7e-13 * 0.217  # -- bread permeability (Zhang 2005)
+perm = 3.5e-15  # -- bread permeability (Zhang 2005)
+perm = 2.4e-14  # -- bread permeability (Zhang 2005)
+# perm = 2.6e-12  # -- bread permeability (Zhang 2005)
 
 # -- heat capacities for the individual phases
-CpS = 1450   # -- solid phase
+# CpS = 1450   # -- solid phase
+CpS = 1130   # -- solid phase
+# CpS = 1800   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
 
 # -- mass densities for the individual phases
-rhoS = 1200  # -- solid density    
-rhoL = 1000  # -- liquid density   
+# rhoS = 1200  # -- solid density    
+# rhoL = 1000  # -- liquid density   
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPC = 0.02
+# kMPC = 0.2
+# kMPCOpen = 5
+kMPCOpen = 0.2
+kMPCClosed = 0.2
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
-# evCoef1 = -0.0071
-# evCoef2 = 4.5
-evCoef1 = -0.0056
-evCoef2 = 5.5
+evCoef1 = -0.0071
+evCoef2 = 4.5
+# evCoef1 = -0.0056
+# evCoef2 = 5.5
 n = 0.38
+
+outFolder = '../ZZ_cases/00_breads/207_testMoist_refSB_rhoD1050_0.4_%g_kCl_%g_torOp_%g_torCl_%g_evCoef1_%g_lambdaS_%g/'%(kMPCOpen, kMPCClosed, tortOpen, tortClosed, evCoef1, lambdaS)
 
 # outFolder = '../ZZ_cases/00_breads/breadAx2D_corrE_alphaKept_%g/'%(alphaKept)
 
 # -- pre-exponential factor and Tm in CO2 generation kinetics 
 # -- in equation (32) in https://doi.org/10.1002/aic.10518
-R0 = 3e-4 
-R0 = 1e-4 
+# R0 = 3e-4 
+
+# R0 = 2e-5
+# R0 = 3e-5
+R0 = 1e-4
+# R0 = 2e-5
+# R0 = 2e-5
+
+# R0 = 4.3e-5
+# R0 = 5e-5
+
 Tm = 313    # -- kinetics from Zhang 2005
+deltaT = 17
+# deltaT = 10
 tau0 = 1
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
-nu = 0.15   # -- Poisson ratio
-E = 10000   # -- Youngs modulus
+# withDeformation = 0 # -- turn on (1) /off (0) deformation
+nu = 0.49   # -- Poisson ratio
+E = 3000   # -- Youngs modulus
 tGelat = 65 # -- temperature of gelatization (solid )
 tGelatEv = 57   # -- temperature of gelatization (evaporation)
 
+# mu0Raw = 70
+# kappa0Raw = 1000
+# muVRaw = 18000
+# lambdaVRaw = 2000
+# mu0Baked = 70
+# kappa0Baked = 1000
+
+mu0Raw = 70
+kappa0Raw = 1000
+muVRaw = 18000
+lambdaVRaw = 0
+mu0Baked = 70
+kappa0Baked = 1000
+
 '''Numerics'''
 timeStep = 1    # -- computational time step
-plusTime1 = 400 # -- how long to run with deformation
-plusTime2 = 500 # -- how long to run without deformation
-writeInt = 20   # -- how often to write results
-nIter = 50  # -- number of iterations in each time step
+plusTime1 = 360 # -- how long to run with deformation
+plusTime2 = 540 # -- how long to run without deformation
+writeInt = 10   # -- how often to write results
+nIter = 40  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
 nCores = 4 # -- number of cores to run the simulation
 
@@ -125,13 +166,22 @@ if prepBlockMesh:
 # CHANGE THE PARAMETERS IN OPENFOAM DICTIONARIES========================
 # 1) BOUNDARY CONDITIONS
 # -- change in tutorial case
+baseCase.setParameters(
+    [
+        ['0.org/T', 'alpha', str(alphaG), 'sides'],
+        ['0.org/T', 'alpha', str(alphaG), 'bottom'],
+    ]
+)
 
 # 2) constant/transportProperties
 baseCase.setParameters(
     [
         ['constant/transportProperties', 'withDeformation', str(withDeformation), ''],
         ['constant/transportProperties', 'permGLViscG', str(perm), ''],
-        ['constant/transportProperties', 'tort', str(tort), ''],
+        # ['constant/transportProperties', 'tort', str(tort), ''],
+        ['constant/transportProperties', 'tortOpen', str(tortOpen), ''],
+        ['constant/transportProperties', 'tortClosed', str(tortClosed), ''],
+        
     ]
 )
 
@@ -139,9 +189,9 @@ baseCase.setParameters(
 baseCase.setParameters(
     [
         ['constant/thermophysicalProperties', 'lambda', str(lambdaS), 'solid'],
-        ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
+        # ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpS), 'solid'],
-        ['constant/thermophysicalProperties', 'rho', str(rhoL), 'liquid'],
+        # ['constant/thermophysicalProperties', 'rho', str(rhoL), 'liquid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpL), 'liquid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpG), 'CO2'],
         ['constant/thermophysicalProperties', 'Cp', str(CpVapor), 'vapor'],
@@ -153,12 +203,13 @@ baseCase.setParameters(
 # -- parameters for evaporation and CO2 generation
 baseCase.setParameters(
     [
-        ['constant/reactiveProperties', 'kMPCOpen', str(kMPC), 'evaporation'],
-        ['constant/reactiveProperties', 'kMPCClosed', str(kMPC), 'evaporation'],
+        ['constant/reactiveProperties', 'kMPCOpen', str(kMPCOpen), 'evaporation'],
+        ['constant/reactiveProperties', 'kMPCClosed', str(kMPCClosed), 'evaporation'],
         ['constant/reactiveProperties', 'evCoef1', str(evCoef1), 'evaporation'],
         ['constant/reactiveProperties', 'evCoef2', str(evCoef2), 'evaporation'],
         ['constant/reactiveProperties', 'R0', str(R0), 'fermentation'],
         ['constant/reactiveProperties', 'Tm', str(Tm), 'fermentation'],
+        ['constant/reactiveProperties', 'deltaT', str(deltaT), 'fermentation'],
         ['constant/reactiveProperties', 'nCoef', str(n), 'evaporation'],
     ]
 )
@@ -186,6 +237,12 @@ baseCase.setParameters(
     [
         ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
         ['constant/mechanicalProperties', 'E', str(E), 'bread'],
+        ['constant/mechanicalProperties', 'mu0Raw', str(mu0Raw), 'bread'],
+        ['constant/mechanicalProperties', 'kappa0Raw', str(kappa0Raw), 'bread'],
+        ['constant/mechanicalProperties', 'muVRaw', str(muVRaw), 'bread'],
+        ['constant/mechanicalProperties', 'lambdaVRaw', str(lambdaVRaw), 'bread'],
+        ['constant/mechanicalProperties', 'mu0Baked', str(mu0Baked), 'bread'],
+        ['constant/mechanicalProperties', 'kappa0Baked', str(kappa0Baked), 'bread'],
         ['constant/mechanicalProperties', 'tau0', str(tau0), 'bread'],
         ['constant/mechanicalProperties', 'tGelat', str(tGelat), 'bread']
     ]
@@ -375,7 +432,7 @@ if runPostProcess:
     # axs[4].plot(CO2Out[:,0] / 60, CO2Out[:,1], 'b', label='CO2 flux simulation')
     # fig.tight_layout()
 
-    print("CO2Out: ", np.sum(CO2Out[:,1]) * writeInt)
+    # print("CO2Out: ", np.sum(CO2Out[:,1]) * writeInt)
 
     plt.savefig(baseCase.dir + 'postProcessingPlot.png')
     np.savetxt(os.path.join(baseCase.dir, 'temperatureProbe.dat'), probesT, header='time\tcenter\tsurface\ttop', comments='')

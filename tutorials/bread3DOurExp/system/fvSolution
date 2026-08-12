@@ -98,10 +98,11 @@ relaxationFactors
     {
         D 0.1;
         // DFinal 0.1;
-        omegaV 0.1;
+        omegaV 0.01;
         // omegaC 0.05;
         // T 0.5;
-        pG 0.02;
+        pG 0.01;
+        // pGFinal 0.;
     }
     equations
     {

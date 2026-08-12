@@ -77,42 +77,47 @@ dPSatdT.correctBoundaryConditions();
 volScalarField dPVdT = rhoG * univR / Mg * yV;
 dPVdT.correctBoundaryConditions();
 
-forAll(dPWdX, cellI)
-{
-    if (moisture[cellI] > SMALL)
-    {
-        dPWdX[cellI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef))/(nCoef*moisture[cellI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef)) + 1),2))) * pSat[cellI];
-    }
-    else
-    {
-        dPWdX[cellI] = 0;
-    }
-}
+dPWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
 
-forAll(dPWdX.boundaryField(), patchI)
-{
-    scalarField& dPWdXP = dPWdX.boundaryFieldRef()[patchI];
-    scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
-    scalarField& aP = a.boundaryFieldRef()[patchI];
-    scalarField& pSatP = pSat.boundaryFieldRef()[patchI];
+// dPWdX = 482363.3441*Foam::exp(0.0071*T/dummyT - 4.5)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), 1.631578947)/(Foam::pow(183298.0708*Foam::pow(moisture,2)*Foam::exp(0.0142*T/dummyT - 9.)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), (631578947.0/1000000000.0)) + 1.0,2.0)) * pSat;
+dPWdX.correctBoundaryConditions();
 
-    forAll(dPWdXP, faceI)
-    {
-        if (moistureP[faceI] > SMALL)
-        {
-            dPWdXP[faceI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef))/(nCoef*moistureP[faceI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef)) + 1),2))) * pSatP[faceI];
-        }
-        else
-        {
-            dPWdXP[faceI] = 0;
-        }
-    }
-}
+// forAll(dPWdX, cellI)
+// {
+//     if (moisture[cellI] > SMALL)
+//     {
+//         dPWdX[cellI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef))/(nCoef*moisture[cellI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef)) + 1),2))) * pSat[cellI];
+//     }
+//     else
+//     {
+//         dPWdX[cellI] = 0;
+//     }
+// }
+
+// forAll(dPWdX.boundaryField(), patchI)
+// {
+//     scalarField& dPWdXP = dPWdX.boundaryFieldRef()[patchI];
+//     scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
+//     scalarField& aP = a.boundaryFieldRef()[patchI];
+//     scalarField& pSatP = pSat.boundaryFieldRef()[patchI];
+
+//     forAll(dPWdXP, faceI)
+//     {
+//         if (moistureP[faceI] > SMALL)
+//         {
+//             dPWdXP[faceI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef))/(nCoef*moistureP[faceI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef)) + 1),2))) * pSatP[faceI];
+//         }
+//         else
+//         {
+//             dPWdXP[faceI] = 0;
+//         }
+//     }
+// }
 
 // -- ratio of cell wall to all thickness
-// delta = 1 - Foam::pow((alphaG), 1.0/3.0);
+delta = 1 - Foam::pow((alphaG), 1.0/3.0);
 // delta = 1.0;
-delta = 0.1;
+// delta = deltaSc;
 delta.correctBoundaryConditions();
 dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPWdX + dHConst / lambdaS * dPSatdT) );
 dKoeffLucas.correctBoundaryConditions();

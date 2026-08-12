@@ -40,8 +40,9 @@ kynuti = True
 
 # DEFINE PARAMETERS=====================================================
 '''Geometry parameters'''
+# mSStep = 0.1e-2 # -- aproximate computational cell size
 mSStep = 0.1e-2 # -- aproximate computational cell size
-# mSStep = 0.07e-2 # -- aproximate computational cell size
+# mSStep = 0.05e-2 # -- aproximate computational cell size
 # rLoaf1 = 8.5e-2  # -- loaf radius                
 # rLoaf2 = 8.5e-2  # -- loaf radius                
 # hLoaf = 7e-2  # -- loaf height 
@@ -75,8 +76,8 @@ for expNum in range(1):
 
     '''Evaporation and CO2 generation parameters'''
     # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.1
-    kMPCClosed = 0.1
+    kMPCOpen = 0.2
+    kMPCClosed = 0.2
 
     # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
     evCoef1 = -0.0071
@@ -97,7 +98,7 @@ for expNum in range(1):
     TKynuti = 300
     TStart = 300
     TTop = 210
-    TBottom = 250
+    TBottom = 230
 
     if kynuti:
         timeKynuti = 400
@@ -133,12 +134,13 @@ for expNum in range(1):
     tau0 = 10
 
     '''Numerics'''
-    timeStep = 1  # -- computational time step
+    timeStepKynuti = 4  # -- computational time step
+    timeStepSim = 1  # -- computational time step
     # plusTime1 = 1450 # -- how long to run with deformation
     # plusTime1 = 1400 # -- how long to run with deformation
     # plusTime1 = 540 # -- how long to run with deformation
     # plusTime1 = 720 # -- how long to run with deformation
-    plusTime1 = 740 # -- how long to run with deformation
+    plusTime1 = 300 # -- how long to run with deformation
     # plusTime1 = 1280 # -- how long to run with deformation
     # plusTime2 = 960 # -- how long to run without deformation
     plusTime2 = 1000 # -- how long to run without deformation
@@ -150,13 +152,21 @@ for expNum in range(1):
 
     writeInt = 20   # -- how often to write results
     # writeInt = 1   # -- how often to write results
-    nIter = 150  # -- number of iterations in each time step
+    nIterKynuti = 200  # -- number of iterations in each time step
+    nIterSim = 100  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
     nCores = 8 # -- number of cores to run the simulation
 
     # -- relaxation factors
     DRelax = 0.1
     DFinalRelax = 1
+    omegaVRelaxKyn = 0.01
+    pGRelaxKyn = 0.01
+    omegaVRelax = 0.1
+    pGRelax = 0.1
+
+    pGRelaxNonDef = 0.03
+    omegaVRelaxNonDef = 0.03
 
     '''Boundary conditions'''
     # kMSides = 0.01   # -- external mass transfer coeficient
@@ -164,14 +174,14 @@ for expNum in range(1):
     # kMBottom = 0.001   # -- external mass transfer coeficient
     kMBottomOmega = 0.01
     kMTop = 3e-3   # -- external mass transfer coeficient
-    alphaG = 7 # -- external heat transfer coeficient 
-    alphaGBottom = 7 # -- external heat transfer coeficient 
+    alphaG = 19 # -- external heat transfer coeficient 
+    alphaGBottom = 13 # -- external heat transfer coeficient 
     # alphaGBottom = 12 # -- external heat transfer coeficient 
 
     '''Post-processing'''
     fig, axs = plt.subplots(1, 1, figsize=(16, 9))  # figure with plots
 
-    outFolder = '../ZZ_cases/2026/V26/exp%d_nonDef_%s/V07_deltaConst_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
+    outFolder = '../ZZ_cases/2026/V27/exp%d_nonDef_%s/V71_pG_ZG_FINE_optNum_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
 
     # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
     # -- create OpenFOAMCase object to change values in dictionaries
@@ -234,7 +244,7 @@ for expNum in range(1):
         # if not nonDeform:
         fl.writelines("\t(0\t%f)\n"%TKynuti)
         fl.writelines("\t(%d\t%f)\n"%(timeKynuti, TKynuti))
-        bakingCurve[:, 1] = TTop
+        # bakingCurve[:, 1] = TTop
         for i in range(bakingCurve.shape[0]):
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1]))
             fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1] + 273.15))
@@ -302,8 +312,9 @@ for expNum in range(1):
     # 5 system/controlDict
     baseCase.setParameters(
         [
-            ['system/controlDict', 'endTime', str(plusTime1), ''],
-            ['system/controlDict', 'deltaT', '%.5g'%timeStep, ''],
+            # ['system/controlDict', 'endTime', str(plusTime1), ''],
+            ['system/controlDict', 'endTime', str(timeKynuti), ''],
+            ['system/controlDict', 'deltaT', '%.5g'%timeStepKynuti, ''],
             ['system/controlDict', 'writeInterval', '%.5g'%writeInt, ''],
         ]
     )
@@ -311,9 +322,11 @@ for expNum in range(1):
     # 6) fvSolutions
     baseCase.setParameters(
         [
-            ['system/fvSolution', 'nOuterCorrectors', str(nIter), 'PIMPLE'],
+            ['system/fvSolution', 'nOuterCorrectors', str(nIterKynuti), 'PIMPLE'],
             ['system/fvSolution', 'D', str(DRelax), 'fields'],
             ['system/fvSolution', 'DFinal', str(DFinalRelax), 'fields'],
+            ['system/fvSolution', 'omegaV', str(omegaVRelaxKyn), 'fields'],
+            ['system/fvSolution', 'pG', str(pGRelaxKyn), 'fields'],
         ]
     )
 
@@ -385,13 +398,15 @@ for expNum in range(1):
                 ]
             )
 
-        # -- run the rest of the simualation without further deformation
-        if plusTime2 > 0:
+        if plusTime1 > 0:
             baseCase.setParameters(
                 [
-                    ['system/controlDict', 'endTime', str(plusTime1 + plusTime2), ''],
-                    ['constant/transportProperties', 'withDeformation', '0', ''],
-                    ['system/fvSolution', 'nOuterCorrectors', str(50), 'PIMPLE'],
+                    ['system/controlDict', 'endTime', str(timeKynuti + plusTime1), ''],
+                    ['system/controlDict', 'deltaT', '%.5g'%timeStepSim, ''],
+                    # ['constant/transportProperties', 'withDeformation', '0', ''],
+                    ['system/fvSolution', 'nOuterCorrectors', str(nIterSim), 'PIMPLE'],
+                    ['system/fvSolution', 'omegaV', str(omegaVRelax), 'fields'],
+                    ['system/fvSolution', 'pG', str(pGRelax), 'fields'],
 
                 ]
             )
@@ -405,6 +420,31 @@ for expNum in range(1):
                 baseCase.runCommands(
                     [
                         '%s > log.%s_2' %(dynSolver,dynSolver),
+                    ]
+                )
+
+        # -- run the rest of the simualation without further deformation
+        if plusTime2 > 0:
+            baseCase.setParameters(
+                [
+                    ['system/controlDict', 'endTime', str(timeKynuti + plusTime1 + plusTime2), ''],
+                    # ['system/controlDict', 'deltaT', '%.5g'%1, ''],
+                    ['constant/transportProperties', 'withDeformation', '0', ''],
+                    ['system/fvSolution', 'omegaV', str(omegaVRelaxNonDef), 'fields'],
+                    ['system/fvSolution', 'pG', str(pGRelaxNonDef), 'fields'],
+
+                ]
+            )
+            if nCores > 1:
+                baseCase.runCommands(
+                    [
+                        'foamJob -parallel -screen %s > log.%s_3' %(dynSolver,dynSolver),
+                    ]
+                )
+            else:
+                baseCase.runCommands(
+                    [
+                        '%s > log.%s_3' %(dynSolver,dynSolver),
                     ]
                 )
 

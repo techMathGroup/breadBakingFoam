@@ -1,5 +1,16 @@
 surfaceScalarField SfMag = physics->mesh().magSf();
 
+
+// volVectorField jLToL = 0*jL;
+// forAll(jLToL, cellI)
+// {
+//     if (omegaL[cellI] < SMALL)
+//     {
+//         jLToL[cellI] = jL[cellI];
+//         jL[cellI] = vector(0,0,0);
+//     }
+// }
+
 jLCorr = fvc::interpolate(Finv & jL) & physics->mesh().Sf();
 jLCorrIntoLiquid =  0*fvc::interpolate(Finv & jL) & physics->mesh().Sf();
 surfaceScalarField omegaVSurf = fvc::interpolate(omegaV);
@@ -11,6 +22,19 @@ surfaceScalarField jPgCorr = fvc::interpolate(jGTilda & fvc::grad(pG)) & physics
 // forAll(jPgCorr, faceI)
 // {
 //     jPgCorr[faceI] = 0;
+// }
+
+// forAll(jLCorr, faceI)
+// {
+//     if (omegaVSurf[faceI] < SMALL)
+//     {
+//         if (jLCorrOld[faceI] < SMALL)
+//         {
+//             scalar coPrenest = jLCorrOld[faceI] / 2.0;
+//             jLCorr[faceI] = coPrenest;
+//             jLCorrIntoLiquid[faceI] = jLCorrIntoLiquidOld[faceI] + coPrenest;
+//         }
+//     }
 // }
 
 if (zhang)
@@ -36,8 +60,8 @@ if (zhang)
                 dKoeffLucasP[faceI] = 0;
                 if (omegaVP[faceI] < SMALL)
                 {
-                    // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
-                    jLCorrIntoLiquidP[faceI] = 0;
+                    jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
+                    // jLCorrIntoLiquidP[faceI] = 0;
                     jLCorrP[faceI] = 0;
                 }
                 if (omegaVP[faceI] >= SMALL)
@@ -78,7 +102,8 @@ else
                 if (omegaVP[faceI] >= SMALL)
                 {
                     jLCorrIntoLiquidP[faceI] = 0;
-                    jLCorrP[faceI] = 0.006 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI];
                 }
                 // jPgCorrP[faceI] = 0.01 * MgP[faceI] / univR.value() * (pGP[faceI] / TP[faceI] - 1e5 / 463) * magSfP[faceI];
             }
@@ -107,7 +132,9 @@ else
                 if (omegaVP[faceI] >= SMALL)
                 {
                     jLCorrIntoLiquidP[faceI] = 0;
-                    jLCorrP[faceI] = 0.0006 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    jLCorrP[faceI] = 0;
+                    // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    jLCorrP[faceI] = - jPgCorrP[faceI] * omegaVP[faceI];
                 }
                 // jPgCorrP[faceI] = 0.01 * MgP[faceI] / univR.value() * (pGP[faceI] / TP[faceI] - 1e5 / 463) * magSfP[faceI];
             }

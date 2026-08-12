@@ -618,7 +618,7 @@ volScalarField dPWdX
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
+        writeOption2
     ),
     ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat,
     "calculated"
@@ -633,7 +633,7 @@ volScalarField dPSatdT
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
+        writeOption2
     ),
     3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT,
     "calculated"
@@ -694,7 +694,7 @@ volVectorField jL
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
+        writeOption2
     ),
     - dKoeffLucas * ((Finv.T() & fvc::grad(pV)))
 );
@@ -710,7 +710,7 @@ surfaceScalarField jLCorr
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE
     ),
-    fvc::interpolate(Finv & jL) & physics->mesh().Sf()
+    linearInterpolate(Finv & jL) & physics->mesh().Sf()
 );
 
 surfaceScalarField jLCorrIntoLiquid = 0*jLCorr;

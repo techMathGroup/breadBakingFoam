@@ -41,7 +41,7 @@ IOdictionary reactiveProperties
 
 // -- model transport parameters 
 dimensionedScalar univR, permGLViscGSc, kappaS;
-scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang;
+scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang, deltaSc;
 transportProperties.subDict("genProps").readEntry("univR", univR); // -- universal gas constant
 transportProperties.readEntry("withDeformation", withDeformation);
 transportProperties.readEntry("permGLViscG",permGLViscGSc);
@@ -49,6 +49,7 @@ transportProperties.readEntry("tortOpen", tortOpen);
 transportProperties.readEntry("tortClosed", tortClosed);
 transportProperties.readEntry("alphaD0",alphaD0);
 transportProperties.readEntry("zhang",zhang);
+transportProperties.readEntry("delta",deltaSc);
 
 // -- model thermophysical parameters 
 dimensionedScalar rhoSScalar, rhoL, CpS, CpL, CpVapor, CpCO2, molMC, molMV, lambdaS, lambdaL, DG, Dl;
@@ -91,8 +92,6 @@ reactiveProperties.subDict("reactProps").subDict("fermentation").readEntry("delt
 
 dimensionedScalar dHConst("dummyDH", dH.dimensions(), 2257362.5);
 dimensionedScalar TRef("TRef", dimTemperature, 300);
-
-
 
 scalar invNCoeff = 1.0 / nCoef;
 

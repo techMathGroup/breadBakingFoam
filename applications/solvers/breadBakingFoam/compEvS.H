@@ -1,5 +1,6 @@
 // -- saturated water pressure
 pSat = dummyP * 1e3 * Foam::exp(16.2886 - 3816.44 / (T / dummyT - 46.13));
+// pSat = dummyP * 1e5 * Foam::exp(3.559 - 643.7 / (T / dummyT - 198.04));
 pSat.correctBoundaryConditions();
 
 

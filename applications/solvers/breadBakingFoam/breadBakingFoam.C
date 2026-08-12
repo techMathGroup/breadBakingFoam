@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
 
                 // -- closed-cell water vapor flux
                 jL = - dKoeffLucas * ((Finv.T() & fvc::grad(awPSat)));
+                // jL = - dKoeffLucas * (aw * (Finv.T() & fvc::grad(pSat)));
                 // jL = - dKoeffLucas * ((Finv.T() & fvc::grad(pV)));
                 jL.correctBoundaryConditions();
                 
@@ -195,7 +196,30 @@ int main(int argc, char *argv[])
                 jCE.correctBoundaryConditions();
                 // jAE.correctBoundaryConditions();
 
+                // if (pimple.finalIter())
+                // {
+                //     for (int i = 0; i < 5; ++i)
+                //     {
 
+                //         // -- solid mass conservation
+                //         #include "alphaSEq.H"
+                //         // -- liquid water conservation
+                //         #include "phiLEq.H"
+                //         omegaL = 1.0 - omegaS;
+                //         omegaL.correctBoundaryConditions();
+                //         // -- closed-cell water vapor flux
+                //         jL = - dKoeffLucas * ((Finv.T() & fvc::grad(awPSat)));
+                //         jL.correctBoundaryConditions();
+                //         // -- evaporation source calculation 
+                //         #include "compEvS.H"
+
+                //         // -- overall gas-phase balance
+                //         #include "concEqG6.H"
+
+                //         // -- species equations
+                //         #include "concEqV5.H"
+                //     }
+                // }
                 // -- overall gas-phase balance
                 #include "concEqG6.H"
 

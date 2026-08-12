@@ -47,7 +47,9 @@ experiments = [
         'hLoaf': 4.46e-2,
         'rLoaf': 6.47e-2,
         'hLoafKynuti':4.8e-2,
+        # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
+        # 'rLoafKynuti': 4.7e-2,
         'rLoafKynuti': 5e-2,
         'up': 1e-2,
         'probes': np.array([
@@ -73,7 +75,9 @@ experiments = [
         'hLoaf': 4.46e-2,
         'rLoaf': 6.47e-2,
         'hLoafKynuti':4.8e-2,
+        # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
+        # 'rLoafKynuti': 4.7e-2,
         'rLoafKynuti': 5e-2,
         'up': 1e-2,
         'probes': np.array([
@@ -99,7 +103,9 @@ experiments = [
         'hLoaf': 4.46e-2,
         'rLoaf': 6.47e-2,
         'hLoafKynuti':4.8e-2,
+        # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
+        # 'rLoafKynuti': 4.7e-2,
         'rLoafKynuti': 5e-2,
         'up': 1e-2,
         'probes': np.array([
@@ -125,7 +131,9 @@ experiments = [
         'hLoaf': 4.46e-2,
         'rLoaf': 6.47e-2,
         'hLoafKynuti':4.8e-2,
+        # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
+        # 'rLoafKynuti': 4.7e-2,
         'rLoafKynuti': 5e-2,
         'up': 1e-2,
         'probes': np.array([
@@ -151,7 +159,9 @@ experiments = [
         'hLoaf': 4.46e-2,
         'rLoaf': 6.47e-2,
         'hLoafKynuti':4.8e-2,
+        # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
+        # 'rLoafKynuti': 4.7e-2,
         'rLoafKynuti': 5e-2,
         'up': 1e-2,
         'probes': np.array([
