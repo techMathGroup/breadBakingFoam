@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from expDict import *
 from myAddFcs import *
 
-kynuti = 400
+kynuti = 2400
 # kynuti = 1100
 # kynuti = 600
 # kynuti = 240
@@ -104,7 +104,7 @@ def saveFigPostProcess(simDir):
     ax1.set_title(f"Temperatures", fontsize=14, fontweight='bold')
     ax1.grid(True, alpha=0.3)
     ax1.set_ylim(25, 110)
-    ax1.set_xlim(0, 35)
+    ax1.set_xlim(0, 25)
     ax1.legend(ncol=2)
     
     # --- Plot 2: Moisture (Weight) ---
@@ -134,7 +134,7 @@ def saveFigPostProcess(simDir):
     ax2.set_title(f"Moisture Content", fontsize=14, fontweight='bold')
     ax2.grid(True, alpha=0.3)
     ax2.set_ylim(0.3, 0.5)
-    # ax2.set_xlim(0, 35)
+    ax2.set_xlim(0, 25)
     ax2.legend()
     
     # --- Create unified dataset ---
@@ -204,8 +204,10 @@ def saveFigPostProcess(simDir):
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(os.path.join(simDir, 'exp_vs_sim4.png'))
+    # plt.savefig(os.path.join(simDir, 'exp_vs_sim3.png'))
+    # plt.savefig(os.path.join(simDir, 'exp_vs_sim4.png'))
+    plt.savefig(os.path.join(simDir, 'exp_vs_sim2.png'))
 
 
-simDir = '../ZZ_cases/2026/V27/exp0_nonDef_False/V71_pG_ZG_FINE_optNum_0.2_Close_0.2_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_70_lambda_0.42_tau_10_alphaG_18_alphaGBottom_8_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_1.5e-15/'
-saveFigPostProcess(simDir)
+# simDir = '../ZZ_cases/2026/V27/exp0_nonDef_False/V46_muVRaw8000_tau22_SlowKynuti_botSameAsTop_2Dl_T_0.2_Close_0.2_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_70_lambda_0.42_tau_10_alphaG_12_alphaGBottom_12_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_5e-15/'
+# saveFigPostProcess(simDir)

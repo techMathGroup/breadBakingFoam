@@ -65,11 +65,17 @@ for expNum in range(1):
     lambdaS = 0.42  # -- heat conductivity of the solid phase (works with addiditional)
     # lambdaS = 0.6  # -- heat conductivity of the solid phase (works with addiditional)
 
-    perm = 3e-15  # -- bread permeability 
-    perm = 1.5e-15  # -- bread permeability 
+    # perm = 9e-15  # -- bread permeability 
+    # perm = 2e-15  # -- bread permeability 
+    # perm = 3e-13  # -- bread permeability 
+    # perm = 6e-14  # -- bread permeability 
+
+    perm = 4e-15  # -- bread permeability 
+    # perm = 8e-15  # -- bread permeability 
 
     # -- heat capacities for the individual phases
     CpS = 1130   # -- solid phase
+    # CpS = 1800   # -- solid phase
     CpG = 853  # -- CO2
     CpVapor = 1878 # -- water vapors
     CpL = 4200  # -- liquid phase
@@ -90,10 +96,21 @@ for expNum in range(1):
     # -- in equation (32) in https://doi.org/10.1002/aic.10518
     # R0 = 1e-4 
     # R0 = 3.3e-5 # -- works for perm = 1.5e-14
-    R0 = 1.1e-5
-    Tm = 310
-    deltaT = 12 # -- works for perm = 1.5e-14
+    # R0 = 1.1e-5
+    # # R0 = 1.2e-6
+    # # R0 = 1.2e-6
+    # Tm = 310
+    # deltaT = 12 # -- works for perm = 1.5e-14
     # deltaT = 17
+
+    # R0 = 4.5e-6   
+    R0 = 9e-6   
+    Tm = 313
+    deltaT = 10
+
+    # R0 = 1e-4
+    # Tm = 313
+    # deltaT = 10
 
     TKynuti = 300
     TStart = 300
@@ -101,7 +118,10 @@ for expNum in range(1):
     TBottom = 230
 
     if kynuti:
-        timeKynuti = 400
+        # timeKynuti = 400
+        # timeKynuti = 2400
+        timeKynuti = 2400
+        # timeKynuti = 1500
         # timeKynuti = 1000
         # timeKynuti = 180
     else:
@@ -121,26 +141,56 @@ for expNum in range(1):
     # mu0Baked = 2800
     # kappa0Baked = 1400
 
-    mu0Raw = 150
-    kappa0Raw = 1396
-    muVRaw = 20000
+    # mu0Raw = 170
+    mu0Raw = 200
+    # kappa0Raw = 100
+    # kappa0Raw = 2396
+    # kappa0Raw = 1390
+    kappa0Raw = 50
+    # muVRaw = 20000
+    # muV1Raw = 2000
+    # muV1Raw = 20000
+    muV1Raw = 10000
+    # muV2Raw = 8000
+    # muV2Raw = 20000
+    muV2Raw = 0
+    # muVRaw = 133
     # muVRaw = 1800
-    lambdaVRaw = 0
-    mu0Baked = 800
-    kappa0Baked = 1500
+    # lambdaVRaw = 0
+    # mu0Baked = 3000
+    mu0Baked = 4000
+    # mu0Baked = 150
+    # kappa0Baked = 86
+    kappa0Baked = 1000
+    # kappa0Baked = 100
 
-    tau0 = 1
+    # nove
+    mu0Raw = 200
+    mu0Raw = 220
+    kappa0Raw = 50
+    kappa0Raw = 55
+    muV1Raw = 450
+    muV1Raw = 495
+    mu0Baked = 2000
+    mu0Baked = 2200
+    kappa0Baked = 500
+    kappa0Baked = 550
+
+
+    tau1 = 1
+    # tau1 = 22
+    tau2 = 1
     tGelat = 65
     tau0 = 10
 
     '''Numerics'''
-    timeStepKynuti = 4  # -- computational time step
+    timeStepKynuti = 20  # -- computational time step
     timeStepSim = 1  # -- computational time step
     # plusTime1 = 1450 # -- how long to run with deformation
     # plusTime1 = 1400 # -- how long to run with deformation
     # plusTime1 = 540 # -- how long to run with deformation
     # plusTime1 = 720 # -- how long to run with deformation
-    plusTime1 = 300 # -- how long to run with deformation
+    plusTime1 = 350 # -- how long to run with deformation
     # plusTime1 = 1280 # -- how long to run with deformation
     # plusTime2 = 960 # -- how long to run without deformation
     plusTime2 = 1000 # -- how long to run without deformation
@@ -153,20 +203,29 @@ for expNum in range(1):
     writeInt = 20   # -- how often to write results
     # writeInt = 1   # -- how often to write results
     nIterKynuti = 200  # -- number of iterations in each time step
-    nIterSim = 100  # -- number of iterations in each time step
+    nIterSim = 200  # -- number of iterations in each time step
+    # nIterSim = 100  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
     nCores = 8 # -- number of cores to run the simulation
 
     # -- relaxation factors
     DRelax = 0.1
     DFinalRelax = 1
-    omegaVRelaxKyn = 0.01
-    pGRelaxKyn = 0.01
-    omegaVRelax = 0.1
-    pGRelax = 0.1
+    # omegaVRelaxKyn = 0.01
+    # pGRelaxKyn = 1
+    # omegaVRelax = 0.1
+    # pGRelax = 0.1
 
-    pGRelaxNonDef = 0.03
-    omegaVRelaxNonDef = 0.03
+    pGRelaxNonDef = 0.02
+    omegaVRelaxNonDef = 0.02
+    omegaVRelaxKyn = 0.01
+    pGRelaxKyn = 0.1
+
+    omegaVRelax = 0.1
+    pGRelax = 0.5
+
+    pGRelaxNonDef = 0.01
+    omegaVRelaxNonDef = 0.01
 
     '''Boundary conditions'''
     # kMSides = 0.01   # -- external mass transfer coeficient
@@ -174,14 +233,15 @@ for expNum in range(1):
     # kMBottom = 0.001   # -- external mass transfer coeficient
     kMBottomOmega = 0.01
     kMTop = 3e-3   # -- external mass transfer coeficient
-    alphaG = 19 # -- external heat transfer coeficient 
-    alphaGBottom = 13 # -- external heat transfer coeficient 
-    # alphaGBottom = 12 # -- external heat transfer coeficient 
+    alphaG = 20 # -- external heat transfer coeficient 
+    # alphaGBottom = 10 # -- external heat transfer coeficient 
+    alphaGBottom = 20 # -- external heat transfer coeficient 
 
     '''Post-processing'''
     fig, axs = plt.subplots(1, 1, figsize=(16, 9))  # figure with plots
 
-    outFolder = '../ZZ_cases/2026/V27/exp%d_nonDef_%s/V71_pG_ZG_FINE_optNum_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
+    outFolder = '../ZZ_cases/2026/V28/exp%d_nonDef_%s/V85_bigChangeInPGAttrToEqn_stiffAlphaGDep_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
+    # baseCaseDir = '../ZZ_cases/2026/V27/exp%d_nonDef_%s/V70_pG_ZG_FINE_optNum_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
 
     # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
     # -- create OpenFOAMCase object to change values in dictionaries
@@ -258,7 +318,7 @@ for expNum in range(1):
         # if not nonDeform:
         fl.writelines("\t(0\t%f)\n"%TKynuti)
         fl.writelines("\t(%d\t%f)\n"%(timeKynuti, TKynuti))
-        bakingCurve[:, 1] = TBottom
+        # bakingCurve[:, 1] = TBottom
         for i in range(bakingCurve.shape[0]):
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1]))
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, 10 + bakingCurve[i,1] + 273.15))
@@ -337,17 +397,14 @@ for expNum in range(1):
             ['constant/mechanicalProperties', 'E', str(E), 'bread'],
             ['constant/mechanicalProperties', 'mu0Raw', str(mu0Raw), 'bread'],
             ['constant/mechanicalProperties', 'kappa0Raw', str(kappa0Raw), 'bread'],
-            ['constant/mechanicalProperties', 'muVRaw', str(muVRaw), 'bread'],
-            ['constant/mechanicalProperties', 'lambdaVRaw', str(lambdaVRaw), 'bread'],
+            ['constant/mechanicalProperties', 'muV1Raw', str(muV1Raw), 'bread'],
+            ['constant/mechanicalProperties', 'muV2Raw', str(muV2Raw), 'bread'],
+            # ['constant/mechanicalProperties', 'lambdaVRaw', str(lambdaVRaw), 'bread'],
             ['constant/mechanicalProperties', 'mu0Baked', str(mu0Baked), 'bread'],
             ['constant/mechanicalProperties', 'kappa0Baked', str(kappa0Baked), 'bread'],
-            ['constant/mechanicalProperties', 'tau0', str(tau0), 'bread'],
+            ['constant/mechanicalProperties', 'tau1', str(tau1), 'bread'],
+            ['constant/mechanicalProperties', 'tau2', str(tau2), 'bread'],
             ['constant/mechanicalProperties', 'tGelat', str(tGelat), 'bread'],
-        ]
-    )
-    baseCase.addToDictionary(
-        [
-            ['constant/mechanicalProperties','tau0 %g;\n'%tau0, ''],
         ]
     )
 

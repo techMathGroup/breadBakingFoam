@@ -33,7 +33,7 @@ scalar logKBaked = Foam::log(kBaked.value());
 
 // -- permiability MPC Zhang 2025
 // permGLViscG = alpha * permGLViscGSc / nuG * Foam::pow(alphaG, 1.34); 
-permGLViscG =  Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
+permGLViscG = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
 // permGLViscG =  permGLViscGSc / nuG; 
 // permGLViscG =  permGLViscGSc / nuG * Foam::pow(alphaG, 1.34); 
 // permGLViscG =  alpha * permGLViscGSc / nuG ; 
@@ -77,7 +77,8 @@ dPSatdT.correctBoundaryConditions();
 volScalarField dPVdT = rhoG * univR / Mg * yV;
 dPVdT.correctBoundaryConditions();
 
-dPWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
+// dPWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
+dPWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
 
 // dPWdX = 482363.3441*Foam::exp(0.0071*T/dummyT - 4.5)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), 1.631578947)/(Foam::pow(183298.0708*Foam::pow(moisture,2)*Foam::exp(0.0142*T/dummyT - 9.)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), (631578947.0/1000000000.0)) + 1.0,2.0)) * pSat;
 dPWdX.correctBoundaryConditions();

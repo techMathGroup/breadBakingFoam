@@ -96,7 +96,7 @@ else
                 if (omegaVP[faceI] < SMALL)
                 {
                     // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
-                    jLCorrIntoLiquidP[faceI] = 0;
+                    jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
                     jLCorrP[faceI] = 0;
                 }
                 if (omegaVP[faceI] >= SMALL)
@@ -134,7 +134,7 @@ else
                     jLCorrIntoLiquidP[faceI] = 0;
                     jLCorrP[faceI] = 0;
                     // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
-                    jLCorrP[faceI] = - jPgCorrP[faceI] * omegaVP[faceI];
+                    // jLCorrP[faceI] = - jPgCorrP[faceI] * omegaVP[faceI];
                 }
                 // jPgCorrP[faceI] = 0.01 * MgP[faceI] / univR.value() * (pGP[faceI] / TP[faceI] - 1e5 / 463) * magSfP[faceI];
             }
@@ -191,5 +191,22 @@ phiLResidual = concEqL.solve().initialResidual();
 rhoD.correctBoundaryConditions();
 
 rhoD.relax();
+
+// fvScalarMatrix CO2inLEqn
+// (
+//     alphaD0 * fvm::ddt(rhoD, omegaL, XCO2InL)
+
+//     ==
+
+//     0.1 * (3.25*exp(-0.0207*(T)) - XCO2InL) * alphaD0 * rhoD * omegaL
+// );
+
+// CO2inLEqn.relax();
+
+// CO2inLEqn.solve().initialResidual();
+
+// XCO2InL.correctBoundaryConditions();
+
+// XCO2InL.relax();
 
 // ************************************************************************* //

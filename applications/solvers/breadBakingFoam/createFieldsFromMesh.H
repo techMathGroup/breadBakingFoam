@@ -40,6 +40,19 @@ volScalarField omegaC
     "calculated"
 );
 
+// volScalarField XCO2InL
+// (
+//     IOobject
+//     (
+//         "XCO2InL",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::NO_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh()
+// );
+
 // -- solid mass fraction
 volScalarField omegaS
 (

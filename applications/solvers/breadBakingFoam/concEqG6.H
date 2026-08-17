@@ -9,6 +9,8 @@
 //     fvc::div(phiThetaG)
 // );
 
+mCO2Dis = 0.067275 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoD * alphaD * omegaL / dummyT;
+
 // -- gas conservation
 fvScalarMatrix pGEq
 (
@@ -60,6 +62,9 @@ fvScalarMatrix pGEq
     // + fvc::div(fvc::interpolate(J) * jLCorr)
 
     - fvc::div(fvc::interpolate(J) * jLCorr)
+
+    + mCO2Dis
+
 
     // + fvc::div(fvc::interpolate(3 * omegaV * J) * jLCorr)
 

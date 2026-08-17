@@ -8,7 +8,8 @@ pSat.correctBoundaryConditions();
 a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
 a.correctBoundaryConditions();
 
-aw = Foam::pow(moisture * 100.0 / a, invNCoeff) / (Foam::pow(moisture * 100.0 / a, invNCoeff) + 1.0); 
+// aw = Foam::pow(moisture * 100.0 / a, invNCoeff) / (Foam::pow(moisture * 100.0 / a, invNCoeff) + 1.0); 
+aw = Foam::exp(-2.9 / (Foam::pow(100.0 * moisture, 0.78))); 
 aw.correctBoundaryConditions();
 
 // -- calculation of free effective
@@ -18,7 +19,7 @@ Sl.correctBoundaryConditions();
 
 alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
 // alpha = - Foam::atan((moisture-0.1) / 0.01) / 3.1415 + 0.5;
-// alpha = - Foam::atan((Sl-0.02) / 0.001) / 3.1415 + 0.5;
+// alpha = - Foam::atan((Sl-0.04) / 0.001) / 3.1415 + 0.5;
 alpha.correctBoundaryConditions();
 
 kMPC = alpha * kMPCOpen + (1 - alpha) * kMPCClosed;
@@ -30,6 +31,7 @@ pV = pG * yV;
 pV.correctBoundaryConditions();
 
 availSurf = -16 * (Foam::pow(Sl - 0.5, 4)) + 1;
+// availSurf =  1;
 availSurf.correctBoundaryConditions();
 
 // evaporation rate

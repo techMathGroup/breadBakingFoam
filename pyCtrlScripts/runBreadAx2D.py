@@ -37,7 +37,7 @@ arcL = 0.008    # -- length of the arc at the side of the bread
 
 '''Internal transport parameters'''
 DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-tortOpen = 3   # -- tortuosity
+tortOpen = 2.4   # -- tortuosity
 tortClosed = 70   # -- tortuosity
 
 # tortOpen = 10   # -- tortuosity
@@ -54,6 +54,7 @@ lambdaS = 0.42
 # perm = 1.7e-13 * 0.217  # -- bread permeability (Zhang 2005)
 perm = 3.5e-15  # -- bread permeability (Zhang 2005)
 perm = 2.4e-14  # -- bread permeability (Zhang 2005)
+perm = 4e-15  # -- bread permeability (Zhang 2005)
 # perm = 2.6e-12  # -- bread permeability (Zhang 2005)
 
 # -- heat capacities for the individual phases
@@ -76,13 +77,13 @@ kMPCOpen = 0.2
 kMPCClosed = 0.2
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
-evCoef1 = -0.0071
-evCoef2 = 4.5
-# evCoef1 = -0.0056
-# evCoef2 = 5.5
+# evCoef1 = -0.0071
+# evCoef2 = 4.5
+evCoef1 = -0.0056
+evCoef2 = 5.5
 n = 0.38
 
-outFolder = '../ZZ_cases/00_breads/207_testMoist_refSB_rhoD1050_0.4_%g_kCl_%g_torOp_%g_torCl_%g_evCoef1_%g_lambdaS_%g/'%(kMPCOpen, kMPCClosed, tortOpen, tortClosed, evCoef1, lambdaS)
+outFolder = '../ZZ_cases/00_breads/186_dT10_muVTest_kOp_%g_kCl_%g_torOp_%g_torCl_%g_evCoef1_%g_lambdaS_%g_perm_%g/'%(kMPCOpen, kMPCClosed, tortOpen, tortClosed, evCoef1, lambdaS, perm)
 
 # outFolder = '../ZZ_cases/00_breads/breadAx2D_corrE_alphaKept_%g/'%(alphaKept)
 
@@ -101,8 +102,8 @@ R0 = 1e-4
 
 Tm = 313    # -- kinetics from Zhang 2005
 deltaT = 17
-# deltaT = 10
-tau0 = 1
+deltaT = 10
+tau0 = 22
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
@@ -121,7 +122,7 @@ tGelatEv = 57   # -- temperature of gelatization (evaporation)
 
 mu0Raw = 70
 kappa0Raw = 1000
-muVRaw = 18000
+muVRaw = 8000
 lambdaVRaw = 0
 mu0Baked = 70
 kappa0Baked = 1000
@@ -130,8 +131,8 @@ kappa0Baked = 1000
 timeStep = 1    # -- computational time step
 plusTime1 = 360 # -- how long to run with deformation
 plusTime2 = 540 # -- how long to run without deformation
-writeInt = 10   # -- how often to write results
-nIter = 40  # -- number of iterations in each time step
+writeInt = 20   # -- how often to write results
+nIter = 100  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
 nCores = 4 # -- number of cores to run the simulation
 
