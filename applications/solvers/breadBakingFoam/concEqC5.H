@@ -7,6 +7,7 @@ fvScalarMatrix omegaCEq
 
     alphaG / univR / T * pG * fvm::ddt(Mg, J, omegaC)
     + fvm::Sp(J * Mg / univR * ((1 / T) * fvc::ddt(alphaG, pG) + alphaG * pG * (- Foam::pow(T, - 2)) * fvc::ddt(T)), omegaC)
+    // + (J * Mg / univR * ((1 / T) * fvc::ddt(alphaG, pG) + alphaG * pG * (- Foam::pow(T, - 2)) * fvc::ddt(T)) * omegaC)
 
     == 
 
@@ -30,9 +31,9 @@ fvScalarMatrix omegaCEq
     // + fvc::laplacian(J.prevIter() * omegaV.prevIter() * (Finv.prevIter() & jDCTilda.prevIter()), omegaC.prevIter())
     // + fvc::laplacian(J.prevIter() * omegaV.prevIter() * (Finv.prevIter() & jDATilda.prevIter()), omegaAir.prevIter())
 
-    + fvc::laplacian(J * omegaV * (Finv & jDVTilda), omegaV)
-    + fvm::laplacian(J * omegaV * (Finv & jDCTilda), omegaC)
-    + fvc::laplacian(J * omegaV * (Finv & jDATilda), omegaAir)
+    + fvc::laplacian(J * omegaC * (Finv & jDVTilda), omegaV)
+    + fvm::laplacian(J * omegaC * (Finv & jDCTilda), omegaC)
+    + fvc::laplacian(J * omegaC * (Finv & jDATilda), omegaAir)
 
     // - fvc::div(fvc::interpolate(J * omegaC) * jPgCorr)
 
@@ -43,6 +44,12 @@ fvScalarMatrix omegaCEq
     // -- CO2 generation 
     + J * mCO2
     // + mCO2
+
+    // + mCO2Dis
+
+    + J * (kCO2VSF * (1e5 / kH / molMC.value() * dummyP) * XCO2InL)
+    - fvm::Sp(J * kCO2VSF * pG * Mg / molMC, omegaC)
+    // - (kCO2 * pG * Mg / molMC * omegaC)
 );
 
 omegaCEq.relax();

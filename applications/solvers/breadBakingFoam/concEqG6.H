@@ -1,28 +1,9 @@
-// // 2. Pomocná proměnná Theta pro plyn
-// volScalarField ThetaG = alphaG * Mg / T / univR;
-
-// volVectorField Um = physics->U();
-// surfaceScalarField phiM = fvc::flux(Um);   // Tok rychlosti matrice
-// surfaceScalarField phiThetaG = fvc::flux(ThetaG * Um);
-// volScalarField sourceCoeff
-// (
-//     fvc::div(phiThetaG)
-// );
-
-mCO2Dis = 0.067275 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoD * alphaD * omegaL / dummyT;
-
 // -- gas conservation
 fvScalarMatrix pGEq
 (
     // -- accumulation
-    // alphaG / univR / T * omegaAir * fvm::ddt(Mg, J, pG)
-    // + fvm::Sp(J * Mg / univR * ((1 / T) * fvc::ddt(alphaG, omegaAir) + alphaG * omegaAir * (- Foam::pow(T, - 2)) * fvc::ddt(T)), pG)
-
     alphaG / univR / T * fvm::ddt(Mg, J, pG)
     + fvm::Sp(J * Mg / univR * ((1 / T) * fvc::ddt(alphaG) + alphaG * (- Foam::pow(T, - 2)) * fvc::ddt(T)), pG)
-
-    // + fvm::div(phiThetaG, pG) - fvm::Sp(fvc::div(phiThetaG), pG)
-    // + fvm::Sp(sourceCoeff, pG)
     
     == 
 
@@ -63,8 +44,11 @@ fvScalarMatrix pGEq
 
     - fvc::div(fvc::interpolate(J) * jLCorr)
 
-    + mCO2Dis
+    // + mCO2Dis
 
+    + J * (kCO2VSF * (1e5 / kH / molMC.value() * dummyP) * XCO2InL)
+    - fvm::Sp(J * kCO2VSF * yC, pG)
+    // - (kCO2 * yC *  pG)
 
     // + fvc::div(fvc::interpolate(3 * omegaV * J) * jLCorr)
 

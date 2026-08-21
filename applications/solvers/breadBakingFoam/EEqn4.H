@@ -9,7 +9,8 @@
 
     fvScalarMatrix EEqn
     (
-        (alphaD0 * rhoD * (omegaS * CpS + omegaL * CpL) + J * alphaG * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T) 
+        // (alphaD0 * rhoD * (omegaS * CpS + omegaL * CpL) + J * alphaG * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T) 
+        (alphaD0 * rhoSScalar * (CpS + moisture * CpL) + J * alphaG * rhoG * (omegaV * CpVapor + omegaC * CpCO2 + omegaAir * CpAir)) * fvm::ddt(T) 
         + (dHConst + (CpVapor - CpL) * (T - TRef)) * (J * evRate)
         // + (dHConst + CpL * (T - TRef)) * (fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas, pV))
         // + (dHConst + CpL * (T - TRef)) * fvc::div(J * alphaG * (1 - alpha) * Dvc * molMV / univR / T * (Finv & (Finv.T() & fvc::grad(pV))))

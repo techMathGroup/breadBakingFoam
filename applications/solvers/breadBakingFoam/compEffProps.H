@@ -1,5 +1,6 @@
 // -- calculation of the Darcy permeability, effective difusivity and effective heat conductivity
 
+// -- binary coefficients
 Dvc = dimensionedScalar("Dvc", DG.dimensions(), 2.15e-5) * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
 Dva = dimensionedScalar("Dva", DG.dimensions(), 2.65e-5) * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
 Dca = dimensionedScalar("Dca", DG.dimensions(), 1.67e-5) * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
@@ -14,9 +15,6 @@ tortField = tortOpen * alpha + (1 - alpha) * tortClosed;
 tortField.correctBoundaryConditions();
 
 // -- effective diffusivity
-// DEff = D * alphaG / tort;
-// DEff = D * alphaG / tortField * (Foam::atan((moisture-0.35)/0.15)/3.14 + 0.5);
-
 DEffvM = alphaG * alpha / tortOpen * 1.0 / ((yC / Dvc + yA / Dva) + yV / (1 - omegaV) * (omegaC / Dvc + omegaAir / Dva));
 DEffcM = alphaG * alpha / tortOpen * 1.0 / ((yV / Dvc + yA / Dca) + yC / (1 - omegaC) * (omegaV / Dvc + omegaAir / Dca));
 DEffaM = alphaG * alpha / tortOpen * 1.0 / ((yC / Dca + yV / Dva) + yA / (1 - omegaAir) * (omegaC / Dca + omegaV / Dva));
@@ -32,32 +30,13 @@ scalar logKRaw = Foam::log(permGLViscGSc.value());
 scalar logKBaked = Foam::log(kBaked.value());
 
 // -- permiability MPC Zhang 2025
-// permGLViscG = alpha * permGLViscGSc / nuG * Foam::pow(alphaG, 1.34); 
 permGLViscG = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
-// permGLViscG =  permGLViscGSc / nuG; 
-// permGLViscG =  permGLViscGSc / nuG * Foam::pow(alphaG, 1.34); 
-// permGLViscG =  alpha * permGLViscGSc / nuG ; 
 permGLViscG.correctBoundaryConditions();
 
 // -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
-// lambdaEff = dummyLamdba * (0.421 - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// lambdaEff = dummyLamdba * (lambdaS.value() - 0.134 * (1 - alphaS - alphaL) - 0.219 * Foam::pow(1 - alphaS - alphaL, 0.5));
-// lambdaEff = dummyLamdba * (Foam::atan((moisture-0.35)/0.15)/3.14 + 0.5)  * (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow(alphaG, 0.5));
-// lambdaEff = dummyLamdba * (Foam::atan((moisture-0.35)/0.15)/3.14 + 0.5)  * (lambdaS.value());
 lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow(alphaG, 0.5));
 
 // -- purlis lambda alternative
-// forAll(lambdaEff, cellI)
-// {
-//     if (T[cellI] > 373)
-//     {
-//         lambdaEff[cellI] = 0.2;
-//     }
-//     else
-//     {
-//         lambdaEff[cellI] = 0.9 / (1.0 + Foam::exp(-0.1 * (T[cellI] - 353.16))) + 0.2;
-//     }
-// }
 // lambdaEff.correctBoundaryConditions();
 // lambdaEff = dummyLamdba *  (lambdaS.value());
 // lambdaEff = dummyLamdba *  (lambdaS.value() * alphaD + 0.02 * alphaG);
@@ -66,61 +45,32 @@ lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow
 // volScalarField phi = (moisture - 0.11111) / (0.8518 - 0.11111);
 // lambdaEff = dummyLamdba *  (0.423 * phi + 0.18 * (1-phi));
 // lambdaEff = dummyLamdba *  (0.37 * phi + 0.18 * (1-phi));
-// lambdaEff = dummyLamdba *  0.25;
+// lambdaEff = dummyLamdba *  0.3;
 
 lambdaEff.correctBoundaryConditions();
 
 // -- calculation of variables for Lucas closed-cell vapor flux
-dPSatdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT;
-dPSatdT.correctBoundaryConditions();
+// -- derivation of saturated water pressure with respect to temperature
+dPSatAwdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT * aw;
+dPSatAwdT.correctBoundaryConditions();
 
-volScalarField dPVdT = rhoG * univR / Mg * yV;
-dPVdT.correctBoundaryConditions();
+// volScalarField dPVdT = rhoG * univR / Mg * yV;
+// dPVdT.correctBoundaryConditions();
 
+// -- derivation of saturated water pressure with respect to moisture content
 // dPWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
-dPWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
+dPSatAwWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
 
 // dPWdX = 482363.3441*Foam::exp(0.0071*T/dummyT - 4.5)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), 1.631578947)/(Foam::pow(183298.0708*Foam::pow(moisture,2)*Foam::exp(0.0142*T/dummyT - 9.)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), (631578947.0/1000000000.0)) + 1.0,2.0)) * pSat;
-dPWdX.correctBoundaryConditions();
-
-// forAll(dPWdX, cellI)
-// {
-//     if (moisture[cellI] > SMALL)
-//     {
-//         dPWdX[cellI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef))/(nCoef*moisture[cellI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture[cellI]/a[cellI]),(1.0/nCoef)) + 1),2))) * pSat[cellI];
-//     }
-//     else
-//     {
-//         dPWdX[cellI] = 0;
-//     }
-// }
-
-// forAll(dPWdX.boundaryField(), patchI)
-// {
-//     scalarField& dPWdXP = dPWdX.boundaryFieldRef()[patchI];
-//     scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
-//     scalarField& aP = a.boundaryFieldRef()[patchI];
-//     scalarField& pSatP = pSat.boundaryFieldRef()[patchI];
-
-//     forAll(dPWdXP, faceI)
-//     {
-//         if (moistureP[faceI] > SMALL)
-//         {
-//             dPWdXP[faceI] = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef))/(nCoef*moistureP[faceI]*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureP[faceI]/aP[faceI]),(1.0/nCoef)) + 1),2))) * pSatP[faceI];
-//         }
-//         else
-//         {
-//             dPWdXP[faceI] = 0;
-//         }
-//     }
-// }
+dPSatAwWdX.correctBoundaryConditions();
 
 // -- ratio of cell wall to all thickness
 delta = 1 - Foam::pow((alphaG), 1.0/3.0);
 // delta = 1.0;
 // delta = deltaSc;
 delta.correctBoundaryConditions();
-dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPWdX + dHConst / lambdaS * dPSatdT) );
+dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+// dKoeffLucas =  alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 dKoeffLucas.correctBoundaryConditions();
 
 

@@ -77,7 +77,7 @@ volScalarField mCO2
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2)) * alphaD0 * rhoD * omegaS / dummyRho,
+    R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2)),
     "calculated"
 );
 mCO2.correctBoundaryConditions();
@@ -168,36 +168,36 @@ volScalarField pSat
 pSat.correctBoundaryConditions();
 
 // -- water vapor mass fraction
-volScalarField omegaL
-(
-    IOobject
-    (
-        "omegaL",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    1 - omegaS,
-    "calculated"
-);
-omegaL.correctBoundaryConditions();
+// volScalarField omegaL
+// (
+//     IOobject
+//     (
+//         "omegaL",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+//     1 - omegaS,
+//     "calculated"
+// );
+// omegaL.correctBoundaryConditions();
 
 // -- moisture content kgLwater/kGS
-volScalarField moisture
-(
-    IOobject
-    (
-        "moisture",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    omegaL / omegaS,
-    "calculated"
-);
-moisture.correctBoundaryConditions();
+// volScalarField moisture
+// (
+//     IOobject
+//     (
+//         "moisture",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::AUTO_WRITE
+//     ),
+//     omegaL / omegaS,
+//     "calculated"
+// );
+// moisture.correctBoundaryConditions();
 
 // -- evaporation rate
 volScalarField evRate
@@ -610,35 +610,35 @@ surfaceScalarField sumJiHi
 );
 sumJiHi.correctBoundaryConditions();
 
-volScalarField dPWdX
+volScalarField dPSatAwdT
 (
     IOobject
     (
-        "dPWdX",
+        "dPSatAwdT",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat,
+    3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT * aw,
     "calculated"
 );
-dPWdX.correctBoundaryConditions();
+dPSatAwdT.correctBoundaryConditions();
 
-volScalarField dPSatdT
+volScalarField dPSatAwWdX
 (
     IOobject
     (
-        "dPSatdT",
+        "dPSatAwWdX",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT,
+    0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat,
     "calculated"
 );
-dPSatdT.correctBoundaryConditions();
+dPSatAwWdX.correctBoundaryConditions();
 
 volScalarField dKoeffLucas
 (
@@ -650,7 +650,7 @@ volScalarField dKoeffLucas
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPWdX + dHConst / lambdaS * dPSatdT) ),
+    (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) ),
     "calculated"
 );
 dKoeffLucas.correctBoundaryConditions();
@@ -728,7 +728,21 @@ surfaceScalarField jLCorr
     linearInterpolate(Finv & jL) & physics->mesh().Sf()
 );
 
-surfaceScalarField jLCorrIntoLiquid = 0*jLCorr;
+volScalarField pCSat
+(
+    IOobject
+    (
+        "pCSat",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    pSat,
+    "calculated"
+);
+
+// surfaceScalarField jLCorrIntoLiquid = 0*jLCorr;
 
 
 

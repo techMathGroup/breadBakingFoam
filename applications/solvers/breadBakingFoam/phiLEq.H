@@ -1,41 +1,6 @@
 surfaceScalarField SfMag = physics->mesh().magSf();
 
-
-// volVectorField jLToL = 0*jL;
-// forAll(jLToL, cellI)
-// {
-//     if (omegaL[cellI] < SMALL)
-//     {
-//         jLToL[cellI] = jL[cellI];
-//         jL[cellI] = vector(0,0,0);
-//     }
-// }
-
 jLCorr = fvc::interpolate(Finv & jL) & physics->mesh().Sf();
-jLCorrIntoLiquid =  0*fvc::interpolate(Finv & jL) & physics->mesh().Sf();
-surfaceScalarField omegaVSurf = fvc::interpolate(omegaV);
-surfaceScalarField jLCorrOld = jLCorr.prevIter();
-surfaceScalarField jLCorrIntoLiquidOld = jLCorrIntoLiquid.prevIter();
-surfaceScalarField jPgCorr = fvc::interpolate(jGTilda & fvc::grad(pG)) & physics->mesh().Sf();
-
-// -- zero flux everywhere except BC
-// forAll(jPgCorr, faceI)
-// {
-//     jPgCorr[faceI] = 0;
-// }
-
-// forAll(jLCorr, faceI)
-// {
-//     if (omegaVSurf[faceI] < SMALL)
-//     {
-//         if (jLCorrOld[faceI] < SMALL)
-//         {
-//             scalar coPrenest = jLCorrOld[faceI] / 2.0;
-//             jLCorr[faceI] = coPrenest;
-//             jLCorrIntoLiquid[faceI] = jLCorrIntoLiquidOld[faceI] + coPrenest;
-//         }
-//     }
-// }
 
 if (zhang)
 {
@@ -48,25 +13,19 @@ if (zhang)
             scalarField& magSfP = SfMag.boundaryFieldRef()[patchI];
             scalarField& dKoeffLucasP = dKoeffLucas.boundaryFieldRef()[patchI];
             scalarField& jLCorrP = jLCorr.boundaryFieldRef()[patchI];
-            scalarField& jLCorrIntoLiquidP = jLCorrIntoLiquid.boundaryFieldRef()[patchI];
-            scalarField& jPgCorrP = jPgCorr.boundaryFieldRef()[patchI];
-            // scalarField& MgP = Mg.boundaryFieldRef()[patchI];
-            // scalarField& TP = T.boundaryFieldRef()[patchI];
-            // scalarField& pGP = pG.boundaryFieldRef()[patchI];
-
 
             forAll(jLCorrP, faceI)
             {
                 dKoeffLucasP[faceI] = 0;
                 if (omegaVP[faceI] < SMALL)
                 {
-                    jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
+                    // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
                     // jLCorrIntoLiquidP[faceI] = 0;
                     jLCorrP[faceI] = 0;
                 }
                 if (omegaVP[faceI] >= SMALL)
                 {
-                    jLCorrIntoLiquidP[faceI] = 0;
+                    // jLCorrIntoLiquidP[faceI] = 0;
                     // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
                     jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
                 }
@@ -87,8 +46,8 @@ else
             scalarField& magSfP = SfMag.boundaryFieldRef()[patchI];
             scalarField& dKoeffLucasP = dKoeffLucas.boundaryFieldRef()[patchI];
             scalarField& jLCorrP = jLCorr.boundaryFieldRef()[patchI];
-            scalarField& jLCorrIntoLiquidP = jLCorrIntoLiquid.boundaryFieldRef()[patchI];
-            scalarField& jPgCorrP = jPgCorr.boundaryFieldRef()[patchI];
+            // scalarField& jLCorrIntoLiquidP = jLCorrIntoLiquid.boundaryFieldRef()[patchI];
+            // scalarField& jPgCorrP = jPgCorr.boundaryFieldRef()[patchI];
 
             forAll(jLCorrP, faceI)
             {
@@ -96,13 +55,14 @@ else
                 if (omegaVP[faceI] < SMALL)
                 {
                     // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
-                    jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
                     jLCorrP[faceI] = 0;
                 }
                 if (omegaVP[faceI] >= SMALL)
                 {
-                    jLCorrIntoLiquidP[faceI] = 0;
-                    jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    // jLCorrIntoLiquidP[faceI] = 0;
+                    // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+                    jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI];
                     // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI];
                 }
                 // jPgCorrP[faceI] = 0.01 * MgP[faceI] / univR.value() * (pGP[faceI] / TP[faceI] - 1e5 / 463) * magSfP[faceI];
@@ -112,12 +72,12 @@ else
         if (patchI == 3)
         {
             scalarField& omegaVP = omegaV.boundaryFieldRef()[patchI];
-            scalarField& rhoGP = rhoG.boundaryFieldRef()[patchI];
+            // scalarField& rhoGP = rhoG.boundaryFieldRef()[patchI];
             scalarField& magSfP = SfMag.boundaryFieldRef()[patchI];
             scalarField& dKoeffLucasP = dKoeffLucas.boundaryFieldRef()[patchI];
             scalarField& jLCorrP = jLCorr.boundaryFieldRef()[patchI];
-            scalarField& jLCorrIntoLiquidP = jLCorrIntoLiquid.boundaryFieldRef()[patchI];
-            scalarField& jPgCorrP = jPgCorr.boundaryFieldRef()[patchI];
+            // scalarField& jLCorrIntoLiquidP = jLCorrIntoLiquid.boundaryFieldRef()[patchI];
+            // scalarField& jPgCorrP = jPgCorr.boundaryFieldRef()[patchI];
 
 
             forAll(jLCorrP, faceI)
@@ -126,12 +86,12 @@ else
                 if (omegaVP[faceI] < SMALL)
                 {
                     // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
-                    jLCorrIntoLiquidP[faceI] = 0;
+                    // jLCorrIntoLiquidP[faceI] = 0;
                     jLCorrP[faceI] = 0;
                 }
                 if (omegaVP[faceI] >= SMALL)
                 {
-                    jLCorrIntoLiquidP[faceI] = 0;
+                    // jLCorrIntoLiquidP[faceI] = 0;
                     jLCorrP[faceI] = 0;
                     // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI] - omegaVInfTable_(runTime.time().timeOutputValue())) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
                     // jLCorrP[faceI] = - jPgCorrP[faceI] * omegaVP[faceI];
@@ -148,7 +108,8 @@ else
 fvScalarMatrix concEqL
 (
     // -- accumulation
-    alphaD0 * fvm::ddt(rhoD)
+    // alphaD0 * fvm::ddt(rhoD)
+    alphaD0 * rhoSScalar * fvm::ddt(moisture)
 
     ==
 
@@ -192,21 +153,37 @@ rhoD.correctBoundaryConditions();
 
 rhoD.relax();
 
-// fvScalarMatrix CO2inLEqn
-// (
-//     alphaD0 * fvm::ddt(rhoD, omegaL, XCO2InL)
+// mCO2Dis = 0.067275 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoD * alphaD * omegaL / dummyT;
+dimensionedScalar KH0("KH0", dimensionSet(0, 0, 0, 0, 0, 0, 0), 0.035);
+volScalarField kH = KH0 * Foam::exp(2400.0 * (1.0 / (T / dummyT) - 1.0 / 298.15));
+dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0.2);
+volScalarField kCO2VSF = kCO2 * availSurf / 8.314 / Foam::pow(T / dummyT, 0.5) * molMC.value();
+// dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0);
+mCO2Dis = kCO2VSF * alphaG * (1e5 * XCO2InL / kH / molMC.value() * dummyP - yC * pG);
+pCSat = 1e5 * XCO2InL / kH / molMC.value() * dummyP;
 
-//     ==
+fvScalarMatrix CO2inLEqn
+(
+    // alphaD0 * fvm::ddt(rhoD, omegaL, XCO2InL)
+    alphaD0 * rhoSScalar * fvm::ddt(moisture, XCO2InL)
 
-//     0.1 * (3.25*exp(-0.0207*(T)) - XCO2InL) * alphaD0 * rhoD * omegaL
-// );
+    ==
 
-// CO2inLEqn.relax();
+    - fvm::Sp(J * kCO2VSF * (1e5 / kH / molMC.value() * dummyP), XCO2InL)
+    // - (kCO2 * (1e5 / kH / molMC.value() * rhoD / dummyRho * omegaL * dummyP) * XCO2InL)
+    + J * kCO2VSF * yC * pG
 
-// CO2inLEqn.solve().initialResidual();
+    // - mCO2Dis
+);
 
-// XCO2InL.correctBoundaryConditions();
+// Info << "Min (XCO2InL): " << min(XCO2InL).value() << ", max (XCO2InL): " << max(XCO2InL).value() << "." << endl;
 
-// XCO2InL.relax();
+CO2inLEqn.relax();
+
+CO2inLEqn.solve().initialResidual();
+
+XCO2InL.correctBoundaryConditions();
+
+XCO2InL.relax();
 
 // ************************************************************************* //

@@ -13,11 +13,52 @@ volScalarField omegaV
 );
 
 // -- water vapor mass fraction
+volScalarField omegaC
+(
+    IOobject
+    (
+        "omegaC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
 // volScalarField omegaC
 // (
 //     IOobject
 //     (
 //         "omegaC",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::NO_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     1.0 - omegaV,
+//     "calculated"
+// );
+
+volScalarField XCO2InL
+(
+    IOobject
+    (
+        "XCO2InL",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
+// -- solid mass fraction
+// volScalarField omegaS
+// (
+//     IOobject
+//     (
+//         "omegaS",
 //         runTime.timeName(),
 //         physics->mesh(),
 //         IOobject::MUST_READ,
@@ -26,46 +67,20 @@ volScalarField omegaV
 //     physics->mesh()
 // );
 
-volScalarField omegaC
+// -- moisture content kgLwater/kGS
+volScalarField moisture
 (
     IOobject
     (
-        "omegaC",
+        "moisture",
         runTime.timeName(),
         physics->mesh(),
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    1.0 - omegaV,
-    "calculated"
-);
-
-// volScalarField XCO2InL
-// (
-//     IOobject
-//     (
-//         "XCO2InL",
-//         runTime.timeName(),
-//         physics->mesh(),
-//         IOobject::NO_READ,
-//         IOobject::AUTO_WRITE
-//     ),
-//     physics->mesh()
-// );
-
-// -- solid mass fraction
-volScalarField omegaS
-(
-    IOobject
-    (
-        "omegaS",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
+        IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
     physics->mesh()
 );
+moisture.correctBoundaryConditions();
 
 // -- dough matrix density
 volScalarField rhoD

@@ -10,6 +10,7 @@ fvScalarMatrix omegaVEq
 
     alphaG / univR / T * pG * fvm::ddt(Mg, J, omegaV)
     + fvm::Sp(J * Mg / univR * ((1 / T) * fvc::ddt(alphaG, pG) + alphaG * pG * (- Foam::pow(T, - 2)) * fvc::ddt(T)), omegaV)
+    // + (J * Mg / univR * ((1 / T) * fvc::ddt(alphaG, pG) + alphaG * pG * (- Foam::pow(T, - 2)) * fvc::ddt(T)) * omegaV)
 
     == 
 
@@ -36,9 +37,9 @@ fvScalarMatrix omegaVEq
     // + fvc::laplacian(J.prevIter() * omegaV.prevIter() * (Finv.prevIter() & jDATilda.prevIter()), omegaAir.prevIter())
 
     // -- this I comment for 
-    // + fvm::laplacian(J * omegaV * (Finv & jDVTilda), omegaV)
-    // + fvc::laplacian(J * omegaV * (Finv & jDCTilda), omegaC)
-    // + fvc::laplacian(J * omegaV * (Finv & jDATilda), omegaAir)
+    + fvm::laplacian(J * omegaV * (Finv & jDVTilda), omegaV)
+    + fvc::laplacian(J * omegaV * (Finv & jDCTilda), omegaC)
+    + fvc::laplacian(J * omegaV * (Finv & jDATilda), omegaAir)
 
     // - fvc::div(fvc::interpolate(J * omegaV) * jPgCorr)
 
