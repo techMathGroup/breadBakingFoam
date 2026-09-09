@@ -40,208 +40,140 @@ kynuti = True
 
 # DEFINE PARAMETERS=====================================================
 '''Geometry parameters'''
-# mSStep = 0.1e-2 # -- aproximate computational cell size
+mSStep = 0.0e-2 # -- aproximate computational cell size
 mSStep = 0.1e-2 # -- aproximate computational cell size
-# mSStep = 0.05e-2 # -- aproximate computational cell size
-# rLoaf1 = 8.5e-2  # -- loaf radius                
-# rLoaf2 = 8.5e-2  # -- loaf radius                
-# hLoaf = 7e-2  # -- loaf height 
-# up = 1e-2
-
-expNum = 0
 
 # for expNum in range(len(experiments)): 
 for expNum in range(1): 
 
     '''Internal transport parameters'''
     DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-    tortOpen = 3   # -- tortuosity
-    tortClosed = 70   # -- tortuosity
-    # tort = 2   # -- tortuosity
+    # Dl = 6e-10  # -- liquid water difusivity in the dough
+    # Dl = 1.6e-9  # -- liquid water difusivity in the dough
+    Dl = 8e-12  # -- liquid water difusivity in the dough
+    tortOpen = 2.4   # -- tortuosity
+    tortClosed = 70   # -- tortuosity (not used)
 
     # -- heat conductivity of the dough material with porosity 0, i.e. the 
     # -- absolute term in equation (5) in 
     # -- https://doi.org/10.1016/j.fbp.2008.04.002
     lambdaS = 0.42  # -- heat conductivity of the solid phase (works with addiditional)
-    # lambdaS = 0.6  # -- heat conductivity of the solid phase (works with addiditional)
 
-    # perm = 9e-15  # -- bread permeability 
-    # perm = 2e-15  # -- bread permeability 
-    # perm = 3e-13  # -- bread permeability 
-    # perm = 6e-14  # -- bread permeability 
-
-    perm = 4e-15  # -- bread permeability 
-    # perm = 8e-15  # -- bread permeability 
+    # -- closed-cell bread intristic permeability
+    # perm = 1e-15  # -- bread permeability 
+    perm = 0.5e-15  # -- bread permeability 
+    perm = 0.9e-15  # -- bread permeability 
+    # perm = 1e-14  # -- bread permeability 
 
     # -- heat capacities for the individual phases
     CpS = 1130   # -- solid phase
-    # CpS = 1800   # -- solid phase
     CpG = 853  # -- CO2
     CpVapor = 1878 # -- water vapors
     CpL = 4200  # -- liquid phase
 
+    # -- mass density for the individual phases
+    rhoS = 701
+    # rhoS = 764
+    # rhoS = 500
+    rhoS = 940
+
     '''Evaporation and CO2 generation parameters'''
     # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.2
-    kMPCClosed = 0.2
+    kMPCOpen = 0.03
+    kMPCClosed = 0.03
 
-    # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
+    # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
     evCoef1 = -0.0071
     evCoef2 = 4.5
-    # evCoef1 = -0.0056
-    # evCoef2 = 5.5
     n = 0.38
 
-    # -- pre-exponential factor and Tm in CO2 generation kinetics 
-    # -- in equation (32) in https://doi.org/10.1002/aic.10518
-    # R0 = 1e-4 
-    # R0 = 3.3e-5 # -- works for perm = 1.5e-14
-    # R0 = 1.1e-5
-    # # R0 = 1.2e-6
-    # # R0 = 1.2e-6
-    # Tm = 310
-    # deltaT = 12 # -- works for perm = 1.5e-14
-    # deltaT = 17
-
-    # R0 = 4.5e-6   
-    R0 = 9e-6   
+    # -- pre-exponential factor and Tm in CO2 generation kinetics in equation (32) in https://doi.org/10.1002/aic.10518  in (kg/m3/s)
+    R0 = 1.8e-3  * 1
+    R0 = 2.2e-3  * 1
+    # R0 = 1.4e-3  * 1
+    # R0 = 0.9e-3
+    # R0 = 3e-3
     Tm = 313
-    deltaT = 10
-
-    # R0 = 1e-4
-    # Tm = 313
-    # deltaT = 10
-
-    TKynuti = 300
-    TStart = 300
-    TTop = 210
-    TBottom = 230
-
-    if kynuti:
-        # timeKynuti = 400
-        # timeKynuti = 2400
-        timeKynuti = 2400
-        # timeKynuti = 1500
-        # timeKynuti = 1000
-        # timeKynuti = 180
-    else:
-        timeKynuti = 1
+    deltaT = 14
 
     '''Mechanical properties'''
     withDeformation = 1 # -- turn on (1) /off (0) deformation
     if nonDeform:
         withDeformation = 0
-    nu = 0.49   # -- Poisson ratio
-    E = 3000   # -- Youngs modulus
+    nu = 0.15   # -- Poisson ratio
+    # nu = 0.49   # -- Poisson ratio
+    E = 30000   # -- Youngs modulus
+    # mu0Raw = 230   # kappa = 2*mu*nu/(1-2*nu)  
+    mu0Raw = 180   # kappa = 2*mu*nu/(1-2*nu)  
+    muV1Raw = 5000 
+    bakedCoeff = 18
+    tau1 = 2
 
-    # mu0Raw = 170
-    # kappa0Raw = 550
-    # muVRaw = 8000
-    # lambdaVRaw = 8000
-    # mu0Baked = 2800
-    # kappa0Baked = 1400
-
-    # mu0Raw = 170
-    mu0Raw = 200
-    # kappa0Raw = 100
-    # kappa0Raw = 2396
-    # kappa0Raw = 1390
-    kappa0Raw = 50
-    # muVRaw = 20000
-    # muV1Raw = 2000
-    # muV1Raw = 20000
-    muV1Raw = 10000
-    # muV2Raw = 8000
-    # muV2Raw = 20000
-    muV2Raw = 0
-    # muVRaw = 133
-    # muVRaw = 1800
-    # lambdaVRaw = 0
-    # mu0Baked = 3000
-    mu0Baked = 4000
-    # mu0Baked = 150
-    # kappa0Baked = 86
-    kappa0Baked = 1000
-    # kappa0Baked = 100
-
-    # nove
-    mu0Raw = 200
-    mu0Raw = 220
-    kappa0Raw = 50
-    kappa0Raw = 55
-    muV1Raw = 450
-    muV1Raw = 495
-    mu0Baked = 2000
-    mu0Baked = 2200
-    kappa0Baked = 500
-    kappa0Baked = 550
-
-
-    tau1 = 1
-    # tau1 = 22
-    tau2 = 1
-    tGelat = 65
-    tau0 = 10
-
-    '''Numerics'''
-    timeStepKynuti = 20  # -- computational time step
-    timeStepSim = 1  # -- computational time step
-    # plusTime1 = 1450 # -- how long to run with deformation
-    # plusTime1 = 1400 # -- how long to run with deformation
-    # plusTime1 = 540 # -- how long to run with deformation
-    # plusTime1 = 720 # -- how long to run with deformation
-    plusTime1 = 350 # -- how long to run with deformation
-    # plusTime1 = 1280 # -- how long to run with deformation
-    # plusTime2 = 960 # -- how long to run without deformation
-    plusTime2 = 1000 # -- how long to run without deformation
+    '''Numerics and time control'''
+    if kynuti:
+        timeKynuti = 2400
+    else:
+        timeKynuti = 1
+    timeStepKynuti = 40 # -- computational time step
+    timeStepSim = 0.5  # -- computational time step
+    timeStepSimNonDef = 1  # -- computational time step
+    plusTime1 = 450 # -- how long to run with deformation
+    # plusTime1 = 800 # -- how long to run with deformation
+    plusTime2 = 800 # -- how long to run without deformation
 
     if nonDeform:
         timeKynuti = 300
         plusTime1 = 1500
         plusTime2 = 0
 
-    writeInt = 20   # -- how often to write results
-    # writeInt = 1   # -- how often to write results
-    nIterKynuti = 200  # -- number of iterations in each time step
-    nIterSim = 200  # -- number of iterations in each time step
-    # nIterSim = 100  # -- number of iterations in each time step
+    writeInt = 30   # -- how often to write results
+    writeIntKynuti = 200    # -- how often to write results during kynuti
+    nIterKynuti = 400  # -- number of iterations in each time step
+    nIterSim = 150  # -- number of iterations in each time step
+    nIterSimNonDef = 50  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
+    # dynSolver = 'breadBakingFoamScratch'   # -- used solver
     nCores = 8 # -- number of cores to run the simulation
 
     # -- relaxation factors
-    DRelax = 0.1
+    DRelaxKyn = 0.1
     DFinalRelax = 1
-    # omegaVRelaxKyn = 0.01
-    # pGRelaxKyn = 1
-    # omegaVRelax = 0.1
-    # pGRelax = 0.1
 
-    pGRelaxNonDef = 0.02
-    omegaVRelaxNonDef = 0.02
-    omegaVRelaxKyn = 0.01
-    pGRelaxKyn = 0.1
+    # -- kynuti
+    omegaVRelaxKyn = 1
+    omegaCRelaxKyn = 1
+    pGRelaxKyn = 1
 
-    omegaVRelax = 0.1
-    pGRelax = 0.5
+    # -- deformation simulation
+    omegaVRelax = 0.8
+    omegaCRelax = 0.8
+    pGRelax = 0.8
+    DRelax = 0.2
 
-    pGRelaxNonDef = 0.01
-    omegaVRelaxNonDef = 0.01
+    # -- non-deformation simulation
+    pGRelaxNonDef = 0.1
+    omegaVRelaxNonDef = 0.1
+    omegaCRelaxNonDef = 0.1
+    TNonDef = 0.1
 
-    '''Boundary conditions'''
-    # kMSides = 0.01   # -- external mass transfer coeficient
-    kMSidesOmega = 0.01 
-    # kMBottom = 0.001   # -- external mass transfer coeficient
-    kMBottomOmega = 0.01
-    kMTop = 3e-3   # -- external mass transfer coeficient
-    alphaG = 20 # -- external heat transfer coeficient 
-    # alphaGBottom = 10 # -- external heat transfer coeficient 
-    alphaGBottom = 20 # -- external heat transfer coeficient 
+    '''Boundary and initial conditions'''
+    TKynuti = 301
+    TStart = 297
+    TTop = 200
+    TBottom = 210
+
+
+    kMSidesOmega = 0.01 # -- legacy (not used)
+    kMBottomOmega = 0.005    # -- legacy (not used)
+    kMTop = 3e-3   # -- legacy (not used) external mass transfer coeficient
+    alphaG = 23 # -- external heat transfer coeficient 
+    alphaGBottom = 23 # -- external heat transfer coeficient 
 
     '''Post-processing'''
     fig, axs = plt.subplots(1, 1, figsize=(16, 9))  # figure with plots
 
-    outFolder = '../ZZ_cases/2026/V28/exp%d_nonDef_%s/V85_bigChangeInPGAttrToEqn_stiffAlphaGDep_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
-    # baseCaseDir = '../ZZ_cases/2026/V27/exp%d_nonDef_%s/V70_pG_ZG_FINE_optNum_%g_Close_%g_E_%g_nu_%g_mSStep_%g_DFree_%g_tortOpen_%g_tortClosed_%g_lambda_%g_tau_%g_alphaG_%g_alphaGBottom_%g_kMSidesOmega%g_kMBottomOmega_%g_r0_%g_perm_%g/' % (expNum, str(nonDeform), kMPCOpen, kMPCClosed, E, nu, mSStep, DFree, tortOpen, tortClosed, lambdaS, tau0, alphaG, alphaGBottom, kMSidesOmega, kMBottomOmega, R0, perm)
+    outFolder = '../ZZ_cases/2026/V30/exp%d_nonDef_%s/V58_TDep_diffAvailSurf_deltaL_TBotH_TDep_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
+    # baseCaseDir = '../ZZ_cases/2026/V29/exp%d_nonDef_%s/V02_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
 
     # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
     # -- create OpenFOAMCase object to change values in dictionaries
@@ -249,12 +181,21 @@ for expNum in range(1):
     baseCase.loadOFCaseFromBaseCase(baseCaseDir)
     baseCase.changeOFCaseDir(outFolder)
     baseCase.copyBaseCase()
-# 
+
     # OTHER COMPUTATIONS====================================================
     dA = mSStep
     dX, dY, dZ = dA, dA, dA                                  
     x0 = y0 = z0 = 0.0      
     grX = grY = grZ = "1.0"
+    kappa0Raw = 2*mu0Raw*nu/(1-2*nu)
+    muV2Raw = 0
+    # kappaV1Raw = 2*muV1Raw*nu/(1-2*nu)
+    kappaV1Raw = 0
+    mu0Baked = mu0Raw * bakedCoeff
+    kappa0Baked = 2*mu0Baked*nu/(1-2*nu)
+    tau2 = 1
+    tGelat = 65
+    tau0 = 10
 
     # -- prepare blockMeshDict using luckas python class
     if prepBlockMesh:   
@@ -278,9 +219,9 @@ for expNum in range(1):
             ['0.org/omegaV', 'kM', str(kMSidesOmega), 'sides'],
             ['0.org/omegaV', 'kM', str(kMBottomOmega), 'bottom'],
             ['0.org/omegaV', 'kM', str(kMBottomOmega), 'bottom2'],
-            # ['0.org/omegaC', 'kM', str(kMSidesOmega), 'sides'],
-            # ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom'],
-            # ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom2'],
+            ['0.org/omegaC', 'kM', str(kMSidesOmega), 'sides'],
+            ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom'],
+            ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom2'],
             # ['0.org/pG', 'kM', str(kMSides), 'sides'],
             # ['0.org/pG', 'kM', str(kMBottom), 'bottom'],
             # ['0.org/pG', 'kM', str(kMBottom), 'bottom2'],
@@ -296,7 +237,6 @@ for expNum in range(1):
     # -- get the external temperature
     cleanDataInRange = loadDataFrame(expDir, experiments[expNum])
     bakingCurve = getTemps(cleanDataInRange, 4)
-
 
     # -- change external temperature
     with open(os.path.join(baseCase.dir, "constant", "TInfTable"), "w") as fl:
@@ -342,13 +282,14 @@ for expNum in range(1):
     baseCase.setParameters(
         [
             ['constant/thermophysicalProperties', 'lambda', str(lambdaS), 'solid'],
-            # ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
+            ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
             ['constant/thermophysicalProperties', 'Cp', str(CpS), 'solid'],
             # ['constant/thermophysicalProperties', 'rho', str(rhoL), 'liquid'],
             ['constant/thermophysicalProperties', 'Cp', str(CpL), 'liquid'],
             ['constant/thermophysicalProperties', 'Cp', str(CpG), 'CO2'],
             ['constant/thermophysicalProperties', 'Cp', str(CpVapor), 'vapor'],
             ['constant/thermophysicalProperties', 'D', str(DFree), 'transport'],
+            ['constant/thermophysicalProperties', 'Dl', str(Dl), 'transport'],
         ]
     )
 
@@ -375,7 +316,7 @@ for expNum in range(1):
             # ['system/controlDict', 'endTime', str(plusTime1), ''],
             ['system/controlDict', 'endTime', str(timeKynuti), ''],
             ['system/controlDict', 'deltaT', '%.5g'%timeStepKynuti, ''],
-            ['system/controlDict', 'writeInterval', '%.5g'%writeInt, ''],
+            ['system/controlDict', 'writeInterval', '%.5g'%writeIntKynuti, ''],
         ]
     )
 
@@ -383,9 +324,10 @@ for expNum in range(1):
     baseCase.setParameters(
         [
             ['system/fvSolution', 'nOuterCorrectors', str(nIterKynuti), 'PIMPLE'],
-            ['system/fvSolution', 'D', str(DRelax), 'fields'],
+            ['system/fvSolution', 'D', str(DRelaxKyn), 'fields'],
             ['system/fvSolution', 'DFinal', str(DFinalRelax), 'fields'],
             ['system/fvSolution', 'omegaV', str(omegaVRelaxKyn), 'fields'],
+            ['system/fvSolution', 'omegaC', str(omegaCRelaxKyn), 'fields'],
             ['system/fvSolution', 'pG', str(pGRelaxKyn), 'fields'],
         ]
     )
@@ -393,13 +335,13 @@ for expNum in range(1):
     # 7) mechanical properties
     baseCase.setParameters(
         [
-            ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
+            # ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
             ['constant/mechanicalProperties', 'E', str(E), 'bread'],
             ['constant/mechanicalProperties', 'mu0Raw', str(mu0Raw), 'bread'],
             ['constant/mechanicalProperties', 'kappa0Raw', str(kappa0Raw), 'bread'],
             ['constant/mechanicalProperties', 'muV1Raw', str(muV1Raw), 'bread'],
             ['constant/mechanicalProperties', 'muV2Raw', str(muV2Raw), 'bread'],
-            # ['constant/mechanicalProperties', 'lambdaVRaw', str(lambdaVRaw), 'bread'],
+            ['constant/mechanicalProperties', 'kappaVRaw', str(kappaV1Raw), 'bread'],
             ['constant/mechanicalProperties', 'mu0Baked', str(mu0Baked), 'bread'],
             ['constant/mechanicalProperties', 'kappa0Baked', str(kappa0Baked), 'bread'],
             ['constant/mechanicalProperties', 'tau1', str(tau1), 'bread'],
@@ -463,7 +405,11 @@ for expNum in range(1):
                     # ['constant/transportProperties', 'withDeformation', '0', ''],
                     ['system/fvSolution', 'nOuterCorrectors', str(nIterSim), 'PIMPLE'],
                     ['system/fvSolution', 'omegaV', str(omegaVRelax), 'fields'],
+                    ['system/fvSolution', 'omegaC', str(omegaCRelax), 'fields'],
+                    ['system/fvSolution', 'D', str(DRelax), 'fields'],
                     ['system/fvSolution', 'pG', str(pGRelax), 'fields'],
+                    ['system/controlDict', 'writeInterval', '%.5g'%writeInt, ''],
+
 
                 ]
             )
@@ -485,10 +431,13 @@ for expNum in range(1):
             baseCase.setParameters(
                 [
                     ['system/controlDict', 'endTime', str(timeKynuti + plusTime1 + plusTime2), ''],
-                    # ['system/controlDict', 'deltaT', '%.5g'%1, ''],
+                    ['system/controlDict', 'deltaT', '%.5g'%timeStepSimNonDef, ''],
                     ['constant/transportProperties', 'withDeformation', '0', ''],
                     ['system/fvSolution', 'omegaV', str(omegaVRelaxNonDef), 'fields'],
+                    ['system/fvSolution', 'omegaC', str(omegaCRelaxNonDef), 'fields'],
+                    ['system/fvSolution', 'T', str(TNonDef), 'fields'],
                     ['system/fvSolution', 'pG', str(pGRelaxNonDef), 'fields'],
+                    ['system/fvSolution', 'nOuterCorrectors', str(nIterSimNonDef), 'PIMPLE'],
 
                 ]
             )
@@ -525,6 +474,7 @@ for expNum in range(1):
                     'TLFProbe -point "(0.032 0.041 1e-4)" > log.TPoint8',
                     'rm -rf 0',
                     'intMoisture > log.intMoisture',
+                    'getBoundPoints > log.getBoundPoints'
                 ]
             )
         else:
@@ -543,6 +493,7 @@ for expNum in range(1):
                     # 'foamJob -parallel -screen TLFProbe -point "(0.042 0.041 0)" > log.TPoint88',
                     'foamJob -parallel -screen intMoisture > log.intMoisture',
                     'foamJob -parallel -screen intWeigth > log.intWeigth',
+                    'foamJob -parallel -screen getBoundPoints > log.getBoundPoints'
                 ]
             )
             for i in range(len(experiments[expNum]['probes'])):
@@ -557,40 +508,52 @@ for expNum in range(1):
                     ]
                 )
 
-        # -- gather the displacement data from probe points
-        rows = []
-        lines = []
-        D = []
-        nProbes = 2
         if nCores > 1:
             latestTime = baseCase.latestParTime
         else:
             latestTime  = baseCase.latestTime
-        with open(baseCase.dir + '/postProcessing/probeOur/%d/D'%latestTime, 'r') as fl:
-            lines = fl.readlines()
-            lines = lines[nProbes+1:]
-            # print(lines)
-            for line in lines:
-                parts = line.split(") (")
-                first_entry = parts[0].split(maxsplit=1)
-                vectors = [first_entry[1]] if len(first_entry) > 1 else []
-                vectors.extend(parts[1:])
 
-                vectors = [
-                    tuple(map(float, vec.replace("(", "").replace(")", "").split()))
-                    for vec in vectors
-                ]
-                rows.append(vectors)
+        shapeBef = np.loadtxt(baseCase.dir + 'Shape/D_values_%d.dat' % timeKynuti, skiprows=1)   
+        shapeAft = np.loadtxt(baseCase.dir + 'Shape/D_values_%d.dat' % latestTime, skiprows=1)   
+        shapeBef = shapeBef[np.argsort(shapeBef[:, 0])]
+        shapeAft = shapeAft[np.argsort(shapeAft[:, 0])]
+        np.savetxt(os.path.join(baseCase.dir, 'Shape/D_values_%d_sorted.dat' % timeKynuti), shapeBef, header='x\ty\tz', comments='')
+        np.savetxt(os.path.join(baseCase.dir, 'Shape/D_values_%d_sorted.dat' % latestTime), shapeAft, header='x\ty\tz', comments='')
 
-        # -- Convert displacements to numpy array
-        D = np.array(rows)
-        np.savetxt(os.path.join(baseCase.dir, 'sim_DX_DY.dat'), np.column_stack([D[:,0, 0], D[:,1,1]]), header='DX DY', comments='')
+        # -- gather the displacement data from probe points
+        # rows = []
+        # lines = []
+        # D = []
+        # nProbes = 2
+        # if nCores > 1:
+        #     latestTime = baseCase.latestParTime
+        # else:
+        #     latestTime  = baseCase.latestTime
+        # with open(baseCase.dir + '/postProcessing/probeOur/%d/D'%latestTime, 'r') as fl:
+        #     lines = fl.readlines()
+        #     lines = lines[nProbes+1:]
+        #     # print(lines)
+        #     for line in lines:
+        #         parts = line.split(") (")
+        #         first_entry = parts[0].split(maxsplit=1)
+        #         vectors = [first_entry[1]] if len(first_entry) > 1 else []
+        #         vectors.extend(parts[1:])
+
+        #         vectors = [
+        #             tuple(map(float, vec.replace("(", "").replace(")", "").split()))
+        #             for vec in vectors
+        #         ]
+        #         rows.append(vectors)
+
+        # # -- Convert displacements to numpy array
+        # D = np.array(rows)
+        # np.savetxt(os.path.join(baseCase.dir, 'sim_DX_DY.dat'), np.column_stack([D[:,0, 0], D[:,1,1]]), header='DX DY', comments='')
             
-        # -- Load temperature profiles in probe points
-        # probesT = np.loadtxt(baseCase.dir + '/postProcessing/probeZhang/%d/T'%latestTime, skiprows=3)
+        # # -- Load temperature profiles in probe points
+        # # probesT = np.loadtxt(baseCase.dir + '/postProcessing/probeZhang/%d/T'%latestTime, skiprows=3)
 
-        # -- Load total moisture evolution 
-        TPoint6 = readDataFromLogFile("%s/log.TPoint6" %baseCase.dir)
+        # # -- Load total moisture evolution 
+        # TPoint6 = readDataFromLogFile("%s/log.TPoint6" %baseCase.dir)
         # TPoint7 = readDataFromLogFile("%s/log.TPoint7" %baseCase.dir)
         # TPoint5 = readDataFromLogFile("%s/log.TPoint5" %baseCase.dir)
         # TPoint8 = readDataFromLogFile("%s/log.TPoint8" %baseCase.dir)
@@ -671,18 +634,18 @@ for expNum in range(1):
         # axs[1,1].legend()
 
         # # -- Displacement
-        axs.plot(TPoint6[:,0] / 60 , D[:, 0, 0], 'b', label='simulation DX')
-        axs.plot(TPoint6[:,0] / 60 , D[:, 1, 1], 'r', label='simulation DY')
-        axs.plot(experiments[expNum]['expDispl'][:,0], experiments[expNum]['expDispl'][:,1], 'xb', label='experimental DX')
-        axs.plot(experiments[expNum]['expDispl'][:,0], experiments[expNum]['expDispl'][:,2], 'xr', label='experimental DY')
-        # axs[2].plot(DExp[:,0] / 60, DExp[:,2], 'xb', label='experimental DY')
-        axs.set_xlabel("time (min)")
-        axs.set_ylabel("displacement in X and Y directions")
-        # axs[2,0].set_xlim(0,35)
-        axs.set_title("Displacement of the bread in vertical (X) and horizontal (Y) directions")
-        axs.legend()
-        fig.tight_layout()
+        # axs.plot(TPoint6[:,0] / 60 , D[:, 0, 0], 'b', label='simulation DX')
+        # axs.plot(TPoint6[:,0] / 60 , D[:, 1, 1], 'r', label='simulation DY')
+        # axs.plot(experiments[expNum]['expDispl'][:,0], experiments[expNum]['expDispl'][:,1], 'xb', label='experimental DX')
+        # axs.plot(experiments[expNum]['expDispl'][:,0], experiments[expNum]['expDispl'][:,2], 'xr', label='experimental DY')
+        # # axs[2].plot(DExp[:,0] / 60, DExp[:,2], 'xb', label='experimental DY')
+        # axs.set_xlabel("time (min)")
+        # axs.set_ylabel("displacement in X and Y directions")
+        # # axs[2,0].set_xlim(0,35)
+        # axs.set_title("Displacement of the bread in vertical (X) and horizontal (Y) directions")
+        # axs.legend()
+        # fig.tight_layout()
 
-        plt.savefig(baseCase.dir + 'postProcessingPlot.png')
+        # plt.savefig(baseCase.dir + 'postProcessingPlot.png')
                                             
         saveFigPostProcess(outFolder)

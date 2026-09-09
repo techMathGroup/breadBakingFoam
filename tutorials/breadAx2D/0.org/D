@@ -45,8 +45,8 @@ boundaryField
 
     "(bottom)"
     {
-        type            fixedValue;
-        // type            fixedDisplacementZeroShear;
+        // type            fixedValue;
+        type            fixedDisplacementZeroShear;
         value           uniform (0 0 0);
     }
 }

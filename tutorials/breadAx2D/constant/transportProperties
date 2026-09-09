@@ -32,3 +32,19 @@ withEq 1;
 permGLViscG permGLViscG [-1 3 1 0 0 0 0] 9e-13;
 
 tort 10;
+tortOpen 10;
+tortClosed 10;
+
+alphaD0 0.39;
+// alphaD0 0.91;
+
+zhang 1;
+delta 0.15;
+moistureMin 0.33;
+
+
+omegaVInfTableDict   
+{
+    file "$FOAM_CASE/constant/omegaVInfTable";
+    outOfBounds warn;
+}

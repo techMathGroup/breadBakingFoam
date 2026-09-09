@@ -16,37 +16,39 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 8e-3;
-// internalField   uniform 0.02;
+internalField   uniform 0.0e-3;
 
 boundaryField
 {
-    // Zhang experiment
+    "symmetryPatch"
+    {
+        type  symmetry;
+    }
+
+    sides
+    {
+        type zeroGradient;
+        // type fixedValue;
+        // value $internalField;
+    }
     "(wedgeZ0|wedgeZE)"
 	{
 		type wedge;
-	}   
-    
-    "(sides|bottom)"
-    {
-        type breadOmegaVMixed;
-        kM               0.01; // -- mass transfer coefficient
+	}
 
-        // -- mixed BC mandatory entires
-        refValue        uniform 8e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 8e-3;
-        omegaVInfTableDict   
-        {
-            file "$FOAM_CASE/constant/omegaVInfTable";
-            outOfBounds warn;
-        }
-        DFieldName       DEffvM;
+    bottom
+    {
+
+        type zeroGradient;
+
+    }
+    bottom2
+    {
+        type zeroGradient;
         // type fixedValue;
         // value $internalField;
         // type zeroGradient;
-	}
+    }
 }
 
 

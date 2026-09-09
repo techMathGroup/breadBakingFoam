@@ -77,7 +77,7 @@ boundaryField
         pressure        uniform 0;
         value           uniform (0 0 0);
         type            breadDFloor;
-        floorPos        0;
+        floorPos        1e-5;
         sidePos        0;
         refValue        uniform (0 0 0);
         refGradient     uniform (0 0 0);

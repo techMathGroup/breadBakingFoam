@@ -548,6 +548,7 @@ volScalarField delta
     1 - Foam::pow((alphaG), 1.0/3.0),
     "calculated"
 );
+delta = delta * 0 + deltaSc;
 delta.correctBoundaryConditions();
 
 volVectorField jVE
@@ -742,6 +743,20 @@ volScalarField pCSat
     "calculated"
 );
 
+volScalarField odtokMoisture
+(
+    IOobject
+    (
+        "odtokMoisture",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::READ_IF_PRESENT,
+        writeOption2
+    ),
+    fvc::div(fvc::interpolate(J) * jLCorr),
+    "calculated"
+);
+
 // surfaceScalarField jLCorrIntoLiquid = 0*jLCorr;
 
 
@@ -754,5 +769,6 @@ Info << "Min (T): " << min(T).value() << ", max (T): " << max(T).value() << "." 
 Info << "univR: " << univR.value() << endl;
 Info << "Min (moisture): " << min(moisture).value() << ", max (moisture): " << max(moisture) << "." << endl;
 Info << "Min (permGLViscG): " << min(permGLViscG).value() << ", max (permGLViscG): " << max(permGLViscG) << "." << endl;
+Info << "Min (moistureMin): " << moistureMin << endl;
 
 // ************************************************************************* //

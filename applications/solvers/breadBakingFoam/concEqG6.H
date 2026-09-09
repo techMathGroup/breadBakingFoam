@@ -42,7 +42,11 @@ fvScalarMatrix pGEq
 
     // + fvc::div(fvc::interpolate(J) * jLCorr)
 
-    - fvc::div(fvc::interpolate(J) * jLCorr)
+    // - fvc::div(fvc::interpolate(J) * jLCorr)
+
+    // + fvc::laplacian(J * (Finv & jDVTilda), omegaV)
+    // + fvc::laplacian(J * (Finv & jDCTilda), omegaC)
+    // + fvc::laplacian(J * (Finv & jDATilda), omegaAir)
 
     // + mCO2Dis
 

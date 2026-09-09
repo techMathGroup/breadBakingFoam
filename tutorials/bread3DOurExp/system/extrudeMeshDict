@@ -19,7 +19,7 @@ constructFrom patch;
 //constructFrom surface;
 point (0 0 0);
 axis (1 0 0);
-angle 10;
+angle 5;
 
 // If construct from patch/mesh:
 sourceCase "./";

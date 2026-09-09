@@ -28,6 +28,12 @@ runDynSim = True    # -- run simulation
 # runDynSim = False    # -- run simulation
 runPostProcess = True   # -- run post-processing
 
+withKynuti = True
+withKynuti = False
+timeKynuti = 0
+TKynuti = 300
+timeStepKynuti = 5
+
 # DEFINE PARAMETERS=====================================================
 '''Geometry parameters'''
 mSStep = 0.1e-2 # -- aproximate computational cell size
@@ -37,107 +43,75 @@ arcL = 0.008    # -- length of the arc at the side of the bread
 
 '''Internal transport parameters'''
 DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-tortOpen = 2.4   # -- tortuosity
+Dl = 8e-12  # -- liquid water difusivity in the dough
+tortOpen = 2   # -- tortuosity
 tortClosed = 70   # -- tortuosity
-
-# tortOpen = 10   # -- tortuosity
-# tortClosed = 10   # -- tortuosity
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
 # -- absolute term in equation (5) in 
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
-lambdaS = 0.55
 lambdaS = 0.42
-# lambdaS = 0.35
 
-# perm = 5e-13  # -- bread permeability (Zhang 2005)
-# perm = 1.7e-13 * 0.217  # -- bread permeability (Zhang 2005)
-perm = 3.5e-15  # -- bread permeability (Zhang 2005)
-perm = 2.4e-14  # -- bread permeability (Zhang 2005)
-perm = 4e-15  # -- bread permeability (Zhang 2005)
-# perm = 2.6e-12  # -- bread permeability (Zhang 2005)
+# -- closed-cell bread intristic permeability
+# perm = 1.3e-14  # -- bread permeability 
+perm = 3.7e-14  # -- bread permeability 
+# perm = 2e-14  # -- bread permeability 
 
 # -- heat capacities for the individual phases
-# CpS = 1450   # -- solid phase
 CpS = 1130   # -- solid phase
-# CpS = 1800   # -- solid phase
 CpG = 853  # -- CO2
 CpVapor = 1878 # -- water vapors
 CpL = 4200  # -- liquid phase
 
 # -- mass densities for the individual phases
-# rhoS = 1200  # -- solid density    
+rhoS = 507  # -- solid density    
+# rhoS = 764  # -- solid density    
 # rhoL = 1000  # -- liquid density   
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-# kMPC = 0.2
-# kMPCOpen = 5
-kMPCOpen = 0.2
-kMPCClosed = 0.2
+kMPCOpen = 0.07
+kMPCClosed = 0.5
 
-# -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S)
-# evCoef1 = -0.0071
-# evCoef2 = 4.5
-evCoef1 = -0.0056
-evCoef2 = 5.5
+# -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
+evCoef1 = -0.0071
+evCoef2 = 4.5
 n = 0.38
 
-outFolder = '../ZZ_cases/00_breads/186_dT10_muVTest_kOp_%g_kCl_%g_torOp_%g_torCl_%g_evCoef1_%g_lambdaS_%g_perm_%g/'%(kMPCOpen, kMPCClosed, tortOpen, tortClosed, evCoef1, lambdaS, perm)
-
-# outFolder = '../ZZ_cases/00_breads/breadAx2D_corrE_alphaKept_%g/'%(alphaKept)
-
-# -- pre-exponential factor and Tm in CO2 generation kinetics 
-# -- in equation (32) in https://doi.org/10.1002/aic.10518
-# R0 = 3e-4 
-
-# R0 = 2e-5
-# R0 = 3e-5
-R0 = 1e-4
-# R0 = 2e-5
-# R0 = 2e-5
-
-# R0 = 4.3e-5
-# R0 = 5e-5
-
-Tm = 313    # -- kinetics from Zhang 2005
-deltaT = 17
+# -- pre-exponential factor and Tm in CO2 generation kinetics in equation (32) in https://doi.org/10.1002/aic.10518 (kg/m^3/s)
+R0 = 1.8e-2
+# R0 = 3e-2
+Tm = 313   
 deltaT = 10
-tau0 = 22
+
+# R0 = 1.8e-3
+# # Tm = 313
+deltaT = 14
 
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
 # withDeformation = 0 # -- turn on (1) /off (0) deformation
-nu = 0.49   # -- Poisson ratio
-E = 3000   # -- Youngs modulus
-tGelat = 65 # -- temperature of gelatization (solid )
-tGelatEv = 57   # -- temperature of gelatization (evaporation)
+nu = 0.15   # -- Poisson ratio
+E = 30000   # -- Youngs modulus
+mu0Raw = 230    # kappa = 2*mu*nu/(1-2*nu)  
+muV1Raw = 5000
+bakedCoeff = 8
+tau1 = 2
 
-# mu0Raw = 70
-# kappa0Raw = 1000
-# muVRaw = 18000
-# lambdaVRaw = 2000
-# mu0Baked = 70
-# kappa0Baked = 1000
-
-mu0Raw = 70
-kappa0Raw = 1000
-muVRaw = 8000
-lambdaVRaw = 0
-mu0Baked = 70
-kappa0Baked = 1000
 
 '''Numerics'''
 timeStep = 1    # -- computational time step
 plusTime1 = 360 # -- how long to run with deformation
 plusTime2 = 540 # -- how long to run without deformation
-writeInt = 20   # -- how often to write results
-nIter = 100  # -- number of iterations in each time step
+writeInt = 10   # -- how often to write results
+nIter = 50  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
 nCores = 4 # -- number of cores to run the simulation
 
+TRelaxAfter = 0.3
+
 # -- relaxation factors
-DRelax = 0.1
+DRelax = 0.5
 DFinalRelax = 1
 
 '''Boundary conditions'''
@@ -146,6 +120,10 @@ alphaG = 10 # -- external heat transfer coeficient
 
 '''Post-processing'''
 fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
+
+outFolder = '../ZZ_cases/00_breads/031_TDep_MoistCalc_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
+# baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
+
 
 # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
 # -- create OpenFOAMCase object to change values in dictionaries
@@ -159,6 +137,15 @@ dA = mSStep
 dX, dY, dZ = dA, dA, dA                                  
 x0 = y0 = z0 = 0.0      
 grX = grY = grZ = "1.0"
+kappa0Raw = 2*mu0Raw*nu/(1-2*nu)
+muV2Raw = 0
+# kappaV1Raw = 2*muV1Raw*nu/(1-2*nu)
+kappaV1Raw = 0
+mu0Baked = mu0Raw * bakedCoeff
+kappa0Baked = 2*mu0Baked*nu/(1-2*nu)
+tau2 = 1
+tGelat = 65
+tau0 = 7
 
 # -- prepare blockMeshDict using luckas python class
 if prepBlockMesh:
@@ -173,6 +160,16 @@ baseCase.setParameters(
         ['0.org/T', 'alpha', str(alphaG), 'bottom'],
     ]
 )
+
+if withKynuti:
+    # -- change external temperature
+    with open(os.path.join(baseCase.dir, "constant", "TInfTable"), "w") as fl:
+        fl.writelines("(\n")
+        fl.writelines("\t(0\t%f)\n"%TKynuti)
+        fl.writelines("\t(%d\t%f)\n"%(timeKynuti, TKynuti))
+        fl.writelines("\t(%f\t%f)\n"%(timeKynuti + 0.1, 463))
+        fl.writelines("\t(%d\t%f)\n"%(100000, 463))
+        fl.writelines(")\n")
 
 # 2) constant/transportProperties
 baseCase.setParameters(
@@ -190,13 +187,15 @@ baseCase.setParameters(
 baseCase.setParameters(
     [
         ['constant/thermophysicalProperties', 'lambda', str(lambdaS), 'solid'],
-        # ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
+        ['constant/thermophysicalProperties', 'rho', str(rhoS), 'solid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpS), 'solid'],
         # ['constant/thermophysicalProperties', 'rho', str(rhoL), 'liquid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpL), 'liquid'],
         ['constant/thermophysicalProperties', 'Cp', str(CpG), 'CO2'],
         ['constant/thermophysicalProperties', 'Cp', str(CpVapor), 'vapor'],
         ['constant/thermophysicalProperties', 'D', str(DFree), 'transport'],
+        ['constant/thermophysicalProperties', 'Dl', str(Dl), 'transport'],
+
     ]
 )
 
@@ -236,16 +235,18 @@ baseCase.setParameters(
 # 7) mechanical properties
 baseCase.setParameters(
     [
-        ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
+        # ['constant/mechanicalProperties', 'nu', str(nu), 'bread'],
         ['constant/mechanicalProperties', 'E', str(E), 'bread'],
         ['constant/mechanicalProperties', 'mu0Raw', str(mu0Raw), 'bread'],
         ['constant/mechanicalProperties', 'kappa0Raw', str(kappa0Raw), 'bread'],
-        ['constant/mechanicalProperties', 'muVRaw', str(muVRaw), 'bread'],
-        ['constant/mechanicalProperties', 'lambdaVRaw', str(lambdaVRaw), 'bread'],
+        ['constant/mechanicalProperties', 'muV1Raw', str(muV1Raw), 'bread'],
+        ['constant/mechanicalProperties', 'muV2Raw', str(muV2Raw), 'bread'],
+        ['constant/mechanicalProperties', 'kappaVRaw', str(kappaV1Raw), 'bread'],
         ['constant/mechanicalProperties', 'mu0Baked', str(mu0Baked), 'bread'],
         ['constant/mechanicalProperties', 'kappa0Baked', str(kappa0Baked), 'bread'],
-        ['constant/mechanicalProperties', 'tau0', str(tau0), 'bread'],
-        ['constant/mechanicalProperties', 'tGelat', str(tGelat), 'bread']
+        ['constant/mechanicalProperties', 'tau1', str(tau1), 'bread'],
+        ['constant/mechanicalProperties', 'tau2', str(tau2), 'bread'],
+        ['constant/mechanicalProperties', 'tGelat', str(tGelat), 'bread'],
     ]
 )
 
@@ -261,6 +262,22 @@ if makeGeom:
         ]
     )
 
+if withKynuti:
+    baseCase.setParameters(
+        [
+            ['system/controlDict', 'endTime', str(timeKynuti), ''],
+            ['system/controlDict', 'deltaT', '%.5g'%timeStepKynuti, ''],
+            ['system/decomposeParDict', 'numberOfSubdomains', str(nCores), ''],
+        ]
+    )
+    baseCase.runCommands(
+        [
+            'decomposePar > log.decomposePar',
+            'foamJob -parallel -screen %s > log.Kynuti' %(dynSolver),
+        ]
+    )
+
+
 # RUN THE SIMULATION====================================================
 if runDynSim:
     if nCores > 1:
@@ -269,9 +286,21 @@ if runDynSim:
                 ['system/decomposeParDict', 'numberOfSubdomains', str(nCores), '']
             ]
         )
+        if withKynuti:
+            baseCase.setParameters(
+                [
+                    ['system/controlDict', 'endTime', str(timeKynuti + plusTime1), ''],
+                    ['system/controlDict', 'deltaT', '%.5g'%timeStep, ''],
+                ]
+            )
+        else:
+            baseCase.runCommands(
+                [
+                    'decomposePar > log.decomposePar',
+                ]
+            )
         baseCase.runCommands(
             [
-                'decomposePar > log.decomposePar',
                 'foamJob -parallel -screen %s > log.%s' %(dynSolver,dynSolver),
             ]
         )
@@ -286,8 +315,9 @@ if runDynSim:
     if plusTime2 > 0:
         baseCase.setParameters(
             [
-                ['system/controlDict', 'endTime', str(plusTime1 + plusTime2), ''],
-                ['constant/transportProperties', 'withDeformation', '0', '']
+                ['system/controlDict', 'endTime', str(timeKynuti + plusTime1 + plusTime2), ''],
+                ['constant/transportProperties', 'withDeformation', '0', ''],
+                ['system/fvSolution', 'T', str(TRelaxAfter), 'fields'],
             ]
         )
         if nCores > 1:
@@ -394,39 +424,39 @@ if runPostProcess:
     # -- Temperatures
     axs[0].plot(TExpCenter[:,0],TExpCenter[:,1], 'xr',  label='center temperature experiment')
     axs[0].plot(TExpSurface[:,0],TExpSurface[:,1], 'xb', label='surface temperature experiment')
-    axs[0].plot(probesT[:,0] / 60, probesT[:,1] - 273, 'r', label='center temperature simulation')
-    axs[0].plot(probesT[:,0] / 60, probesT[:,2] - 273, 'b', label='center temperature simulation')
+    axs[0].plot(probesT[:,0] / 60-timeKynuti/60, probesT[:,1] - 273, 'r', label='center temperature simulation')
+    axs[0].plot(probesT[:,0] / 60-timeKynuti/60, probesT[:,2] - 273, 'b', label='center temperature simulation')
     axs[0].set_xlabel("time (min)")
     axs[0].set_ylabel("T (°C)")
-    axs[0].set_xlim(0, 15)
+    # axs[0].set_xlim(0, 15)
     axs[0].set_title("Temperature evolution in the center and at the surface")
     axs[0].legend()
 
     # -- Moisture
-    axs[1].plot(moistureSim[:,0] / 60, moistureSim[:,1], 'b', label='simulation')
+    axs[1].plot(moistureSim[:,0] / 60 -timeKynuti/60, moistureSim[:,1], 'b', label='simulation')
     axs[1].plot(moistureExp[:,0] , moistureExp[:,1], 'xb', label='experiment')
     axs[1].set_xlabel("time (min)")
     axs[1].set_ylabel("total moisture content (-)")
-    axs[1].set_xlim(0,15)
+    # axs[1].set_xlim(0,15)
     axs[1].set_title("Total moisture content in the the bread")
     axs[1].legend()
 
-    axs[2].plot(probespG[:,0] / 60, probespG[:,1], 'r', label='center pressure simulation')
-    axs[2].plot(probespG[:,0] / 60, probespG[:,2], 'b', label='surface pressure simulation')
+    axs[2].plot(probespG[:,0] / 60-timeKynuti/60, probespG[:,1], 'r', label='center pressure simulation')
+    axs[2].plot(probespG[:,0] / 60-timeKynuti/60, probespG[:,2], 'b', label='surface pressure simulation')
     axs[2].set_xlabel("time (min)")
     axs[2].set_ylabel("p (Pa)")
-    axs[2].set_xlim(0, 15)
+    # axs[2].set_xlim(0, 15)
     axs[2].set_title("Pressure evolution in the center of the loaf")
     axs[2].legend()
 
     # -- Displacement
-    axs[3].plot(probesT[1:,0] / 60, D[:, 1, 1], 'b', label='simulation DY')
-    axs[3].plot(probesT[1:,0] / 60, D[:, 2, 0], 'r', label='simulation DX')
+    axs[3].plot(probesT[1:,0] / 60-timeKynuti/60, D[:, 1, 1], 'b', label='simulation DY')
+    axs[3].plot(probesT[1:,0] / 60-timeKynuti/60, D[:, 2, 0], 'r', label='simulation DX')
     axs[3].plot(DExp[:,0] / 60, DExp[:,1], 'xr', label='experimental DX')
     axs[3].plot(DExp[:,0] / 60, DExp[:,2], 'xb', label='experimental DY')
     axs[3].set_xlabel("time (min)")
     axs[3].set_ylabel("displacement in X and Y directions")
-    axs[3].set_xlim(0,15)
+    # axs[3].set_xlim(0,15)
     axs[3].set_title("Displecement of the bread in vertical (X) and horizontal (Y) directions")
     axs[3].legend()
 

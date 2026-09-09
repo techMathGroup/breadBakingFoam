@@ -4,6 +4,19 @@
     // volScalarField h3 = rhoG * J * alphaG * omegaV;
     // volScalarField h4 = omegaL * rhoD;
 
+//     surfaceScalarField jLCorrBound = jLCorr;
+//     forAll(jLCorrBound.boundaryField(), patchI)
+// {
+//     if (jLCorrBound.boundaryField()[patchI].type() == "calculated")
+//     {
+//         scalarField& jLCorrBoundP = jLCorrBound.boundaryFieldRef()[patchI];
+//         forAll(jLCorrBoundP, faceI)
+//         {
+//             jLCorrBoundP[faceI] = 0;
+//         }
+//     }
+// }
+
 
 
 
@@ -15,7 +28,8 @@
         // + (dHConst + CpL * (T - TRef)) * (fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas, pV))
         // + (dHConst + CpL * (T - TRef)) * fvc::div(J * alphaG * (1 - alpha) * Dvc * molMV / univR / T * (Finv & (Finv.T() & fvc::grad(pV))))
         // + (dHConst + CpL * (T - TRef)) * (fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas, awPSat))
-        // - (dHConst + CpL * (T - TRef)) * fvc::div(fvc::interpolate(J) * jLCorr)
+        // + (dHConst + CpL * (T - TRef)) * fvc::div(fvc::interpolate(J) * jLCorr)
+        + (dHConst + CpL * (T - TRef)) * fvc::div(fvc::interpolate(J) * jLCorr)
         // - (dHConst + CpL * (T - TRef)) * fvc::div(fvc::interpolate(J) * jLCorr)
         // - (CpVapor * (T - TRef)) * (fvc::div(J * Finv & jVE))
         // - (CpVapor * (T - TRef)) * (fvc::div(fvc::interpolate(J) * jLCorr))

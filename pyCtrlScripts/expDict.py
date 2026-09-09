@@ -21,7 +21,7 @@ experiments = [
         # 'hLoafKynuti':5e-2,
         # 'rLoafKynuti': 4.4e-2,
         # 'rLoafKynuti': 4.7e-2,
-        'rLoafKynuti': 5e-2,
+        'rLoafKynuti': 4.5e-2,
         'up': 1e-2,
         'probes': np.array([
             [4.45e-2, 0, 2.89e-2],

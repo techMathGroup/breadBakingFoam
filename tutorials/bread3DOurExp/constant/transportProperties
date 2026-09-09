@@ -39,9 +39,12 @@ tortClosed 10;
 // alphaD0 0.91;
 // alphaD0 0.82;
 // alphaD0 0.39;
-alphaD0 0.91;
+// alphaD0 0.91;
+alphaD0 0.84;
 // alphaD0 0.75;
 delta 0.1;
+
+moistureMin 0.27;
 
 zhang 0;
 

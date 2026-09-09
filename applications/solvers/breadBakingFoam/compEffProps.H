@@ -33,8 +33,49 @@ scalar logKBaked = Foam::log(kBaked.value());
 permGLViscG = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
 permGLViscG.correctBoundaryConditions();
 
+// Info << "alphaG min: " << min(alphaG).value() << ", max: " << max(alphaG).value() << endl;
+
+
 // -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
-lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow(alphaG, 0.5));
+// lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow(alphaG, 0.5));
+
+forAll(lambdaEff, i)
+{
+    if (alphaG[i] > SMALL)
+    {
+        lambdaEff[i] = lambdaS.value() - 0.134 * alphaG[i] - 0.219 * Foam::pow(alphaG[i], 0.5);
+        // delta[i] = 1 - Foam::pow((alphaG[i]), 1.0/3.0);
+    }
+    else
+    {
+        lambdaEff[i] = lambdaS.value();
+        // delta[i] = 1 - SMALL;
+    }
+}
+
+forAll(lambdaEff.boundaryField(), patchI)
+{
+    scalarField& lambdaEffP = lambdaEff.boundaryFieldRef()[patchI];
+    scalarField& alphaGP = alphaG.boundaryFieldRef()[patchI];
+    scalarField& deltaP = delta.boundaryFieldRef()[patchI];
+    forAll(lambdaEffP, faceI)
+    {
+        if (alphaGP[faceI] > SMALL)
+        {
+            lambdaEffP[faceI] = (lambdaS.value() - 0.134 * alphaGP[faceI] - 0.219 * Foam::pow(alphaGP[faceI], 0.5));
+            // deltaP[faceI] = 1 - Foam::pow((alphaGP[faceI]), 1.0/3.0);
+        }
+        else
+        {
+            lambdaEffP[faceI] = lambdaS.value();
+            // deltaP[faceI] = 1 - SMALL;
+        }
+    }
+}
+
+lambdaEff = lambdaEff * (0.25*Foam::atan((T / dummyT - 273 - 50) / 8) / 3.1415 + 1.1);
+
+
 
 // -- purlis lambda alternative
 // lambdaEff.correctBoundaryConditions();
@@ -47,31 +88,65 @@ lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow
 // lambdaEff = dummyLamdba *  (0.37 * phi + 0.18 * (1-phi));
 // lambdaEff = dummyLamdba *  0.3;
 
-lambdaEff.correctBoundaryConditions();
+// lambdaEff.correctBoundaryConditions();
 
 // -- calculation of variables for Lucas closed-cell vapor flux
 // -- derivation of saturated water pressure with respect to temperature
-dPSatAwdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT * aw;
-dPSatAwdT.correctBoundaryConditions();
+// dPSatAwdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT * aw;
+// dPSatAwdT.correctBoundaryConditions();
 
-// volScalarField dPVdT = rhoG * univR / Mg * yV;
-// dPVdT.correctBoundaryConditions();
+volScalarField dPVdT = rhoG * univR / Mg * yV;
+dPVdT.correctBoundaryConditions();
 
 // -- derivation of saturated water pressure with respect to moisture content
-// dPWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
-dPSatAwWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
+dPSatAwWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
+// dPSatAwWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
+
+// forAll(dPSatAwWdX, i)
+// {
+//     if (moisture[i] < SMALL)
+//     {
+//         dPSatAwWdX[i] = 0.0;
+//     }
+//     else
+//     {
+//         dPSatAwWdX[i] = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture[i], 0.78)))/(Foam::pow(moisture[i],1.78)) * pSat[i];
+//     }
+// }
+
+// forAll(dPSatAwWdX.boundaryField(), patchI)
+// {
+//     scalarField& dPSatAwWdXP = dPSatAwWdX.boundaryFieldRef()[patchI];
+//     scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
+//     scalarField& pSatP = pSat.boundaryFieldRef()[patchI];
+//     forAll(dPSatAwWdXP, faceI)
+//     {
+//         if (moistureP[faceI] < SMALL)
+//         {
+//             dPSatAwWdXP[faceI] = 0.0;
+//         }
+//         else
+//         {
+//             dPSatAwWdXP[faceI] = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moistureP[faceI], 0.78)))/(Foam::pow(moistureP[faceI],1.78)) * pSatP[faceI];
+//         }
+//     }
+// }
+
 
 // dPWdX = 482363.3441*Foam::exp(0.0071*T/dummyT - 4.5)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), 1.631578947)/(Foam::pow(183298.0708*Foam::pow(moisture,2)*Foam::exp(0.0142*T/dummyT - 9.)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), (631578947.0/1000000000.0)) + 1.0,2.0)) * pSat;
-dPSatAwWdX.correctBoundaryConditions();
+// dPSatAwWdX.correctBoundaryConditions();
 
 // -- ratio of cell wall to all thickness
-delta = 1 - Foam::pow((alphaG), 1.0/3.0);
+// delta = 1 - Foam::pow((alphaG), 1.0/3.0);
 // delta = 1.0;
 // delta = deltaSc;
-delta.correctBoundaryConditions();
-dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+// delta.correctBoundaryConditions();
+dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+// dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 // dKoeffLucas =  alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 dKoeffLucas.correctBoundaryConditions();
+
+// Info << "tu OK" << endl;
 
 
 // volScalarField a = Foam::exp(evCoef1 * T / dummyT + evCoef2);

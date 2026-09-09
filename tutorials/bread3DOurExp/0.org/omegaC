@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 0.25;
+internalField   uniform 0.01;
 
 boundaryField
 {
@@ -48,12 +48,12 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffcM;
-        type fixedValue;
-        value $internalField;
-        // type calculated;
         // type fixedValue;
         // value $internalField;
-        type zeroGradient;
+        // type calculated;
+        // type fixedValue;
+        // value uniform 0.01;
+        // type zeroGradient;
 	}
     bottom
     {
@@ -73,9 +73,9 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffcM;
-        type fixedValue;
-        value $internalField;
-        type zeroGradient;
+        // type fixedValue;
+        // value $internalField;
+        // type zeroGradient;
 	}
     bottom2
     {
@@ -93,9 +93,9 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffcM;
-        type fixedValue;
-        value $internalField;
-                type zeroGradient;
+        // type fixedValue;
+        // value $internalField;
+                // type zeroGradient;
 
 	}
 }

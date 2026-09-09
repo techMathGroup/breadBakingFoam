@@ -17,18 +17,18 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP)"
+    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture)"
     {
         solver          PBiCGStab;
-        preconditioner  DIC;
+        preconditioner  diagonal;
         tolerance       1e-10;
         relTol          0.01;
     }
  
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP)Final"
+    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture)Final"
     {
         solver          PBiCGStab;
-        preconditioner  DIC;
+        preconditioner  diagonal;
         tolerance       1e-12;
     }
 
@@ -80,10 +80,11 @@ relaxationFactors
     {
         D 0.1;
         // // DFinal 0.1;
-        omegaV 0.1;
-        omegaC 0.1;
-        // T 0.9;
-        pG 0.1;
+        omegaV 0.8;
+        omegaC 0.8;
+        // // // omegaAir 0.1;
+        T 0.8;
+        pG 0.8;
         // rhoG 0.1;
     }
     equations
@@ -92,12 +93,12 @@ relaxationFactors
         // gammaSnGradCorr(omegaV)_0 0.5;
         // gammaSnGradCorr(T)_0 0.5;
         // snGradCorr(D) 0.5;
-        // omegaV 0.9;
-        // omegaC 0.9;
-        // D 0.9;
+        // omegaV 0.999;
+        // omegaC 0.999;
+        // D 0.9999;
         // T 0.9999;
         // DFinal 0.1;
-        // pG 0.3;
+        // pG 0.999;
         // DFinal 0.95;
     }
 }

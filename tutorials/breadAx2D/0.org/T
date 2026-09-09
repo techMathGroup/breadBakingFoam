@@ -22,7 +22,7 @@ internalField   uniform 300;
 boundaryField
 {
     // Zhang experiment
-    "(sides|bottom)"
+    sides
 	{
         type breadTMixed;
         refValue        uniform 300;
@@ -36,7 +36,25 @@ boundaryField
             outOfBounds warn;
         }
         // type fixedValue;
-        // value $internalField;
+        // value uniform 350;
+        // type zeroGradient;
+	}
+
+    bottom
+	{
+        type breadTMixed;
+        refValue        uniform 300;
+        refGradient     uniform 0;
+        valueFraction   uniform 0;
+        value           uniform 300;
+        alpha           10;
+        TInfTableDict   
+        {
+            file "$FOAM_CASE/constant/TInfTable";
+            outOfBounds warn;
+        }
+        // type fixedValue;
+        // value uniform 350;
         // type zeroGradient;
 	}
 	

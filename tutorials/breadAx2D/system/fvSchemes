@@ -72,6 +72,11 @@ snGradSchemes
 interpolationSchemes
 {
     default            linear;
+    // interpolate(impK) linear;
+    // default            upwind jLCorr;
+    // interpolate((jVE*(Cp*(T-TRef)))) linear;
+    // interpolate((Finv&jL)) SFCD jLCorr;
+    // interpolate(omegaV) upwind jLCorr;
 }
 fluxRequired
 {

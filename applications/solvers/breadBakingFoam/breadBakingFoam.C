@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
         while (pimple.loop())
         {
             iter++;
+            physics().setICorr(iter);
             if (withDeformation == 1)
             {
                 for (int i = 0; i < 1; ++i)
@@ -119,99 +120,138 @@ int main(int argc, char *argv[])
             alphaG = 1.0 - alphaD;
             alphaG.correctBoundaryConditions();
 
-            // -- evaporation source calculation 
-            #include "compEvRate.H"
+            int nIter = 1;
+            if (pimple.finalIter())
+            {
+                nIter = 1;
+            }
 
-            // -- update of the effective diffusivity, heat conductivity and permeability
-            #include "compEffProps.H"
+            for (int i = 0; i < nIter; ++i)
+            {
 
-            // -- solid mass conservation
-            // #include "alphaSEq.H"
+                // -- evaporation source calculation 
+                #include "compEvRate.H"
 
-            // -- closed-cell water vapor flux
-            jL = - dKoeffLucas * ((Finv.T() & fvc::grad(awPSat)));
-            // jL = - dKoeffLucas * (aw * (Finv.T() & fvc::grad(pSat)));
-            // jL = - dKoeffLucas * ((Finv.T() & fvc::grad(pV)));
-            jL.correctBoundaryConditions();
-            
-            // -- liquid water conservation
-            #include "phiLEq.H"
-            // omegaL = 1.0 - omegaS;
-            // omegaL.correctBoundaryConditions();
+                // -- update of the effective diffusivity, heat conductivity and permeability
+                #include "compEffProps.H"
 
-            // -- update moisture content
-            // moisture = omegaL / omegaS;
-            // moisture.correctBoundaryConditions();
+                // -- solid mass conservation
+                // #include "alphaSEq.H"
 
-            // -- fermentation source (kg/m3/s)
-            mCO2 = R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2));
-            mCO2.correctBoundaryConditions();
-            
-            // -- calculation of pre-coefficients for flux calculations
-            jGTilda = - rhoG * permGLViscG * Finv.T();
-            jGTilda.correctBoundaryConditions();
-
-            jDVTilda = - rhoG * DEffvM * Finv.T();
-            jDVTilda.correctBoundaryConditions();
-            jDCTilda = - rhoG * DEffcM * Finv.T();
-            jDCTilda.correctBoundaryConditions();
-            jDATilda = - rhoG * DEffaM * Finv.T();
-            jDATilda.correctBoundaryConditions();
-        
-            // -- correction of diffusive flux
-            jC = - ((jDVTilda & fvc::grad(omegaV)) + (jDCTilda & fvc::grad(omegaC)) + (jDATilda & fvc::grad(omegaAir)));
-            jC.correctBoundaryConditions();
-
-            jVE = omegaV * ((jGTilda & fvc::grad(pG)) + jC) + (jDVTilda & fvc::grad(omegaV)); 
-            jCE = omegaC * ((jGTilda & fvc::grad(pG)) + jC) + (jDCTilda & fvc::grad(omegaC)); 
-            jAE = omegaAir * ((jGTilda & fvc::grad(pG)) + jC) + (jDATilda & fvc::grad(omegaAir)); 
-            jVE.correctBoundaryConditions();
-            jCE.correctBoundaryConditions();
-            jAE.correctBoundaryConditions();
-
-            // -- overall gas-phase balance
-            #include "concEqG6.H"
-
-            // -- species equations
-            #include "concEqV5.H"
-            #include "concEqC5.H"
-
-            // -- last species
-            omegaAir = 1.0 - omegaV - omegaC;
-            omegaAir.correctBoundaryConditions();
-
-            // omegaC = 1.0 - omegaV;
-            // omegaC.correctBoundaryConditions();
+                // -- closed-cell water vapor flux
+                jL = - dKoeffLucas * ((Finv.T() & fvc::grad(awPSat)));
+                // jL = - dKoeffLucas * (aw * (Finv.T() & fvc::grad(pSat)));
+                // jL = - dKoeffLucas * ((Finv.T() & fvc::grad(pV)));
+                jL.correctBoundaryConditions();
                 
-            #include "EEqn4.H"
+                // -- liquid water conservation
+                #include "phiLEq.H"
+                // omegaL = 1.0 - omegaS;
+                // omegaL.correctBoundaryConditions();
 
-            // -- gas density calculation
-            rhoG = Mg / univR / T * pG;
-            rhoG.correctBoundaryConditions();
+                // -- update moisture content
+                // moisture = omegaL / omegaS;
+                // moisture.correctBoundaryConditions();
 
-            // -- gas properties calculation
-            Mg = 1.0 / (omegaV / molMV + omegaC / molMC + omegaAir / molMAir);
-            // Mg = 1.0 / (omegaV / molMV + omegaC / molMC);
-            Mg.correctBoundaryConditions();
+                // -- fermentation source (kg/m3/s)
+                mCO2 = R0*Foam::exp(-Foam::pow((T - Tm) / deltaT, 2));
+                mCO2.correctBoundaryConditions();
+                
+                // -- calculation of pre-coefficients for flux calculations
+                jGTilda = - rhoG * permGLViscG * Finv.T();
+                jGTilda.correctBoundaryConditions();
 
-            // -- molar fractions
-            yV = omegaV / molMV * Mg;
-            yV.correctBoundaryConditions();
-            yC = omegaC / molMC * Mg;
-            yC.correctBoundaryConditions();
-            yA = omegaAir / molMAir * Mg;
-            yA.correctBoundaryConditions();
+                jDVTilda = - rhoG * DEffvM * Finv.T();
+                jDVTilda.correctBoundaryConditions();
+                jDCTilda = - rhoG * DEffcM * Finv.T();
+                jDCTilda.correctBoundaryConditions();
+                jDATilda = - rhoG * DEffaM * Finv.T();
+                jDATilda.correctBoundaryConditions();
+            
+                // -- correction of diffusive flux
+                jC = - ((jDVTilda & fvc::grad(omegaV)) + (jDCTilda & fvc::grad(omegaC)) + (jDATilda & fvc::grad(omegaAir)));
+                jC.correctBoundaryConditions();
 
-            // -- gas density calculation
-            rhoG = Mg / univR / T * pG;
-            rhoG.correctBoundaryConditions();
+                jVE = omegaV * ((jGTilda & fvc::grad(pG)) + jC) + (jDVTilda & fvc::grad(omegaV)); 
+                jCE = omegaC * ((jGTilda & fvc::grad(pG)) + jC) + (jDCTilda & fvc::grad(omegaC)); 
+                jAE = omegaAir * ((jGTilda & fvc::grad(pG)) + jC) + (jDATilda & fvc::grad(omegaAir)); 
+                jVE.correctBoundaryConditions();
+                jCE.correctBoundaryConditions();
+                jAE.correctBoundaryConditions();
+
+                if (iter % 2 == 0)
+                {
+
+                    
+                    // -- overall gas-phase balance
+                    #include "concEqG6.H"
+                        
+                    #include "EEqn4.H"
+
+                    // -- gas density calculation
+                    rhoG = Mg / univR / T * pG;
+                    rhoG.correctBoundaryConditions();
+                    
+                    // -- species equations
+                    #include "concEqV5.H"
+                    #include "concEqC5.H"
+
+                    
+                    // -- last species
+                    omegaAir = 1.0 - omegaV - omegaC;
+                    omegaAir.correctBoundaryConditions();
+
+                }
+
+                else
+                {
+
+                    // -- species equations
+                    #include "concEqV5.H"
+                    #include "concEqC5.H"
+
+                    
+                    // -- last species
+                    omegaAir = 1.0 - omegaV - omegaC;
+                    omegaAir.correctBoundaryConditions();
+
+                    
+                    // -- overall gas-phase balance
+                    #include "concEqG6.H"
+                        
+                    #include "EEqn4.H"
+
+                    // -- gas density calculation
+                    rhoG = Mg / univR / T * pG;
+                    rhoG.correctBoundaryConditions();
+                }
+
+
+                // -- gas properties calculation
+                Mg = 1.0 / (omegaV / molMV + omegaC / molMC + omegaAir / molMAir);
+                // Mg = 1.0 / (omegaV / molMV + omegaC / molMC);
+                Mg.correctBoundaryConditions();
+
+                // -- molar fractions
+                yV = omegaV / molMV * Mg;
+                yV.correctBoundaryConditions();
+                yC = omegaC / molMC * Mg;
+                yC.correctBoundaryConditions();
+                yA = omegaAir / molMAir * Mg;
+                yA.correctBoundaryConditions();
+
+                // -- gas density calculation
+                rhoG = Mg / univR / T * pG;
+                rhoG.correctBoundaryConditions();
+
+            }
 
             
 
             // -- basic log
             if (debug >= 1)
             {
-                Info << "phiL   : res: " << phiLResidual << " Min (rhoD): " << min(rhoD).value() << ", max (rhoD): " << max(rhoD).value() << "." << endl;
+                Info << "phiL   : res: " << phiLResidual << " Min (moisture): " << min(moisture).value() << ", max (moisture): " << max(moisture).value() << "." << endl;
                 Info << "pG     : res: " << pResidual    << " Min (pG): " << min(pG).value() << ", max (pG): " << max(pG).value() << "." << endl;
                 Info << "T      : res: " << TResidual    << " Min (T): " << min(T).value() << ", max (T): " << max(T).value() << "." << endl;
                 Info << "omV    : res: " << omegaVResidual << " Min (omegaV): " << min(omegaV).value() << ", max (omegaV): " << max(omegaV).value() << "." << endl;

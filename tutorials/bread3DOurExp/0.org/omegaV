@@ -16,7 +16,7 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 8e-3;
+internalField   uniform 6e-3;
 
 boundaryField
 {
@@ -43,9 +43,9 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffvM;
-        type zeroGradient;
+        // type zeroGradient;
         // type fixedValue;
-        // value $internalField;
+        // value $internalFiesld;
     }
     "(wedgeZ0|wedgeZE)"
 	{
@@ -71,7 +71,7 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffvM;
-        type zeroGradient;
+        // type zeroGradient;
         // type fixedValue;
         // value $internalField;
         // type zeroGradient;
@@ -94,7 +94,7 @@ boundaryField
             outOfBounds warn;
         }
         DFieldName      DEffvM;
-        type zeroGradient;
+        // type zeroGradient;
         // type fixedValue;
         // value $internalField;
         // type zeroGradient;

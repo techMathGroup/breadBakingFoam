@@ -1,6 +1,46 @@
 // volVectorField preKoeff1 = - J * (Finv & (( (alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / DG) + delta * dHConst / lambdaS * dPSatdT )) * Finv.T())));
 // ((omegaV * jDVTilda & fvc::grad(omegaV)) + (omegaC * jDCTilda & fvc::grad(omegaC)) + (omegaAir * jDATilda & fvc::grad(omegaAir)));
 
+// surfaceScalarField jLVap = 0*jLCorr;
+
+// if (zhang)
+// {
+//     forAll(jLCorr.boundaryField(), patchI)
+//     {
+//         if (jLCorr.boundaryField()[patchI].type() == "calculated")
+//         {
+//             scalarField& omegaVP = omegaV.boundaryFieldRef()[patchI];
+//             scalarField& alphaGP = alphaG.boundaryFieldRef()[patchI];
+//             scalarField& yVP = yV.boundaryFieldRef()[patchI];
+//             scalarField& rhoGP = rhoG.boundaryFieldRef()[patchI];
+//             scalarField& magSfP = SfMag.boundaryFieldRef()[patchI];
+//             scalarField& dKoeffLucasP = dKoeffLucas.boundaryFieldRef()[patchI];
+//             scalarField& jLVapP = jLVap.boundaryFieldRef()[patchI];
+//             scalarField& alphaP = alpha.boundaryFieldRef()[patchI];
+
+//             forAll(jLVapP, faceI)
+//             {
+//                 // dKoeffLucasP[faceI] = 0;
+//                 if (omegaVP[faceI] < SMALL)
+//                 {
+//                     // jLCorrIntoLiquidP[faceI] = -0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
+//                     // jLCorrIntoLiquidP[faceI] = 0;
+//                     jLVapP[faceI] = 0;
+//                 }
+//                 if (omegaVP[faceI] >= SMALL)
+//                 {
+//                     // jLCorrIntoLiquidP[faceI] = 0;
+//                     // jLCorrP[faceI] = 0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI] - jPgCorrP[faceI] * omegaVP[faceI];
+//                     // jLVapP[faceI] = alphaP[faceI] * 0.01 * rhoGP[faceI] * (omegaVP[faceI]) * magSfP[faceI];
+//                     jLVapP[faceI] =  0.01 * rhoGP[faceI] * (omegaVP[faceI] * alphaGP[faceI]) * magSfP[faceI];
+//                     // jLVapP[faceI] = alphaP[faceI] * 0.01 * rhoGP[faceI] * (yVP[faceI]) * magSfP[faceI];
+//                 }
+//                 // jPgCorrP[faceI] = 0.01 * MgP[faceI] / univR.value() * (pGP[faceI] / TP[faceI] - 1e5 / 463) * magSfP[faceI];
+//             }
+//         }
+//     }
+// }
+
 // -- conservation of the water wapor
 fvScalarMatrix omegaVEq
 (
@@ -44,13 +84,13 @@ fvScalarMatrix omegaVEq
     // - fvc::div(fvc::interpolate(J * omegaV) * jPgCorr)
 
 
-    - fvc::div(fvc::interpolate(J) * jLCorr)
+    // - fvc::div(fvc::interpolate(J) * jLCorr)
     // + fvc::laplacian(J * (Finv & Finv.T()) * dKoeffLucas, pV)
     // + fvc::div(fvc::interpolate(omegaV * J) * jLCorr)
 
     // + fvc::div(fvc::interpolate(omegaV * J) * jLCorr)
 
-    // + fvc::div(fvc::interpolate(omegaV * J) * jLCorr)
+    // - fvc::div(fvc::interpolate(omegaV * J) * jLVap)
 
         // - fvc::div(J * (Finv & jL))
 
