@@ -50,7 +50,9 @@ for expNum in range(1):
     DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
     # Dl = 6e-10  # -- liquid water difusivity in the dough
     # Dl = 1.6e-9  # -- liquid water difusivity in the dough
-    Dl = 8e-12  # -- liquid water difusivity in the dough
+    # Dl = 5e-11  # -- liquid water difusivity in the dough
+    # Dl = 5e-11  # -- liquid water difusivity in the dough
+    Dl = 1e-10  # -- liquid water difusivity in the dough
     tortOpen = 2.4   # -- tortuosity
     tortClosed = 70   # -- tortuosity (not used)
 
@@ -76,11 +78,17 @@ for expNum in range(1):
     # rhoS = 764
     # rhoS = 500
     rhoS = 940
+    # rhoS = 970
+    # rhoS = 1025
+
+    alphaD0 = 0.84
+    if not kynuti:
+        alphaD0 = 0.43
 
     '''Evaporation and CO2 generation parameters'''
     # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.03
-    kMPCClosed = 0.03
+    kMPCOpen = 0.01
+    kMPCClosed = 0.01
 
     # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
     evCoef1 = -0.0071
@@ -100,23 +108,30 @@ for expNum in range(1):
     withDeformation = 1 # -- turn on (1) /off (0) deformation
     if nonDeform:
         withDeformation = 0
-    nu = 0.15   # -- Poisson ratio
+    nu = 0.14   # -- Poisson ratio
     # nu = 0.49   # -- Poisson ratio
     E = 30000   # -- Youngs modulus
     # mu0Raw = 230   # kappa = 2*mu*nu/(1-2*nu)  
-    mu0Raw = 180   # kappa = 2*mu*nu/(1-2*nu)  
-    muV1Raw = 5000 
-    bakedCoeff = 18
-    tau1 = 2
+    mu0Raw = 170   # kappa = 2*mu*nu/(1-2*nu)  
+    # mu0Raw = 130   # kappa = 2*mu*nu/(1-2*nu)  
+    muV1Raw = 7400 
+    # muV1Raw = 4.87e3 
+    bakedCoeff = 25
+    tau1 = 1.6
+    # tau1 = 0.2
+
+    # muV1Raw = 7000
+    # tau1 = 1
 
     '''Numerics and time control'''
     if kynuti:
         timeKynuti = 2400
+        # timeKynuti = 200
     else:
-        timeKynuti = 1
-    timeStepKynuti = 40 # -- computational time step
+        timeKynuti = 200
+    timeStepKynuti = 20 # -- computational time step
     timeStepSim = 0.5  # -- computational time step
-    timeStepSimNonDef = 1  # -- computational time step
+    timeStepSimNonDef = 0.5  # -- computational time step
     plusTime1 = 450 # -- how long to run with deformation
     # plusTime1 = 800 # -- how long to run with deformation
     plusTime2 = 800 # -- how long to run without deformation
@@ -128,8 +143,8 @@ for expNum in range(1):
 
     writeInt = 30   # -- how often to write results
     writeIntKynuti = 200    # -- how often to write results during kynuti
-    nIterKynuti = 400  # -- number of iterations in each time step
-    nIterSim = 150  # -- number of iterations in each time step
+    nIterKynuti = 200  # -- number of iterations in each time step
+    nIterSim = 300  # -- number of iterations in each time step
     nIterSimNonDef = 50  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
     # dynSolver = 'breadBakingFoamScratch'   # -- used solver
@@ -145,35 +160,41 @@ for expNum in range(1):
     pGRelaxKyn = 1
 
     # -- deformation simulation
-    omegaVRelax = 0.8
-    omegaCRelax = 0.8
-    pGRelax = 0.8
-    DRelax = 0.2
+    omegaVRelax = 0.2
+    omegaCRelax = 0.2
+    pGRelax = 0.2
+    DRelax = 1
 
     # -- non-deformation simulation
-    pGRelaxNonDef = 0.1
-    omegaVRelaxNonDef = 0.1
-    omegaCRelaxNonDef = 0.1
+    pGRelaxNonDef = 1
+    omegaVRelaxNonDef = 0.2
+    omegaCRelaxNonDef = 0.2
     TNonDef = 0.1
 
     '''Boundary and initial conditions'''
     TKynuti = 301
     TStart = 297
     TTop = 200
-    TBottom = 210
+    TBottom = 200
 
 
     kMSidesOmega = 0.01 # -- legacy (not used)
-    kMBottomOmega = 0.005    # -- legacy (not used)
+    kMBottomOmega = 0.01    # -- legacy (not used)
     kMTop = 3e-3   # -- legacy (not used) external mass transfer coeficient
-    alphaG = 23 # -- external heat transfer coeficient 
-    alphaGBottom = 23 # -- external heat transfer coeficient 
+    alphaG = 18 # -- external heat transfer coeficient 
+    alphaGBottom = 18 # -- external heat transfer coeficient 
+
+    alphaG = 10 # -- external heat transfer coeficient 
+    alphaGBottom = 10
+    
+     # -- external heat transfer coeficient 
 
     '''Post-processing'''
     fig, axs = plt.subplots(1, 1, figsize=(16, 9))  # figure with plots
 
-    outFolder = '../ZZ_cases/2026/V30/exp%d_nonDef_%s/V58_TDep_diffAvailSurf_deltaL_TBotH_TDep_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
-    # baseCaseDir = '../ZZ_cases/2026/V29/exp%d_nonDef_%s/V02_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
+    outFolder = '../ZZ_cases/2026/V30/exp%d_nonDef_%s/V19_mechFrompaper_mu0_%g_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), mu0Raw, Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
+    # baseCaseDir = '../ZZ_cases/2026/V30/exp%d_nonDef_%s/V23_losingMoisture_Dl_%g_kOp_%g_kCl_%g_nu_%g_mu0_%g_muV1_%g_mS_%g_lambda_%g_kH_%g_kHB_%g_r0_%g_per_%g/' % (expNum, str(nonDeform), Dl, kMPCOpen, kMPCClosed, nu, mu0Raw, muV1Raw, mSStep, lambdaS, alphaG, alphaGBottom, R0, perm)
+
 
     # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
     # -- create OpenFOAMCase object to change values in dictionaries
@@ -244,7 +265,7 @@ for expNum in range(1):
         # if not nonDeform:
         fl.writelines("\t(0\t%f)\n"%TKynuti)
         fl.writelines("\t(%d\t%f)\n"%(timeKynuti, TKynuti))
-        # bakingCurve[:, 1] = TTop
+        bakingCurve[:, 1] = TTop
         for i in range(bakingCurve.shape[0]):
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1]))
             fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1] + 273.15))
@@ -258,7 +279,7 @@ for expNum in range(1):
         # if not nonDeform:
         fl.writelines("\t(0\t%f)\n"%TKynuti)
         fl.writelines("\t(%d\t%f)\n"%(timeKynuti, TKynuti))
-        # bakingCurve[:, 1] = TBottom
+        bakingCurve[:, 1] = TBottom
         for i in range(bakingCurve.shape[0]):
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, bakingCurve[i,1]))
             # fl.write("\t(%.5g\t%.5g)\n"%(bakingCurve[i,0]*60+timeKynuti+0.1, 10 + bakingCurve[i,1] + 273.15))
@@ -275,6 +296,7 @@ for expNum in range(1):
             ['constant/transportProperties', 'permGLViscG', str(perm), ''],
             ['constant/transportProperties', 'tortOpen', str(tortOpen), ''],
             ['constant/transportProperties', 'tortClosed', str(tortClosed), ''],
+            ['constant/transportProperties', 'alphaD0', str(alphaD0), ''],
         ]
     )
 
@@ -648,4 +670,4 @@ for expNum in range(1):
 
         # plt.savefig(baseCase.dir + 'postProcessingPlot.png')
                                             
-        saveFigPostProcess(outFolder)
+        saveFigPostProcess(timeKynuti, outFolder)

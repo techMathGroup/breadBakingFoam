@@ -43,8 +43,8 @@ arcL = 0.008    # -- length of the arc at the side of the bread
 
 '''Internal transport parameters'''
 DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-Dl = 8e-12  # -- liquid water difusivity in the dough
-tortOpen = 2   # -- tortuosity
+Dl = 1e-10  # -- liquid water difusivity in the dough
+tortOpen = 2.4   # -- tortuosity
 tortClosed = 70   # -- tortuosity
 
 # -- heat conductivity of the dough material with porosity 0, i.e. the 
@@ -54,7 +54,8 @@ lambdaS = 0.42
 
 # -- closed-cell bread intristic permeability
 # perm = 1.3e-14  # -- bread permeability 
-perm = 3.7e-14  # -- bread permeability 
+# perm = 3.7e-14  # -- bread permeability 
+perm = 5e-14  # -- bread permeability 
 # perm = 2e-14  # -- bread permeability 
 
 # -- heat capacities for the individual phases
@@ -70,8 +71,8 @@ rhoS = 507  # -- solid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPCOpen = 0.07
-kMPCClosed = 0.5
+kMPCOpen = 0.01
+kMPCClosed = 0.01
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
 evCoef1 = -0.0071
@@ -91,27 +92,27 @@ deltaT = 14
 '''Mechanical properties'''
 withDeformation = 1 # -- turn on (1) /off (0) deformation
 # withDeformation = 0 # -- turn on (1) /off (0) deformation
-nu = 0.15   # -- Poisson ratio
+nu = 0.14   # -- Poisson ratio
 E = 30000   # -- Youngs modulus
 mu0Raw = 230    # kappa = 2*mu*nu/(1-2*nu)  
-muV1Raw = 5000
+muV1Raw = 7400
 bakedCoeff = 8
-tau1 = 2
+tau1 = 1.6
 
 
 '''Numerics'''
-timeStep = 1    # -- computational time step
+timeStep = 0.2    # -- computational time step
 plusTime1 = 360 # -- how long to run with deformation
 plusTime2 = 540 # -- how long to run without deformation
 writeInt = 10   # -- how often to write results
-nIter = 50  # -- number of iterations in each time step
+nIter = 200  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
 nCores = 4 # -- number of cores to run the simulation
 
 TRelaxAfter = 0.3
 
 # -- relaxation factors
-DRelax = 0.5
+DRelax = 0.3
 DFinalRelax = 1
 
 '''Boundary conditions'''
@@ -121,7 +122,7 @@ alphaG = 10 # -- external heat transfer coeficient
 '''Post-processing'''
 fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
 
-outFolder = '../ZZ_cases/00_breads/031_TDep_MoistCalc_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
+outFolder = '../ZZ_cases/00_breads/018_coarse_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
 # baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
 
 
