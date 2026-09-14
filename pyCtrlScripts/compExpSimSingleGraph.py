@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Python script to plot first experiment vs first simulation for first 4 temperatures
+# Python script to plot compare experimental temperatures with simulation
 
 import os 
 import pandas as pd
@@ -9,18 +9,6 @@ from OF_caseClass import *
 import matplotlib.pyplot as plt
 from expDict import *
 from myAddFcs import *
-
-# kynuti = 2400
-# kynuti = 1100
-# kynuti = 600
-# kynuti = 240
-# kynuti = 300
-
-# simDir = '../ZZ_cases/2026/V26/exp0_nonDef_False/V63_takeC_litlealphaG_Dl8e11_kMOpen_0.1_Close_0.1_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_10_lambda_0.42_tau_10_alphaG_9_alphaGBottom_9_kMSidesOmega0.01_kMBottomOmega_0.01_r0_3.3e-05_perm_1.5e-14/'
-# simDir = '../ZZ_cases/2026/V26/exp0_nonDef_False/V54_testTemps__kMOpen_0.11_Close_0.11_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_10_lambda_0.42_tau_10_alphaG_9_alphaGBottom_9_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_1.5e-15/'
-# simDir = '../ZZ_cases/2026/V26/exp0_nonDef_False/V15_lowalphag_lowDl_TnonConst_0.05_Close_0.05_E_3000_nu_0.49_mSStep_0.001_DFree_2.6e-05_tortOpen_3_tortClosed_10_lambda_0.42_tau_10_alphaG_7_alphaGBottom_7_kMSidesOmega0.01_kMBottomOmega_0.01_r0_1.1e-05_perm_1.5e-15/'
-# simDir = '../ZZ_cases/2026/V19/exp0_nonDef_False/lam3KMPC_0.1_E_3000_nu_0.49_mSStep_0.0015_DFree_2e-05_tort_10_lambda_0.55_tau_10_alphaG_20_alphaGBottom_22_kMSidesOmega0.015_kMBottomOmega_0.015_r0_8e-05_perm_1e-14/'
-
 
 
 def save_for_latex(filename, x, y, header="Time Value"):
@@ -213,7 +201,3 @@ def saveFigPostProcess(kynuti, simDir):
     # plt.savefig(os.path.join(simDir, 'exp_vs_sim3.png'))
     plt.savefig(os.path.join(simDir, 'exp_vs_sim4.png'))
     # plt.savefig(os.path.join(simDir, 'exp_vs_sim2.png'))
-
-
-# simDir = '../ZZ_cases/2026/V29/exp0_nonDef_False/V02_Dl_1.5e-09_kOp_0.04_kCl_0.07_nu_0.15_mu0_230_muV1_5000_mS_0.001_lambda_0.42_kH_24_kHB_24_r0_0.0018_per_9e-16/'
-# saveFigPostProcess(simDir)

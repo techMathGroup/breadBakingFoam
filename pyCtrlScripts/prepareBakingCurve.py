@@ -1,6 +1,10 @@
-# -- python script to create baking curve according to parameters
-# -- INTERACTIVE VERSION with sliders
+#!/usr/bin/python
 
+#FILE DESCRIPTION=======================================================
+
+# -- python script to create baking curve according to parameters
+
+# IMPORTS===============================================================
 import numpy as np 
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button

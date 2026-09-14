@@ -1,7 +1,12 @@
 #!/usr/bin/python
 
-# Python script to plot first experiment vs first simulation for first 4 temperatures
+#FILE DESCRIPTION=======================================================
 
+# Python script to post-process bread baking simulations 
+# -- compare multiple experiments with simulation in a several graphs
+# -- in development
+
+#IMPORTS================================================================
 import os 
 import pandas as pd
 import numpy as np

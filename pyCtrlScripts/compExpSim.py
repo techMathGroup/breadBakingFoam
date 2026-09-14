@@ -3,6 +3,8 @@
 #FILE DESCRIPTION=======================================================
 
 # Python script to post-process bread baking simulations 
+# -- compare multiple experiments with multiple simulations in a several graphs
+# -- legacy
 
 #IMPORTS================================================================
 import os 

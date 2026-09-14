@@ -71,8 +71,8 @@ rhoS = 507  # -- solid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPCOpen = 0.01
-kMPCClosed = 0.01
+kMPCOpen = 0.012
+kMPCClosed = 0.012
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
 evCoef1 = -0.0071
@@ -105,7 +105,7 @@ timeStep = 0.2    # -- computational time step
 plusTime1 = 360 # -- how long to run with deformation
 plusTime2 = 540 # -- how long to run without deformation
 writeInt = 10   # -- how often to write results
-nIter = 200  # -- number of iterations in each time step
+nIter = 40  # -- number of iterations in each time step
 dynSolver = 'breadBakingFoam'   # -- used solver
 nCores = 4 # -- number of cores to run the simulation
 

@@ -1,3 +1,10 @@
+#!/usr/bin/python
+
+#FILE DESCRIPTION=======================================================
+
+# Python database with experimental data
+
+# IMPORTS===============================================================
 import os
 import pandas as pd
 import numpy as np

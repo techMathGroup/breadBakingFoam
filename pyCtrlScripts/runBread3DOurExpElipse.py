@@ -3,7 +3,7 @@
 #FILE DESCRIPTION=======================================================
 
 # Python script to set up and run bread baking simulations according to 
-# Zhang et al. https://doi.org/10.1002/aic.10518
+# custom experiments
 
 # IMPORTS===============================================================
 import sys

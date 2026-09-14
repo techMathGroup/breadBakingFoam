@@ -2,8 +2,8 @@
 
 #FILE DESCRIPTION=======================================================
 
-# Python script to set up and run bread baking simulations according to 
-# Zhang et al. https://doi.org/10.1002/aic.10518
+# Python script to set up and run and optimize parameters in bread baking simulations from Zhang et al. https://doi.org/10.1002/aic.10518
+# -- legacy
 
 # IMPORTS===============================================================
 import sys

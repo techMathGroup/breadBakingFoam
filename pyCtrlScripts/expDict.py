@@ -1,3 +1,7 @@
+#!/usr/bin/python
+
+# Python database with experimental data
+
 import os
 import pandas as pd
 import numpy as np
