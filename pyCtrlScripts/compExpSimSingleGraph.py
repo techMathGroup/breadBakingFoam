@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from expDict import *
 from myAddFcs import *
 
-kynuti = 2400
+# kynuti = 2400
 # kynuti = 1100
 # kynuti = 600
 # kynuti = 240
@@ -27,7 +27,7 @@ def save_for_latex(filename, x, y, header="Time Value"):
     data = np.column_stack((x, y))
     np.savetxt(filename, data, header=header, comments='', fmt='%.6f', delimiter='\t')
 
-def saveFigPostProcess(simDir):
+def saveFigPostProcess(kynuti, simDir):
 
     mLInit = 159.9/2
     mSInit = 336.6/2
@@ -82,7 +82,7 @@ def saveFigPostProcess(simDir):
     os.makedirs(out_dir, exist_ok=True)
 
     # 4. Create subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 8))
     colorLst = ['r', 'g', 'b', 'm']
 
     # --- Plot 1: Temperatures ---
@@ -124,10 +124,12 @@ def saveFigPostProcess(simDir):
     # loss_sim = (weight_sim_data[110] - weight_sim_data)
     # loss_sim = (weight_sim_data[10] - weight_sim_data)
     loss_sim = (weight_sim_data[0] - weight_sim_data)
-    y_sim_w = (mLInit - loss_sim) / mSInit
-    # ax2.plot(x_sim_w, y_sim_w, '--', color='k', linewidth=2, label='Sim Moisture')
+    y_sim_w = rhoData * 72 * 1000
+    ax3.plot(x_sim_w, y_sim_w, '--', color='k', linewidth=2, label='Sim Moisture')
+    ax3.plot(expData['weightData'][:,0], expData['weightData'][:,1]-expData['weightData'][5,1]+y_sim_w[0], '--', color='k', linewidth=2, label='Sim Moisture')
     ax2.plot(simData['weight'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1], '--', color='k', linewidth=2, label='Sim Moisture')
     save_for_latex(os.path.join(out_dir, 'moisture_sim.dat'), x_sim_w, y_sim_w, "Time(min)\tMoistureRatio")
+    ax3.set_xlim(0, 25)
 
     ax2.set_xlabel('Time (min)', fontsize=12)
     ax2.set_ylabel('Moisture (dry basis)', fontsize=12)
@@ -141,6 +143,10 @@ def saveFigPostProcess(simDir):
     t_unified = simData['sim1'][:,0] / 60 - kynuti / 60
     unified_data = [t_unified]
     header = ["Time(min)"]
+
+    # x_oven = expData[f'data0'][:,0]
+    # y_oven = expData[f'data0'][:,1]
+    # y_oven = np.interp(t_unified, x_oven, y_oven)
 
     for j in range(4):
         x_sim = simData[f'sim{j+1}'][:,0] / 60 - kynuti / 60
