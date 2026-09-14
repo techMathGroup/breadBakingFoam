@@ -240,4 +240,27 @@ XCO2InL.correctBoundaryConditions();
 
 XCO2InL.relax();
 
+fvScalarMatrix rhoDCEqn
+(
+    // alphaD0 * fvm::ddt(rhoD, omegaL, XCO2InL)
+    alphaD0 * fvm::ddt(rhoDC)
+
+    ==
+
+    - J * evRate
+    - J * mCO2
+
+    // - mCO2Dis
+);
+
+// Info << "Min (XCO2InL): " << min(XCO2InL).value() << ", max (XCO2InL): " << max(XCO2InL).value() << "." << endl;
+
+rhoDCEqn.relax();
+
+rhoDCEqn.solve().initialResidual();
+
+rhoDC.correctBoundaryConditions();
+
+rhoDC.relax();
+
 // ************************************************************************* //

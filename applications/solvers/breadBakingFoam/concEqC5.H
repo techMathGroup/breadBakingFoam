@@ -60,9 +60,5 @@ omegaC.relax();
 
 omegaC.correctBoundaryConditions();
 
-// forAll(omegaC, cellI)
-// {
-//     omegaC[cellI] = min(max(omegaC[cellI], SMALL), 1.0 - SMALL);
-// }
 
 // ************************************************************************* //

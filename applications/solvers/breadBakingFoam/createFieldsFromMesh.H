@@ -26,6 +26,19 @@ volScalarField omegaC
     physics->mesh()
 );
 
+volScalarField rhoDC
+(
+    IOobject
+    (
+        "rhoDC",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    physics->mesh()
+);
+
 // volScalarField omegaC
 // (
 //     IOobject
