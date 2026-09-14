@@ -20,14 +20,19 @@ experiments = [
         'hLoafKynuti':4.8e-2,
         # 'rLoafKynuti': 4.4e-2,
         # 'rLoafKynuti': 4.7e-2,
-        'rLoafKynuti1': 5e-2,
-        'rLoafKynuti2': 5e-2,
+        'rLoafKynuti1': 4.35e-2,
+        'rLoafKynuti2': 4.55e-2,
         'up': 0,
         'probes': np.array([
-            [4.45e-2, 2.89e-2, 0],
-            [4.35e-2, 0, 0],
-            [3.36e-2, 0, -3.63e-2],
-            [1.46e-2, 0, 3.72e-2],
+            [4.45e-2, 2.89e-2, 1e-3],
+            [3.36e-2, 1e-3, 3.63e-2],
+            [1.46e-2, 1e-3, 3.72e-2],
+            [2.54e-2, 1e-3, 1e-3],
+
+            # [4.25e-2, 2.89e-2, 0.10e-2],
+            # [4.17e-2, 5.89e-2, 0.10e-2],
+            # [1.37e-2, 0.01e-2, 7.53e-2],
+            # [1.46e-2, 1e-3, 3.72e-2],
         ]),
         'expDispl': np.array(
             [
@@ -36,7 +41,7 @@ experiments = [
             ]
         ),
         # 'thermoOffset': np.array([0, 1.13, -0.31])*1e-2, 
-        'thermoOffset': np.array([0, 1.13, -0.31])*1e-2, 
+        'thermoOffset': np.array([0, 0, 0])*1e-2, 
     },
 ]
 
