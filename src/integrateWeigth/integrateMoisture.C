@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i < timeDirs.size(); i++)
     {
         runTime.setTime(timeDirs[i], timeDirs.size()-1);
-        volScalarField moisture
+        volScalarField rhoDC
         (
             IOobject
                 (
                 // "moisturePostProcess", 
-                "moisture", 
+                "rhoDC", 
                 runTime.timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -130,27 +130,80 @@ int main(int argc, char *argv[])
             ),
             mesh
         );
+        volScalarField alphaD
+        (
+            IOobject
+                (
+                "alphaD", 
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh
+        );
+
+        // volScalarField alphaG
+        // (
+        //     IOobject
+        //         (
+        //         "alphaG", 
+        //         runTime.timeName(),
+        //         mesh,
+        //         IOobject::MUST_READ,
+        //         IOobject::NO_WRITE
+        //     ),
+        //     mesh
+        // );
+
+        // volScalarField rhoG
+        // (
+        //     IOobject
+        //         (
+        //         "rhoG", 
+        //         runTime.timeName(),
+        //         mesh,
+        //         IOobject::MUST_READ,
+        //         IOobject::NO_WRITE
+        //     ),
+        //     mesh
+        // );
+
+        // volScalarField omegaV
+        // (
+        //     IOobject
+        //         (
+        //         "omegaV", 
+        //         runTime.timeName(),
+        //         mesh,
+        //         IOobject::MUST_READ,
+        //         IOobject::NO_WRITE
+        //     ),
+        //     mesh
+        // );
 
         // Compute local partial sums
-        // scalar localSum = gSum(moisture.internalField() * J.internalField() * mesh.V().field());
-        scalar localSum = sum(moisture.internalField()  * mesh.V().field());
-        // scalar localSum = sum(moisture.internalField()  * mesh.V().field() * J.internalField());
-        // scalar localSum = sum(moisture.internalField()   * mesh.V().field());
+        scalar localSum = sum(J.internalField() * alphaD.internalField() * rhoDC.internalField() * mesh.V().field());
 
 
-        // scalar totalVol  = sum(mesh.V().field() * J.internalField());
-        scalar totalVol  = sum(mesh.V().field() );
+        scalar totalVol  = sum(mesh.V().field());
 
         // Parallel reduction
+        // scalar globalSum = returnReduce(localSum, sumOp<scalar>());
+        // scalar globalVol  = returnReduce(totalVol, sumOp<scalar>());
         scalar globalSum = localSum;
         Foam::reduce(globalSum, Foam::sumOp<scalar>());
         scalar globalVol  = totalVol;
         Foam::reduce(globalVol, Foam::sumOp<scalar>());
+        // rhoD.correctBoundaryConditions();
 
-        scalar avg = globalSum / globalVol;
+        // scalar avg = globalSum / globalVol;
+        // scalar avg = globalSum;
         // scalar avgB = globalSumB / globalVol;
 
-        Info << "Time = " << runTime.timeName() << "; Moisture average = " << avg << endl;
+        // Info << "Time = " << runTime.timeName() << "; rhoD average = " << avg << endl;
+        // Info << "Time = " << runTime.timeName() << "; weight = " << globalSum << "total volume = " << globalVol << endl;
+        Info << "Time = " << runTime.timeName() << "; weight = " << globalSum <<endl;
 
     }
     Info << "End" << endl;

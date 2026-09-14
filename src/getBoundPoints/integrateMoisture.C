@@ -104,13 +104,14 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < timeDirs.size(); i++)
     {
+        Info << "Time = " << runTime.timeName() << endl;
         runTime.setTime(timeDirs[i], timeDirs.size()-1);
-        volScalarField moisture
+        volVectorField D
         (
             IOobject
                 (
                 // "moisturePostProcess", 
-                "moisture", 
+                "D", 
                 runTime.timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -118,11 +119,12 @@ int main(int argc, char *argv[])
             ),
             mesh
         );
-        volScalarField J
+
+        volScalarField rhoG
         (
             IOobject
                 (
-                "J", 
+                "rhoG", 
                 runTime.timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -131,26 +133,110 @@ int main(int argc, char *argv[])
             mesh
         );
 
+        // Create output directory and file once per time step
+        fileName outputDir = runTime.path();
+        mkDir(outputDir/"../Shape");
+        fileName outputFile = outputDir/"../Shape/D_values_" + runTime.timeName() + ".dat";
+        bool intro = false;
+
+        // Initialize file (clear it on first write)
+        if (Pstream::master())
+        {
+            std::ofstream initFile(outputFile.c_str(), std::ios::trunc);
+            initFile.close();
+        }
+
+        // surfaceVectorField Cf = mesh.Cf();
+
+        forAll(D.boundaryField(), patchI)
+        {
+            if (rhoG.boundaryField()[patchI].type() == "calculated")
+            {
+                vectorField& DP = D.boundaryFieldRef()[patchI];
+                const vectorField& Cf = mesh.boundary()[patchI].Cf();
+                DP = DP + Cf;
+                
+                labelList sizes(Pstream::nProcs());
+                sizes[Pstream::myProcNo()] = DP.size();
+                Pstream::gatherList(sizes);
+                Pstream::scatterList(sizes);
+                
+                if (Pstream::master())
+                {
+                    Info << "Writing patch " << patchI << " to: " << outputFile << endl;
+                    
+                    std::ofstream os(outputFile.c_str(), std::ios::app);
+
+                    if (!intro)
+                    {
+                        os << "x" << "\t" << "y" << "\t" << "z" << "\n";
+                        intro = true;
+                    }
+                    // os << "x" << "\t" << "y" << "\t" << "z" << "\n";
+                    
+                    if (!os.good())
+                    {
+                        FatalErrorInFunction
+                            << "Cannot open file: " << outputFile
+                            << exit(FatalError);
+                    }
+                    
+                    forAll(sizes, procI)
+                    {
+                        vectorField procDP = DP;
+                        if (procI != Pstream::myProcNo())
+                        {
+                            procDP.resize(sizes[procI]);
+                            IPstream fromProc(UPstream::commsTypes::scheduled, procI);
+                            fromProc >> procDP;
+                        }
+                        
+                        forAll(procDP, faceI)
+                        {
+                            os << procDP[faceI][0] << "\t" << procDP[faceI][1] << "\t" << procDP[faceI][2] << "\n";
+                        }
+                    }
+                    os.close();
+                }
+                else
+                {
+                    OPstream toMaster(UPstream::commsTypes::scheduled, Pstream::masterNo());
+                    toMaster << DP;
+                }
+            }
+        }
+        rhoG.correctBoundaryConditions();
+        // volScalarField J
+        // (
+        //     IOobject
+        //         (
+        //         "J", 
+        //         runTime.timeName(),
+        //         mesh,
+        //         IOobject::MUST_READ,
+        //         IOobject::NO_WRITE
+        //     ),
+        //     mesh
+        // );
+
         // Compute local partial sums
         // scalar localSum = gSum(moisture.internalField() * J.internalField() * mesh.V().field());
-        scalar localSum = sum(moisture.internalField()  * mesh.V().field());
-        // scalar localSum = sum(moisture.internalField()  * mesh.V().field() * J.internalField());
+        // scalar localSum = sum(moisture.internalField()  * J.internalField() * mesh.V().field());
         // scalar localSum = sum(moisture.internalField()   * mesh.V().field());
 
 
-        // scalar totalVol  = sum(mesh.V().field() * J.internalField());
-        scalar totalVol  = sum(mesh.V().field() );
+        // scalar totalVol  = sum(mesh.V().field() );
 
         // Parallel reduction
-        scalar globalSum = localSum;
-        Foam::reduce(globalSum, Foam::sumOp<scalar>());
-        scalar globalVol  = totalVol;
-        Foam::reduce(globalVol, Foam::sumOp<scalar>());
+        // scalar globalSum = localSum;
+        // Foam::reduce(globalSum, Foam::sumOp<scalar>());
+        // scalar globalVol  = totalVol;
+        // Foam::reduce(globalVol, Foam::sumOp<scalar>());
 
-        scalar avg = globalSum / globalVol;
+        // scalar avg = globalSum / globalVol;
         // scalar avgB = globalSumB / globalVol;
 
-        Info << "Time = " << runTime.timeName() << "; Moisture average = " << avg << endl;
+        // Info << "Time = " << runTime.timeName() << "; Moisture average = " << avg << endl;
 
     }
     Info << "End" << endl;

@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i < timeDirs.size(); i++)
     {
         runTime.setTime(timeDirs[i], timeDirs.size()-1);
-        volScalarField moisture
+        volScalarField alphaG
         (
             IOobject
                 (
                 // "moisturePostProcess", 
-                "moisture", 
+                "alphaG", 
                 runTime.timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -133,13 +133,11 @@ int main(int argc, char *argv[])
 
         // Compute local partial sums
         // scalar localSum = gSum(moisture.internalField() * J.internalField() * mesh.V().field());
-        scalar localSum = sum(moisture.internalField()  * mesh.V().field());
-        // scalar localSum = sum(moisture.internalField()  * mesh.V().field() * J.internalField());
-        // scalar localSum = sum(moisture.internalField()   * mesh.V().field());
+        // scalar localSum = sum(moisture.internalField()  * J.internalField() * mesh.V().field());
+        scalar localSum = sum(alphaG.internalField()  * J.internalField() * mesh.V().field());
 
 
-        // scalar totalVol  = sum(mesh.V().field() * J.internalField());
-        scalar totalVol  = sum(mesh.V().field() );
+        scalar totalVol  = sum(mesh.V().field()* J.internalField() );
 
         // Parallel reduction
         scalar globalSum = localSum;
@@ -150,7 +148,7 @@ int main(int argc, char *argv[])
         scalar avg = globalSum / globalVol;
         // scalar avgB = globalSumB / globalVol;
 
-        Info << "Time = " << runTime.timeName() << "; Moisture average = " << avg << endl;
+        Info << "Time = " << runTime.timeName() << "; AlphaG average = " << avg << endl;
 
     }
     Info << "End" << endl;
