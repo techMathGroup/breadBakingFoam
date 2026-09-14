@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture)"
+    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture|rhoDC)"
     {
         solver          PBiCGStab;
         preconditioner  diagonal;
@@ -25,7 +25,7 @@ solvers
         relTol          0.01;
     }
  
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture)Final"
+    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture|rhoDC)Final"
     {
         solver          PBiCGStab;
         preconditioner  diagonal;
@@ -80,11 +80,11 @@ relaxationFactors
     {
         D 0.1;
         // // DFinal 0.1;
-        omegaV 0.8;
-        omegaC 0.8;
-        // // // omegaAir 0.1;
-        T 0.8;
-        pG 0.8;
+        omegaV 0.2;
+        omegaC 0.2;
+        // // // // omegaAir 0.1;
+        // T 0.05;
+        // pG 0.05;
         // rhoG 0.1;
     }
     equations

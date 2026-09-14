@@ -25,5 +25,6 @@ tutorials/*Test
 
 pyCtrlScripts/*swin*
 pyCtrlScripts/*GAB*
+pyCtrlScripts/latex_data
 pyCtrlScripts/bakingCurves*
 Experiments*
