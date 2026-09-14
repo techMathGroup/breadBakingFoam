@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
             int nIter = 1;
             if (pimple.finalIter())
             {
-                nIter = 1;
+                nIter = 50;
             }
 
             for (int i = 0; i < nIter; ++i)
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
                 jDATilda.correctBoundaryConditions();
             
                 // -- correction of diffusive flux
-                jC = - ((jDVTilda & fvc::grad(omegaV)) + (jDCTilda & fvc::grad(omegaC)) + (jDATilda & fvc::grad(omegaAir)));
+                jC = - 0* ((jDVTilda & fvc::grad(omegaV)) + (jDCTilda & fvc::grad(omegaC)) + (jDATilda & fvc::grad(omegaAir)));
                 jC.correctBoundaryConditions();
 
                 jVE = omegaV * ((jGTilda & fvc::grad(pG)) + jC) + (jDVTilda & fvc::grad(omegaV)); 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 jCE.correctBoundaryConditions();
                 jAE.correctBoundaryConditions();
 
-                if (iter % 2 == 0)
+                if (i % 2 == 0)
                 {
 
                     
@@ -193,8 +193,9 @@ int main(int argc, char *argv[])
                     rhoG.correctBoundaryConditions();
                     
                     // -- species equations
-                    #include "concEqV5.H"
+                    
                     #include "concEqC5.H"
+                    #include "concEqV5.H"
 
                     
                     // -- last species
