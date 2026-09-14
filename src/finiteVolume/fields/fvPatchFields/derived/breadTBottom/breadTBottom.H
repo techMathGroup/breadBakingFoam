@@ -25,19 +25,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::breadOmegaVMixedFvPatchField
+    Foam::breadTBottomFvPatchField
 
 Group
     grpGenericBoundaryConditions
 
 Description
-    This boundary condition provides a base class for 'breadOmegaVMixed' type boundary
+    This boundary condition provides a base class for 'breadTBottom' type boundary
     conditions, i.e. conditions that mix fixed value and patch-normal gradient
     conditions.
 
     Usage:
 
-    type breadOmegaVMixed;
+    type breadTBottom;
     alpha           10; // -- heat transfer coefficient
     TInf            463;    // -- oven temperature
 
@@ -51,12 +51,12 @@ Note
     Boundary condition for temperature field for bread in oven.
 
 SourceFiles
-    breadOmegaVMixedFvPatchField.C
+    breadTBottomFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef breadOmegaVMixedFvPatchScalarField_H
-#define breadOmegaVMixedFvPatchScalarField_H
+#ifndef breadTBottomFvPatchScalarField_H
+#define breadTBottomFvPatchScalarField_H
 
 #include "fvPatchField.H"
 #include "fvPatchFields.H"
@@ -70,11 +70,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class breadOmegaVMixedFvPatchField Declaration
+                      Class breadTBottomFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 // template<class Type>
-class breadOmegaVMixedFvPatchScalarField
+class breadTBottomFvPatchScalarField
 :
     public fvPatchScalarField
 {
@@ -92,16 +92,17 @@ class breadOmegaVMixedFvPatchScalarField
         //- Source field
         scalarField source_;
 
-        //- mass transfer coefficient
-        scalar kM_;
+        //- heat transfer coefficient
+        scalar alpha_;
 
-        //- dictionary with omegaVInf in oven
-        dictionary omegaVInfDict_;
+        //- internal heat transfer coefficient field name 
+        word intLamName_;
+
+        //- dictionary with T in oven
+        dictionary TInfDict_;
 
         //- Interpolation table for temperature vs time
-        interpolationTable<scalar> omegaVInfTable_;
-
-        word DFieldName_;
+        interpolationTable<scalar> qInfTable_;
 
 protected:
 
@@ -121,13 +122,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("breadOmegaVMixed");
+    TypeName("breadTBottom");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        breadOmegaVMixedFvPatchScalarField
+        breadTBottomFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
@@ -135,7 +136,7 @@ public:
 
         //- Construct from patch and internal field,
         //- initialise as zero-gradient
-        breadOmegaVMixedFvPatchScalarField
+        breadTBottomFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -143,7 +144,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
-        breadOmegaVMixedFvPatchScalarField
+        breadTBottomFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -153,19 +154,19 @@ public:
             IOobjectOption::readOption requireMixed = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping the given breadOmegaVMixedFvPatchField onto a new patch
-        breadOmegaVMixedFvPatchScalarField
+        //- Construct by mapping the given breadTBottomFvPatchField onto a new patch
+        breadTBottomFvPatchScalarField
         (
-            const breadOmegaVMixedFvPatchScalarField&,
+            const breadTBottomFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        breadOmegaVMixedFvPatchScalarField
+        breadTBottomFvPatchScalarField
         (
-            const breadOmegaVMixedFvPatchScalarField&
+            const breadTBottomFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -173,14 +174,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new breadOmegaVMixedFvPatchScalarField(*this)
+                new breadTBottomFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        breadOmegaVMixedFvPatchScalarField
+        breadTBottomFvPatchScalarField
         (
-            const breadOmegaVMixedFvPatchScalarField&,
+            const breadTBottomFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -192,7 +193,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new breadOmegaVMixedFvPatchScalarField(*this, iF)
+                new breadTBottomFvPatchScalarField(*this, iF)
             );
         }
 
@@ -337,7 +338,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // #ifdef NoRepository
-//     #include "breadOmegaVMixedFvPatchField.C"
+//     #include "breadTBottomFvPatchField.C"
 // #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -272,9 +272,9 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             const volScalarField& T = this->db().objectRegistry::lookupObject<volScalarField>("T");
             const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
             const volScalarField& Mg = this->db().objectRegistry::lookupObject<volScalarField>("Mg");
-            const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
-            const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
-            const volVectorField& sumDiffFlux = this->db().objectRegistry::lookupObject<volVectorField>("sumDiffFlux");
+            // const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
+            // const volScalarField& alphaL = this->db().objectRegistry::lookupObject<volScalarField>("alphaL");
+            // const volVectorField& sumDiffFlux = this->db().objectRegistry::lookupObject<volVectorField>("sumDiffFlux");
 
             scalarField rhoGBound = rhoG.boundaryField()[patch().index()];
             scalarField permBound = perm.boundaryField()[patch().index()];
@@ -288,7 +288,7 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
 
             // scalarField sumDiffFluxFaceBound = sumDiffFluxBound & SfBound;
             
-            scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
+            // scalarField alphaGBound = 1 - alphaS.boundaryField()[patch().index()] - alphaL.boundaryField()[patch().index()];
             scalarField K1Bound = rhoGBound * permBound * patch().deltaCoeffs();
             scalarField TInf = TBound;
 
@@ -305,8 +305,8 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             scalarField a = (kM_ * MgBound * pGInf_ / (univR.value() * TInf)) / denominator;
             // scalarField a = (kM_ * 0.044 * pGInf_ / (univR.value() * TInf) ) / denominator;
 
-            Info << " min ref value" << min(a/f) << " max ref value" << max(a/f) << endl;
-            Info << " min ref fraction" << min(f) << " max ref fraction" << max(f) << endl;
+            // Info << " min ref value" << min(a/f) << " max ref value" << max(a/f) << endl;
+            // Info << " min ref fraction" << min(f) << " max ref fraction" << max(f) << endl;
 
             this->valueFraction() = f;
             // this->valueFraction() = 1;

@@ -275,11 +275,11 @@ void Foam::breadDSideSedgeFvPatchVectorField::evaluate(const Pstream::commsTypes
             forAll(CfBound, faceI)
             {
                 vector pos = CfBound[faceI] + DBound[faceI];
-                scalar a = 5e-2;
+                scalar a = 4.9e-2;
                 // scalar b = 114e-3 / 2;
                 // scalar c = 141e-3 / 2;
-                scalar b = 103e-3 / 2;
-                scalar c = 129e-3 / 2;
+                scalar b = 106e-3 / 2;
+                scalar c = 132e-3 / 2;
                 // scalar LHS = Foam::pow(pos[0] / a, 2) + Foam::pow(pos[1] / b, 6) + Foam::pow(pos[2] / c, 6);
                 scalar LHS = Foam::pow(pos[0] / a, 2) + Foam::pow(pos[1] / b, 6) + Foam::pow(pos[2] / c, 6);
 
@@ -287,7 +287,7 @@ void Foam::breadDSideSedgeFvPatchVectorField::evaluate(const Pstream::commsTypes
                 // if ((CfBound[faceI][1] + DBound[faceI][1]) > sidePos_ )
                 if (LHS > 1)
                 {
-                    if (const scalar t = this->db().time().timeOutputValue() < 300)
+                    if (const scalar t = this->db().time().timeOutputValue() < 2400)
                     {
                         // Pout << "LHS: " << LHS << " pos: " << pos << " Cf: " << CfBound[faceI] << " D: " << DBound[faceI] << endl;
                         this->valueFraction()[faceI] = 1;

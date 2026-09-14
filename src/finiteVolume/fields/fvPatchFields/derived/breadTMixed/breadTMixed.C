@@ -282,6 +282,9 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             surfaceScalarField sumJiHi = this->db().objectRegistry::lookupObject<surfaceScalarField>("sumJiHi");
             scalarField sumJiHiBound = sumJiHi.boundaryField()[this->patch().index()];
 
+            // Info << "min(sumJiHiBound) " << min(sumJiHiBound) << "max(sumJiHiBound) " << max(sumJiHiBound) << endl;
+            // Info << "BC T" << endl;
+
             // scalarField DCorrect = (DBound - DCells) & mesh
             const scalar t = this->db().time().timeOutputValue();
             scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
@@ -289,11 +292,19 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             // scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
             scalarField f = alpha_ / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
             scalarField a = (alpha_ * TInfTable_(t) + sumJiHiBound) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
+            // scalarField a = (alpha_ * TInfTable_(t) ) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
+            // scalarField test = 
+            // Info << "min(alpha_ * TInfTable_(t)) " << alpha_ * TInfTable_(t)<< "max(alpha_ * TInfTable_(t)) " << alpha_ * TInfTable_(t) << endl;
+
+            // Info << "min sumJiHiBound " << min(sumJiHiBound) << "max sumJiHiBound " << max(sumJiHiBound) <<endl;
+            // Info << "alpha * T"<< alpha_ * TInfTable_(t) <<endl;
 
 
             this->valueFraction() = f;
-            this->refValue() = TInfTable_(t);
-            // this->refValue() = a / f;
+            // this->refValue() = TInfTable_(t);
+            this->refValue() = a / f;
+
+            // Info << "BC Tend" << endl;
         }
     }
 
