@@ -58,8 +58,8 @@ forAll(aw.boundaryField(), patchI)
 // volScalarField alphaL = alphaD * moisture * rhoSScalar / rhoL;
 // Sl = alphaL / (alphaL + alphaG);
 // availSurf = -16 * (Foam::pow(Sl - 0.5, 4)) + 1;
-// availSurf =  1;
-// availSurf.correctBoundaryConditions();
+availSurf =  1;
+availSurf.correctBoundaryConditions();
 // Sl.correctBoundaryConditions();
 
 alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
@@ -90,19 +90,19 @@ forAll(alpha.boundaryField(), patchI)
         scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
         forAll(alphaP, faceI)
         {
-            if (moistureP[faceI]  > 0.5)
-            {
-                // awP[faceI] = 0.0;
-                alphaP[faceI] = SMALL;
-            }
-            else
-            {
-                // aw[i] = Foam::exp(-2.9 / (Foam::pow(100.0 * moisture[i], 0.78))); 
-                // availSurf[i] = -16 * (Foam::pow(Sl[i] - 0.5, 4)) + 1;
-                // alphaP[faceI] = 1.0 - Foam::exp(- 10.0 * (0.5 - moistureP[faceI]));
-                alphaP[faceI] = - Foam::atan((moistureP[faceI]-moistureMin) / 0.001) / 3.1415 + 0.5;
-            }
-            // alphaP[faceI] = 1 - SMALL;
+            // if (moistureP[faceI]  > 0.5)
+            // {
+            //     // awP[faceI] = 0.0;
+            //     alphaP[faceI] = SMALL;
+            // }
+            // else
+            // {
+            //     // aw[i] = Foam::exp(-2.9 / (Foam::pow(100.0 * moisture[i], 0.78))); 
+            //     // availSurf[i] = -16 * (Foam::pow(Sl[i] - 0.5, 4)) + 1;
+            //     // alphaP[faceI] = 1.0 - Foam::exp(- 10.0 * (0.5 - moistureP[faceI]));
+            //     alphaP[faceI] = - Foam::atan((moistureP[faceI]-moistureMin) / 0.001) / 3.1415 + 0.5;
+            // }
+            alphaP[faceI] = 1 - SMALL;
         }
     }
 }
