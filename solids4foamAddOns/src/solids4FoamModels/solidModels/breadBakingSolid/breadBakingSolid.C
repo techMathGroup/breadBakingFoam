@@ -121,7 +121,8 @@ breadBakingSolid::breadBakingSolid
     impK_(mechanical().impK()),
     impKf_(mechanical().impKf()),
     rImpK_(1.0/impK_),
-    predictor_(solidModelDict().lookupOrDefault<Switch>("predictor", false))
+    predictor_(solidModelDict().lookupOrDefault<Switch>("predictor", false)),
+    iCorrMy(0)
 {
     DisRequired();
 
@@ -173,7 +174,10 @@ breadBakingSolid::breadBakingSolid
 
 bool breadBakingSolid::evolve()
 {
-    Info<< "Evolving solid solver" << endl;
+
+
+
+    // Info<< "Evolving solid solver" << endl;
 
     if (predictor_)
     {
@@ -189,106 +193,115 @@ bool breadBakingSolid::evolve()
     blockLduMatrix::debug = 0;
 #endif
 
-    Info<< "Solving the total Lagrangian form of the momentum equation for D"
-        << endl;
+    // Info<< "Solving the total Lagrangian form of the momentum equation for D"
+    //     << endl;
 
     // Momentum equation loop
+    scalar relaxFactor = 1e-6;
+
+    // const volScalarField& pG = mesh().lookupObject<volScalarField>("pG");
+    // const volScalarField& alphaG = mesh().lookupObject<volScalarField>("alphaG");
+    // const volScalarField& J = mesh().lookupObject<volScalarField>("solverJ");
+
+    // volScalarField pGReal = pG;
+
 
     do
     {
-        // -- pressure field
-        const volScalarField& pG = mesh().lookupObject<volScalarField>("pG");
-
-        // -- expansion driving force
-        volScalarField deltaP = pG - min(pG);
-
         // -- bread composition
-        const volScalarField& alphaS = mesh().lookupObject<volScalarField>("alphaS");
-        const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
+        const volScalarField& alphaD = mesh().lookupObject<volScalarField>("alphaD");
 
-        // -- load the dictionary with the reaction data
-        IOdictionary thermophysicalProperties
-        (
-            IOobject
-            (
-                "thermophysicalProperties",      // dictionary name
-                mesh().time().constant(),            // dict is found in "constant"
-                mesh(),                      // registry for the dict
-                IOobject::MUST_READ,        // must exist, otherwise failure
-                IOobject::NO_WRITE          // dict is only read by the solver
-            )
-        );
+        volScalarField rhoD = mesh().lookupObject<volScalarField>("rhoD");
 
-        dimensionedScalar rhoS, rhoL;
-        thermophysicalProperties.subDict("solid").readEntry("rho", rhoS);
-        thermophysicalProperties.subDict("liquid").readEntry("rho", rhoL);
-
-        // Info << "rhoL" << rhoL << endl;
+        const volScalarField& pG = mesh().lookupObject<volScalarField>("pG");
+        // volScalarField deltaP = pG;
 
         // -- bread density
-        volScalarField rho = rhoL * alphaL + rhoS * alphaS;
+        // volScalarField rho = rhoL * alphaL + rhoS * alphaS;
 
         // Store fields for under-relaxation and residual calculation
         D().storePrevIter();
+        
+        // Momentum equation total displacement total Lagrangian form°
 
-        // Momentum equation total displacement total Lagrangian form
-        fvVectorMatrix DEqn
-        (
-            J_*rho*fvm::d2dt2(D())
-         == fvm::laplacian(impKf_, D(), "laplacian(DD,D)")
-          - fvc::laplacian(impKf_, D(), "laplacian(DD,D)")
-          + fvc::div(J_*Finv_ & sigma(), "div(sigma)")
-          + J_*rho*g()
-        //   - fvc::div(J_*Finv_ & deltaP*symmTensor(I))
-          - fvc::div(J_*Finv_ & deltaP*I)
-          + stabilisation().stabilisation(D(), gradD(), impK_)
-        );
+        // if (iCorrMy > 100)
+        // {
 
-        // mechanical().updateSigmaHyd();
+        
 
-        // Under-relax the linear system
-        DEqn.relax();
+            fvVectorMatrix DEqn
+            (
+                J_*alphaD*rhoD*fvm::d2dt2(D())
+            //   +  J_*fvc::ddt(alphaD*rhoD)*fvc::ddt(D())
+            == 
+                fvm::laplacian(impKf_, D(), "laplacian(DD,D)")
+            - fvc::laplacian(impKf_, D(), "laplacian(DD,D)")
+            + fvc::div( J_ * ( Finv_ & sigma() ), "div(sigma)" )
+            //   - fvc::div(J_*Finv_ & deltaP*I)
+            - (J_*Finv_.T() & fvc::grad(pG))
+            + J_*alphaD*rhoD*g()
+            );        
+        
 
-        // Enforce any cell displacements
-        solidModel::setCellDisps(DEqn);
 
-        // Solve the linear system
-        solverPerfD = DEqn.solve();
+            // mechanical().updateSigmaHyd();
 
-        // Fixed or adaptive field under-relaxation
-        D().relax();
-        // relaxField(D(), iCorr);
+            // Under-relax the linear system
+            DEqn.relax();
 
-        if (iCorr == 0)
-        {
-            initialResidual = mag(solverPerfD.initialResidual());
-        }
+            // Enforce any cell displacements
+            solidModel::setCellDisps(DEqn);
 
-        // Increment of displacement
-        DD() = D() - D().oldTime();
+            // Solve the linear system
+            solverPerfD = DEqn.solve();
 
-        // Update gradient of displacement
-        mechanical().grad(D(), gradD());
+            // Fixed or adaptive field under-relaxation
+            // if (iCorrMy % 2 == 1)
+            // {
+            //     // Info << "tu" <<endl;
+            //     D().relax(0.2);
+            // }
+            // else
+            // {
+            //     D().relax();
+            // }
+            D().relax();
+            // relaxField(D(), iCorr);
 
-        // Update gradient of displacement increment
-        gradDD() = gradD() - gradD().oldTime();
+            if (iCorr == 0)
+            {
+                initialResidual = mag(solverPerfD.initialResidual());
+            }
 
-        // Total deformation gradient
-        F_ = I + gradD().T();
+            // Increment of displacement
+            DD() = D() - D().oldTime();
 
-        // Inverse of the deformation gradient
-        Finv_ = inv(F_);
+            // Update gradient of displacement
+            mechanical().grad(D(), gradD());
 
-        // Jacobian of the deformation gradient
-        J_ = det(F_);
+            // Update gradient of displacement increment
+            gradDD() = gradD() - gradD().oldTime();
 
-        // Update the momentum equation inverse diagonal field
-        // This may be used by the mechanical law when calculating the
-        // hydrostatic pressure
-        const volScalarField DEqnA("DEqnA", DEqn.A());
+            // Total deformation gradient
+            F_ = I + gradD().T();
 
-        // Calculate the stress using run-time selectable mechanical law
-        mechanical().correct(sigma());
+            // Inverse of the deformation gradient
+            Finv_ = inv(F_);
+
+            // Jacobian of the deformation gradient
+            J_ = det(F_);
+
+            // Update the momentum equation inverse diagonal field
+            // This may be used by the mechanical law when calculating the
+            // hydrostatic pressure
+
+            U() = fvc::ddt(D());
+
+
+            // Calculate the stress using run-time selectable mechanical law
+            mechanical().correct(sigma());
+
+        // }
 
     }
     while
@@ -305,20 +318,26 @@ bool breadBakingSolid::evolve()
 #endif
             D()
         ) && ++iCorr < nCorr()
+            // ++iCorr < nCorr()
     );
-    Info<< solverPerfD.solverName() << ": Solving for " << D().name()
+    // Info<< solverPerfD.solverName() << 
+    Info <<"Solving for " << D().name()
     << ", Initial residual = " << initialResidual
     << ", Final residual = " << solverPerfD.initialResidual()
-    << ", No outer iterations = " << iCorr << nl
+    << ", No outer iterations = " << iCorr <<endl;
     // << " Max relative residual = " << maxRes
     // << ", Relative residual = " << res
-    << ", enforceLinear = " << enforceLinear() << endl;
+    // << ", enforceLinear = " << enforceLinear() << endl;
 
 #ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector>::debug = 1;
 #else
     blockLduMatrix::debug = 1;
 #endif
+
+
+
+
 
     return true;
 }
@@ -333,6 +352,11 @@ void breadBakingSolid::updateFields()
 
     // Velocity
     U() = fvc::ddt(D());
+}
+
+void breadBakingSolid::setICorr(int iCorrIn)
+{
+    iCorrMy = iCorrIn;
 }
 
 

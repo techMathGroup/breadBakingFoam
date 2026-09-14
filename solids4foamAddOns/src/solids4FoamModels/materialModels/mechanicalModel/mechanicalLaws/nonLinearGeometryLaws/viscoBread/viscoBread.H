@@ -97,19 +97,47 @@ class viscoBread
         surfaceSymmTensorField D0f_;
         volScalarField T_;
         volScalarField alphaG_;
-        volScalarField tau_;
+        volScalarField tau1VSF_;
+        volScalarField tau2VSF_;
         volTensorField invF_;
         surfaceTensorField invFf_;
-        volTensorField S_;
+        volSymmTensorField S_;
         surfaceTensorField Sf_;
-        volTensorField dEpsPInit_;
+        // volTensorField dEpsPInit_;
+        volTensorField dSigmaTensP_;
         surfaceTensorField dEpsPInitf_;
-        volTensorField dEpsInit_;
+        volTensorField dE_;
         surfaceTensorField dEpsInitf_;
         volSymmTensorField dSigma_;
         surfaceSymmTensorField dSigmaf_;
         volSymmTensorField dSigmaP_;
+        volSymmTensorField SEl1_;
+        volSymmTensorField SEl2_;
+        volSymmTensorField SV1_;
+        volSymmTensorField SV2_;
         surfaceSymmTensorField dSigmaPf_;
+
+        volTensorField epsilonP_;
+        volTensorField e_;
+        volTensorField hard_;
+
+        volSymmTensorField dS_;
+
+        volScalarField EField_;
+        volScalarField nuField_;
+
+        scalar tau1_;
+        scalar tau2_;
+        scalar tGelat_;
+        scalar alphaBiot_;
+
+        dimensionedScalar mu0Raw_;
+        dimensionedScalar kappa0Raw_;
+        dimensionedScalar muV1Raw_;
+        dimensionedScalar muV2Raw_;
+        dimensionedScalar kappaVRaw_;
+        dimensionedScalar mu0Baked_;
+        dimensionedScalar kappa0Baked_;
 
     // Private Member Functions
 

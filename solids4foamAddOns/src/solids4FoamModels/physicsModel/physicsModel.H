@@ -205,8 +205,11 @@ public:
                 return sigma();
             }
 
+            // virtual void setICorr(int iCorrIn);
+
             //- Evolve the mathematical model
             virtual bool evolve() = 0;
+            virtual void setICorr(int iCorrIn) {};
 
             //- This function lets the physics models know the end of the
             //  time-step has been reached

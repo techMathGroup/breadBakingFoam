@@ -197,7 +197,7 @@ Foam::viscoBread::viscoBread
     (
         IOobject
         (
-            "alphaG",
+            "alphaG_",
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
@@ -206,18 +206,33 @@ Foam::viscoBread::viscoBread
         mesh,
         dimensionedScalar("zero", dimless, 0)
     ),
-    tau_
+    tau1VSF_
     (
         IOobject
         (
-            "tau",
+            "tau1VSF",
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", dimTime, 0)
+        dimensionedScalar("zero", dimTime, 0),
+        "zeroGradient"
+    ),
+    tau2VSF_
+    (
+        IOobject
+        (
+            "tau2VSF",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("zero", dimTime, 0),
+        "zeroGradient"
     ),
     invF_
     (
@@ -256,7 +271,7 @@ Foam::viscoBread::viscoBread
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedTensor("zero", dimPressure, tensor::zero)
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
     ),
     Sf_
     (
@@ -271,18 +286,31 @@ Foam::viscoBread::viscoBread
         mesh,
         dimensionedTensor("zero", dimPressure, tensor::zero)
     ),
-    dEpsPInit_
+    // dEpsPInit_
+    // (
+    //     IOobject
+    //     (
+    //         "dEpsPInit",
+    //         mesh.time().timeName(),
+    //         mesh,
+    //         IOobject::READ_IF_PRESENT,
+    //         IOobject::NO_WRITE
+    //     ),
+    //     mesh,
+    //     dimensionedTensor("zero", dimless, tensor::zero)
+    // ),
+    dSigmaTensP_
     (
         IOobject
         (
-            "dEpsPInit",
+            "dSigmaTensP_",
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedTensor("zero", dimless, tensor::zero)
+        dimensionedTensor("zero", dimPressure, symmTensor::zero)
     ),
     dEpsPInitf_
     (
@@ -297,15 +325,15 @@ Foam::viscoBread::viscoBread
         mesh,
         dimensionedTensor("zero", dimless, tensor::zero)
     ),
-    dEpsInit_
+    dE_
     (
         IOobject
         (
-            "dEpsInit",
+            "dE",
             mesh.time().timeName(),
             mesh,
             IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh,
         dimensionedTensor("zero", dimless, tensor::zero)
@@ -362,6 +390,58 @@ Foam::viscoBread::viscoBread
         mesh,
         dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
     ),
+    SEl1_
+    (
+        IOobject
+        (
+            "SEl1",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+    ),
+    SEl2_
+    (
+        IOobject
+        (
+            "SEl2",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+    ),
+    SV1_
+    (
+        IOobject
+        (
+            "SV1",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+    ),
+    SV2_
+    (
+        IOobject
+        (
+            "SV2",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+    ),
     dSigmaPf_
     (
         IOobject
@@ -374,7 +454,98 @@ Foam::viscoBread::viscoBread
         ),
         mesh,
         dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
-    )
+    ),
+    epsilonP_
+    (
+        IOobject
+        (
+            "epsilonP",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedTensor("zero", dimless, tensor::zero)
+    ),
+    e_
+    (
+        IOobject
+        (
+            "e",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedTensor("zero", dimless, tensor::zero)
+    ),
+    hard_
+    (
+        IOobject
+        (
+            "hard",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedTensor("zero", dimless, tensor(1,1,1,1,1,1,1,1,1))
+    ),
+    dS_
+    (
+        IOobject
+        (
+            "dS",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+    ),
+    EField_
+    (
+        IOobject
+        (
+            "E",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("zero", dimPressure, 0),
+        "zeroGradient"
+    ),
+    nuField_
+        (
+        IOobject
+        (
+            "nu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("zero", dimless, 0),
+        "zeroGradient"
+    ),
+    tau1_(0),
+    tau2_(0),
+    tGelat_(0),
+    alphaBiot_(1.0),
+    mu0Raw_(dimensionedScalar("mu0Raw", dimPressure, 0)),
+    kappa0Raw_(dimensionedScalar("kappa0Raw", dimPressure, 0)),
+    muV1Raw_(dimensionedScalar("muV1Raw", dimPressure, 0)),
+    muV2Raw_(dimensionedScalar("muV2Raw", dimPressure, 0)),
+    kappaVRaw_(dimensionedScalar("kappaVRaw", dimPressure, 0)),
+    mu0Baked_(dimensionedScalar("mu0Baked", dimPressure, 0)),
+    kappa0Baked_(dimensionedScalar("kappa0Baked", dimPressure, 0))
 {
     // Force the creation of Fs so they are read on restart
     F();
@@ -416,6 +587,39 @@ Foam::viscoBread::viscoBread
         )   << "Either E and nu or mu and K elastic parameters should be "
             << "specified" << abort(FatalError);
     }
+
+    tau1_ = dict.lookupOrDefault<scalar>("tau1", 1.0);
+    tau2_ = dict.lookupOrDefault<scalar>("tau2", 1.0);
+    tGelat_ = dict.lookupOrDefault<scalar>("tGelat", 65.0);
+
+    alphaBiot_ = dict.lookupOrDefault<scalar>("alphaBiot", 1.0);
+
+    // Info << "mu0 Raw: " << mu0Raw_ << endl;
+
+    // --- Raw State Parameters (Ambient / Proofing / Early Baking) ---
+    mu0Raw_ = dict.lookupOrDefault<dimensionedScalar>("mu0Raw", dimensionedScalar("mu0Raw", dimPressure, 300));         // 0.3 kPa
+    kappa0Raw_ = dict.lookupOrDefault<dimensionedScalar>("kappa0Raw", dimensionedScalar("kappa0Raw", dimPressure, 1000));   // 1.0 kPa
+
+    muV1Raw_ = dict.lookupOrDefault<dimensionedScalar>("muV1Raw", dimensionedScalar("muV1Raw", dimPressure, 3000));       // 3.0 kPa
+    muV2Raw_ = dict.lookupOrDefault<dimensionedScalar>("muV2Raw", dimensionedScalar("muV2Raw", dimPressure, 3000));       // 3.0 kPa
+    kappaVRaw_ = dict.lookupOrDefault<dimensionedScalar>("kappaVRaw", dimensionedScalar("kappaVRaw", dimPressure, 6000)); // 6.0 kPa
+    // dimensionedScalar tau_raw("tau_raw", dimTime, 20);                // 20 seconds
+
+    // --- Baked State Parameters (Post-Gelatinization T > 75°C) ---
+    mu0Baked_ = dict.lookupOrDefault<dimensionedScalar>("mu0Baked", dimensionedScalar("mu0Baked", dimPressure, 12500));    // 25.0 kPa
+    kappa0Baked_ = dict.lookupOrDefault<dimensionedScalar>("kappa0Baked", dimensionedScalar("kappa0Baked", dimPressure, 40000)); // 85.0 kPa
+
+    Info << "mu0 Raw: " << mu0Raw_ << endl;
+    Info << "kappa0Raw_ Raw: " << kappa0Raw_ << endl;
+    Info << "muV1Raw_ Raw: " << muV1Raw_ << endl;
+    Info << "muV2Raw_ Raw: " << muV2Raw_ << endl;
+    Info << "Tau1: " << tau1_ << endl;
+    Info << "Tau2: " << tau2_ << endl;
+    Info << "TGelat: " << tGelat_ << endl;
+    SEl1_.storeOldTime();
+    SEl2_.storeOldTime();
+    SV1_.storeOldTime();
+    SV2_.storeOldTime();
 }
 
 
@@ -471,216 +675,105 @@ Foam::viscoBread::impK() const
 
 void Foam::viscoBread::correct(volSymmTensorField& sigma)
 {
-    // Update the deformation gradient field
-    // Note: if true is returned, it means that linearised elasticity was
-    // enforced by the solver via the enforceLinear switch
     if (updateF(sigma, mu_, K_))
     {
         return;
     }
 
-    // Update the Jacobian of the total deformation gradient
     J() = det(F());
     J().correctBoundaryConditions();
 
-    // Store previous iteration for under-relaxation and calculation of plastic
-    // residual in the solver
-    // DEpsilonP_.storePrevIter();
+    volSymmTensorField CSymm = symm(T(F()) & F());
+    volSymmTensorField invC = inv(CSymm);
 
-    // prepare DEpsilon
-    const Time& time = mesh().time();
-    scalar dTimeSc = time.deltaTValue();
-    dimensionedScalar dTime("dTime", dimTime, dTimeSc); // -- timestep
+    dimensionedScalar dTime("dTime", dimTime, mesh().time().deltaTValue()); 
+    dimensionedScalar pRef("pRef", dimPressure, 1e5);   
+
+    alphaG_ = mesh().lookupObject<volScalarField>("alphaG"); // Normalize alphaG to be dimensionless
 
     // -- temperature
-    const volScalarField& TItself = mesh().lookupObject<volScalarField>("T");
-    T_ = TItself / dimensionedScalar("dummyT", dimTemperature, 1) - 273;
+    T_ = mesh().lookupObject<volScalarField>("T") / dimensionedScalar("dummyT", dimTemperature, 1) - 273;
+    const volScalarField pG = mesh().lookupObject<volScalarField>("pG");
 
-    // -- composition
-    const volScalarField& alphaS = mesh().lookupObject<volScalarField>("alphaS");
-    const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
-    alphaG_ = 1 - alphaL - alphaS;
+    // -- Compute current gelatinization state based on temperature field T
+    // volScalarField kappaGel = 0.5 * (1.0 + Foam::tanh((T_ - 50) / 10.0));
+    volScalarField kappaGel = 0.5 + Foam::atan((T_ - 65) / 2.0) / 3.1415; // Smooth transition from 0 to 1 around T = 65°C
 
-    // -- load the dictionary with the reaction data
-    IOdictionary mechanicalProperties
-    (
-        IOobject
-        (
-            "mechanicalProperties",      // dictionary name
-            mesh().time().constant(),            // dict is found in "constant"
-            mesh(),                      // registry for the dict
-            IOobject::MUST_READ,        // must exist, otherwise failure
-            IOobject::NO_WRITE          // dict is only read by the solver
-        )
-    );
+    // -- Dynamically blend the elastostatic ground state (from soft paste to rigid crumb)
+    volScalarField mu0 = (1-alphaG_) * ((1.0 - kappaGel) * mu0Raw_ + kappaGel * mu0Baked_);
+    volScalarField kappa0 = (1-alphaG_) * (((1.0 - kappaGel) * kappa0Raw_ + kappaGel * kappa0Baked_)* (1 + (100 - 1) * (0.5 - Foam::atan((alphaG_ - 0.05) / 0.01) / 3.1415)));
+    // volScalarField kappa0 = ((1.0 - kappaGel) * kappa0Raw_ + kappaGel * kappa0Baked_);
 
-    scalar tau0 = mechanicalProperties.lookupOrDefault<scalar>("tau0", 1.0);
-    scalar tGelat = mechanicalProperties.lookupOrDefault<scalar>("tGelat", 65.0);
-    // Info << "Tau0" << tau0;
-    // thermophysicalProperties.subDict("solid").readEntry("rho", rhoS);
-    // -- relaxation time, Young modulus, Poisson ration, pre-elastic matrix factor
-    // tau_ = 20*(9.0 * (2.0 / 3.14 * Foam::atan((T_ - 65) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
-    tau_ = tau0 * (9.0 * (2.0 / 3.14 * Foam::atan((T_ - tGelat) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
-    dimensionedScalar E = 9 * mu_ * K_ / (3 * K_ + mu_);
-    dimensionedScalar nu = 0.5 * (3 * K_ - 2 * mu_) / (3 * K_ + mu_);
+    volScalarField muV1 = (1.0 - kappaGel) * muV1Raw_ + kappaGel * muV1Raw_;
+    volScalarField muV2 = (1.0 - kappaGel) * muV2Raw_ + kappaGel * muV2Raw_;
+    volScalarField lambdaV = (1.0 - kappaGel) * kappaVRaw_ + kappaGel * kappaVRaw_;
 
-    // volScalarField K_my = K_ ;
-    // volScalarField K_my = K_ * (- Foam::atan(4e4 * alphaG - 4e3) / 1e-3 + 1571.75);
-    // volScalarField K_my = K_ * (- Foam::atan(4e4 * alphaG - 4e3) / 0.1 + 16.71);
+    // tau_ = tau0_ / (1.0 - kappaGel + 1e-5) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    tau1VSF_ = tau1_ * (2.0 * (1.0 - kappaGel) + 20.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    tau2VSF_ = tau2_ * (2.0 * (1.0 - kappaGel) + 20.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    tau1VSF_.correctBoundaryConditions();
+    tau2VSF_.correctBoundaryConditions();
 
-    // volScalarField E = 9 * mu_ * K_my  / (3 * K_my + mu_);
-    // volScalarField nu = 0.5 * (3 * K_my - 2 * mu_) / (3 * K_my + mu_);
+    // -- Baseline isotropic Neo-Hookean response (Contains the purely elastic bulk compression)
+    // Info << "mu0: " << min(J()) << endl;
+    volSymmTensorField SInf = mu0 * (I - invC) + kappa0 * Foam::log(J()) * invC;
 
-    dimensionedScalar preCoeff = 1 / ((1 + nu) * (1 - 2 * nu));
-    // volScalarField preCoeff = 1 / ((1 + nu) * (1 - 2 * nu));
+    // Info << "mu2: " << min(J()) << endl;
 
+    SEl1_ = muV1 * (I - invC) + lambdaV * Foam::log(J()) * invC;
+    SEl1_.correctBoundaryConditions();
 
-    invF_ = inv(F());
-    S_ = J() * invF_ & sigma & invF_.T();
-    D0_.replace(symmTensor::XX, S_.component(tensor::XX) - nu * S_.component(tensor::YY) - nu * S_.component(tensor::ZZ));
-    D0_.replace(symmTensor::XY, (2 * nu + 2) * S_.component(tensor::XY));
-    D0_.replace(symmTensor::XZ, (2 * nu + 2) * S_.component(tensor::XZ));
-    D0_.replace(symmTensor::YY, - nu * S_.component(tensor::XX) + S_.component(tensor::YY) - nu * S_.component(tensor::ZZ));
-    D0_.replace(symmTensor::YZ, (2 * nu + 2) * S_.component(tensor::YZ));
-    D0_.replace(symmTensor::ZZ, - nu * S_.component(tensor::XX) - nu * S_.component(tensor::YY) + S_.component(tensor::ZZ));
+    // Info << "mu3: " << min(J()) << endl;
 
-    dEpsPInit_ = 1 / J() / E / tau_ * dTime * (F() & D0_ & F().T());
-    // DEpsilonP_ = 1 / E / tau * dTime * D0;
-    // DEpsilonP_ = 1 / E / tau * dTime * sigma;
-    // DEpsilonP_.replace(symmTensor::XX, dEpsPInit_.component(tensor::XX));
-    // DEpsilonP_.replace(symmTensor::XY, dEpsPInit_.component(tensor::XY));
-    // DEpsilonP_.replace(symmTensor::XZ, dEpsPInit_.component(tensor::XZ));
-    // DEpsilonP_.replace(symmTensor::YY, dEpsPInit_.component(tensor::YY));
-    // DEpsilonP_.replace(symmTensor::YZ, dEpsPInit_.component(tensor::YZ));
-    // DEpsilonP_.replace(symmTensor::ZZ, dEpsPInit_.component(tensor::ZZ));
+    SEl2_ = muV2 * (I - invC) + lambdaV * Foam::log(J()) * invC;
+    SEl2_.correctBoundaryConditions();
 
-    const volTensorField& gradDD = mesh().lookupObject<volTensorField>("grad(DD)");
-    // const volVectorField& DD = mesh().lookupObject<volVectorField>("DD");
-    // volTensorField gradDD = fvc::grad(DD);
-    
-    // volSymmTensorField dEpsilon = symm(gradDD);
-    dEpsInit_ = 1 / J() * F() & symm(gradDD) & F().T();
-    // dEpsilon_.replace(symmTensor::XX, dEpsInit_.component(tensor::XX));
-    // dEpsilon_.replace(symmTensor::XY, dEpsInit_.component(tensor::XY));
-    // dEpsilon_.replace(symmTensor::XZ, dEpsInit_.component(tensor::XZ));
-    // dEpsilon_.replace(symmTensor::YY, dEpsInit_.component(tensor::YY));
-    // dEpsilon_.replace(symmTensor::YZ, dEpsInit_.component(tensor::YZ));
-    // dEpsilon_.replace(symmTensor::ZZ, dEpsInit_.component(tensor::ZZ));
+    // Info << "mu4: " << min(J())  << endl;
 
-    // volSymmTensorField dSigma = E * dEpsilon;
+    // Calculate pure elastic increment against the true stored old time
+    volSymmTensorField deltaS0elastic1 = SEl1_ - SEl1_.oldTime();
+    volSymmTensorField deltaS0elastic2 = SEl2_ - SEl2_.oldTime();
 
-    dSigma_.replace(symmTensor::XX, E * preCoeff * ((1 - nu) * dEpsInit_.component(tensor::XX) + (nu) * dEpsInit_.component(tensor::YY) + (nu) * dEpsInit_.component(tensor::ZZ)));
-    dSigma_.replace(symmTensor::XY, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInit_.component(tensor::XY));
-    dSigma_.replace(symmTensor::XZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInit_.component(tensor::XZ));
-    dSigma_.replace(symmTensor::YY, E * preCoeff * ((nu) * dEpsInit_.component(tensor::XX) + (1 - nu) * dEpsInit_.component(tensor::YY) + (nu) * dEpsInit_.component(tensor::ZZ)));
-    dSigma_.replace(symmTensor::YZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInit_.component(tensor::YZ));
-    dSigma_.replace(symmTensor::ZZ, E * preCoeff * ((nu) * dEpsInit_.component(tensor::XX) + (nu) * dEpsInit_.component(tensor::YY) + (1 - nu) * dEpsInit_.component(tensor::ZZ)));
+    // Integration coefficients
+    volScalarField oden1 = dTime / tau1VSF_;
+    volScalarField oden2 = dTime / tau2VSF_;
+    volScalarField expFactor1 = Foam::exp(-oden1);
+    volScalarField integrationFactor1 = (1.0 - expFactor1) / oden1;
+    volScalarField expFactor2 = Foam::exp(-oden2);
+    volScalarField integrationFactor2 = (1.0 - expFactor2) / oden2;
 
-    // volSymmTensorField dSigmaP = E * DEpsilonP_;
+    // -- BIOT POROMECHANICAL COUPLING & TOTAL STRESS ASSEMBLY
+    // volSymmTensorField S_total = SInf - alphaBiot_ * J() * (pG - pRef) * invC;
+    volSymmTensorField S_total = SInf;
 
-    dSigmaP_.replace(symmTensor::XX, E * preCoeff * ((1 - nu) * dEpsPInit_.component(tensor::XX) + (nu) * dEpsPInit_.component(tensor::YY) + (nu) * dEpsPInit_.component(tensor::ZZ)));
-    dSigmaP_.replace(symmTensor::XY, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInit_.component(tensor::XY));
-    dSigmaP_.replace(symmTensor::XZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInit_.component(tensor::XZ));
-    dSigmaP_.replace(symmTensor::YY, E * preCoeff * ((nu) * dEpsPInit_.component(tensor::XX) + (1 - nu) * dEpsPInit_.component(tensor::YY) + (nu) * dEpsPInit_.component(tensor::ZZ)));
-    dSigmaP_.replace(symmTensor::YZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInit_.component(tensor::YZ));
-    dSigmaP_.replace(symmTensor::ZZ, E * preCoeff * ((nu) * dEpsPInit_.component(tensor::XX) + (nu) * dEpsPInit_.component(tensor::YY) + (1 - nu) * dEpsPInit_.component(tensor::ZZ)));
+    // if (mesh().time().timeOutputValue() > 10)
+    // {
+        // Update the internal viscous state variable
+        SV1_ = expFactor1 * SV1_.oldTime() + integrationFactor1 * deltaS0elastic1;
+        SV1_.correctBoundaryConditions();
+        S_total += SV1_ ;
 
-    sigma = sigma.oldTime() + (dSigma_ - dSigmaP_);
+        // SV2_ = expFactor2 * SV2_.oldTime() + integrationFactor2 * deltaS0elastic2;
+        // SV2_.correctBoundaryConditions();
+        // S_total += SV2_ ;
+    // }
+    S_total.correctBoundaryConditions();
+
+    // Push-forward Second Piola-Kirchhoff (S_total) to Cauchy Spatial Stress (sigma)
+    sigma = symm( (1.0 / J()) * (F() & S_total & T(F())) );
+    sigma.correctBoundaryConditions();
 }
 
 
 void Foam::viscoBread::correct(surfaceSymmTensorField& sigma)
 {
-        // Update the deformation gradient field
-    // Note: if true is returned, it means that linearised elasticity was
-    // enforced by the solver via the enforceLinear switch
-    if (updateF(sigma, mu_, K_))
-    {
-        return;
-    }
-
-    // Update the Jacobian of the total deformation gradient
-    Jf() = det(Ff());
-    // Store previous iteration for under-relaxation and calculation of plastic
-    // residual in the solver
-    // DEpsilonP_.storePrevIter();
-
-    // prepare DEpsilon
-    const Time& time = mesh().time();
-    scalar dTimeSc = time.deltaTValue();
-    dimensionedScalar dTime("dTime", dimTime, dTimeSc); // -- timestep
-
-    // -- temperature
-    const volScalarField& TItself = mesh().lookupObject<volScalarField>("T");
-    T_ = TItself / dimensionedScalar("dummyT", dimTemperature, 1) - 273;
-
-    // -- composition
-    const volScalarField& alphaS = mesh().lookupObject<volScalarField>("alphaS");
-    const volScalarField& alphaL = mesh().lookupObject<volScalarField>("alphaL");
-    alphaG_ = 1 - alphaL - alphaS;
-
-    // -- relaxation time, Young modulus, Poisson ration, pre-elastic matrix factor
-    tau_ = (9.0 * (2.0 / 3.14 * Foam::atan((T_ - 65) / 2) + 1) + 2) * dimensionedScalar("dummyTime", dimTime, 1) * (- Foam::atan(4e4 * alphaG_ - 4e3) / 1e-3 + 1571.75);
-    dimensionedScalar E = 9 * mu_ * K_ / (3 * K_ + mu_);
-    dimensionedScalar nu = 0.5 * (3 * K_ - 2 * mu_) / (3 * K_ + mu_);
-    dimensionedScalar preCoeff = 1 / ((1 + nu) * (1 - 2 * nu));
-
-    invFf_ = inv(Ff());
-    Sf_ = Jf() * invFf_ & sigma & invFf_.T();
-    D0f_.replace(symmTensor::XX, Sf_.component(tensor::XX) - nu * Sf_.component(tensor::YY) - nu * Sf_.component(tensor::ZZ));
-    D0f_.replace(symmTensor::XY, (2 * nu + 2) * Sf_.component(tensor::XY));
-    D0f_.replace(symmTensor::XZ, (2 * nu + 2) * Sf_.component(tensor::XZ));
-    D0f_.replace(symmTensor::YY, - nu * Sf_.component(tensor::XX) + Sf_.component(tensor::YY) - nu * Sf_.component(tensor::ZZ));
-    D0f_.replace(symmTensor::YZ, (2 * nu + 2) * Sf_.component(tensor::YZ));
-    D0f_.replace(symmTensor::ZZ, - nu * Sf_.component(tensor::XX) - nu * Sf_.component(tensor::YY) + Sf_.component(tensor::ZZ));
-
-    dEpsPInitf_ = 1 / Jf() / E / fvc::interpolate(tau_) * dTime * (Ff() & D0f_ & Ff().T());
-
-    const volTensorField& gradDD = mesh().lookupObject<volTensorField>("grad(DD)");
-    // const surfaceTensorField& gradD = mesh().lookupObject<surfaceTensorField>("grad(D)f");
-    // surfaceTensorField gradDDf = gradD - gradD.oldTime();
-    surfaceTensorField gradDDf = fvc::interpolate(gradDD);
-    // const volVectorField& DD = mesh().lookupObject<volVectorField>("DD");
-    // volTensorField gradDD = fvc::grad(DD);
     
-    // const volTensorField& gradDD = mesh().lookupObject<volTensorField>("grad(DD)");
-    // const volVectorField& DD = mesh().lookupObject<volVectorField>("DD");
-    // volTensorField gradDD = fvc::grad(DD);
-    
-    // volSymmTensorField dEpsilon = symm(gradDD);
-    dEpsInitf_ = 1 / Jf() * Ff() & symm(gradDDf) & Ff().T();
-    // dEpsilon_.replace(symmTensor::XX, dEpsInit_.component(tensor::XX));
-    // dEpsilon_.replace(symmTensor::XY, dEpsInit_.component(tensor::XY));
-    // dEpsilon_.replace(symmTensor::XZ, dEpsInit_.component(tensor::XZ));
-    // dEpsilon_.replace(symmTensor::YY, dEpsInit_.component(tensor::YY));
-    // dEpsilon_.replace(symmTensor::YZ, dEpsInit_.component(tensor::YZ));
-    // dEpsilon_.replace(symmTensor::ZZ, dEpsInit_.component(tensor::ZZ));
-
-    // volSymmTensorField dSigma = E * dEpsilon;
-
-    dSigmaf_.replace(symmTensor::XX, E * preCoeff * ((1 - nu) * dEpsInitf_.component(tensor::XX) + (nu) * dEpsInitf_.component(tensor::YY) + (nu) * dEpsInitf_.component(tensor::ZZ)));
-    dSigmaf_.replace(symmTensor::XY, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInitf_.component(tensor::XY));
-    dSigmaf_.replace(symmTensor::XZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInitf_.component(tensor::XZ));
-    dSigmaf_.replace(symmTensor::YY, E * preCoeff * ((nu) * dEpsInitf_.component(tensor::XX) + (1 - nu) * dEpsInitf_.component(tensor::YY) + (nu) * dEpsInitf_.component(tensor::ZZ)));
-    dSigmaf_.replace(symmTensor::YZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsInitf_.component(tensor::YZ));
-    dSigmaf_.replace(symmTensor::ZZ, E * preCoeff * ((nu) * dEpsInitf_.component(tensor::XX) + (nu) * dEpsInitf_.component(tensor::YY) + (1 - nu) * dEpsInitf_.component(tensor::ZZ)));
-
-    // volSymmTensorField dSigmaP = E * DEpsilonP_;
-
-    dSigmaPf_.replace(symmTensor::XX, E * preCoeff * ((1 - nu) * dEpsPInitf_.component(tensor::XX) + (nu) * dEpsPInitf_.component(tensor::YY) + (nu) * dEpsPInitf_.component(tensor::ZZ)));
-    dSigmaPf_.replace(symmTensor::XY, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInitf_.component(tensor::XY));
-    dSigmaPf_.replace(symmTensor::XZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInitf_.component(tensor::XZ));
-    dSigmaPf_.replace(symmTensor::YY, E * preCoeff * ((nu) * dEpsPInitf_.component(tensor::XX) + (1 - nu) * dEpsPInitf_.component(tensor::YY) + (nu) * dEpsPInitf_.component(tensor::ZZ)));
-    dSigmaPf_.replace(symmTensor::YZ, E * preCoeff * (1 - 2 * nu) / 2 * dEpsPInitf_.component(tensor::YZ));
-    dSigmaPf_.replace(symmTensor::ZZ, E * preCoeff * ((nu) * dEpsPInitf_.component(tensor::XX) + (nu) * dEpsPInitf_.component(tensor::YY) + (1 - nu) * dEpsPInitf_.component(tensor::ZZ)));
-
-    sigma = sigma.oldTime() + (dSigmaf_ - dSigmaPf_);
 }
 
 
 Foam::scalar Foam::viscoBread::residual()
 {
-    Info << "Residual not implemented" << endl;
+    // Info << "Residual not implemented" << endl;
     return 1;
 //     // Calculate residual based on change in plastic strain increment
 //     if

@@ -87,6 +87,8 @@ class breadBakingSolid
         //- Predict new time-step fields using the velocity field
         const Switch predictor_;
 
+        int iCorrMy;
+
     // Private Member Functions
 
         //- Predict the fields for the next time-step based on the
@@ -152,6 +154,7 @@ public:
             //- Evolve the solid solver and solve the mathematical model
             virtual bool evolve();
             virtual void updateFields();
+            virtual void setICorr(int iCorrIn);
 
             //- Traction boundary surface normal gradient
             virtual tmp<vectorField> tractionBoundarySnGrad
