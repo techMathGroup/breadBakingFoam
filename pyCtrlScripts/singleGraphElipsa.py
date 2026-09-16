@@ -121,10 +121,10 @@ def saveFigPostProcess(simDir):
 
         expTemp[:,0] = expTemp[:,0] - expTemp[0,0]
 
-        ax1.plot(expTemp[:,0]/60, expTemp[:,2], linewidth=2, label=f'Exp TC1')
-        ax2.plot(expTemp[:,0]/60, expTemp[:,3], linewidth=2, label=f'Exp TC2')
-        ax3.plot(expTemp[:,0]/60, expTemp[:,4], linewidth=2, label=f'Exp TC3')
-        ax4.plot(expTemp[:,0]/60, expTemp[:,5], linewidth=2, label=f'Exp TC4')
+        ax1.plot(expTemp[:,0]/60, expTemp[:,2], color="lightgray", linewidth=2, label=f'Exp TC1')
+        ax2.plot(expTemp[:,0]/60, expTemp[:,3], color="lightgray",linewidth=2, label=f'Exp TC2')
+        ax3.plot(expTemp[:,0]/60, expTemp[:,4], color="lightgray",linewidth=2, label=f'Exp TC3')
+        ax4.plot(expTemp[:,0]/60, expTemp[:,5], color="lightgray", linewidth=2, label=f'Exp TC4')
         ax5.plot(expTemp[:,0]/60, expTemp[:,1], linewidth=2, label=f'Exp TC0')
 
         tHere = np.interp(tUnified, expTemp[:,0]/60, expTemp[:,1])

@@ -43,7 +43,7 @@ arcL = 0.008    # -- length of the arc at the side of the bread
 
 '''Internal transport parameters'''
 DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-Dl = 1e-10  # -- liquid water difusivity in the dough
+Dl = 6e-12  # -- liquid water difusivity in the dough
 tortOpen = 2.4   # -- tortuosity
 tortClosed = 70   # -- tortuosity
 
@@ -71,8 +71,8 @@ rhoS = 507  # -- solid density
 
 '''Evaporation and CO2 generation parameters'''
 # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-kMPCOpen = 0.012
-kMPCClosed = 0.012
+kMPCOpen = 0.015
+kMPCClosed = 0.015
 
 # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
 evCoef1 = -0.0071
@@ -122,7 +122,7 @@ alphaG = 10 # -- external heat transfer coeficient
 '''Post-processing'''
 fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
 
-outFolder = '../ZZ_cases/00_breads/018_coarse_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
+outFolder = '../ZZ_cases/00_breads/016_coarse_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
 # baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
 
 

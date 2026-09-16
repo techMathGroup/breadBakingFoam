@@ -20,7 +20,7 @@ from compExpSimSingleGraph import saveFigPostProcess
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/bread3DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_bread3DOurExp/V1_evap012/'
+outFolder = '../ZZ_cases/01_bread3DOurExp/V9_DlTDep/'
 # expDir = os.path.join('..', 'Experiments2026') # -- when comparing experiments
 
 # WHAT SHOULD RUN=======================================================
@@ -29,6 +29,7 @@ makeGeom = True # -- creation of the geometry for computation
 runDynSim = True    # -- run simulation
 runPostProcess = True   # -- run post-processing
 
+proofing = False  # -- proofing included
 proofing = True  # -- proofing included
 
 # DEFINE PARAMETERS=====================================================
@@ -40,7 +41,7 @@ for expNum in range(1):
 
     '''Internal transport parameters'''
     DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-    Dl = 1e-10  # -- liquid water difusivity in the dough
+    Dl = 6e-11  # -- liquid water difusivity in the dough
     tortOpen = 2.4   # -- tortuosity
     tortClosed = 70   # -- tortuosity (not used)
 
@@ -59,17 +60,19 @@ for expNum in range(1):
     CpL = 4200  # -- liquid phase
 
     # -- mass density for the individual phases
-    rhoS = 940
+    rhoS = 865
 
     # -- initial dough volumetric fraction
     alphaD0 = 0.84 
+    alphaD0 = 0.91 
     if not proofing:
         alphaD0 = 0.43
+        rhoS = 1387
 
     '''Evaporation and CO2 generation parameters'''
     # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.012
-    kMPCClosed = 0.012
+    kMPCOpen = 0.015
+    kMPCClosed = 0.015
 
     # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
     evCoef1 = -0.0071
@@ -77,7 +80,7 @@ for expNum in range(1):
     n = 0.38
 
     # -- pre-exponential factor and Tm in CO2 generation kinetics in equation (32) in https://doi.org/10.1002/aic.10518  in (kg/m3/s)
-    R0 = 2.2e-3  
+    R0 = 2.3e-3  
     Tm = 313
     deltaT = 14
 
@@ -86,7 +89,7 @@ for expNum in range(1):
 
     nu = 0.14   # -- Poisson ratio
     E = 30000   # -- Youngs modulus (legacy -- not used) 
-    mu0Raw = 170   # kappa = 2*mu*nu/(1-2*nu)   
+    mu0Raw = 147   # kappa = 2*mu*nu/(1-2*nu)   
     muV1Raw = 7400 
     bakedCoeff = 25
     tau1 = 1.6
@@ -96,7 +99,7 @@ for expNum in range(1):
         timeProofing = 2400
     else:
         timeProofing = 200
-    timeStepProofing = 20 # -- computational time step for proofing
+    timeStepProofing = 200 # -- computational time step for proofing
     timeStepSim = 0.5  # -- computational time step for deformable simulation
     timeStepSimNonDef = 0.5  # -- computational time step non-deformable simulation
     plusTime1 = 450 # -- how long to run with deformation 
@@ -123,7 +126,7 @@ for expNum in range(1):
     # -- deformation simulation
     omegaVRelax = 0.2
     omegaCRelax = 0.2
-    pGRelax = 0.8
+    pGRelax = 0.2
     DRelax = 1
 
     # -- non-deformation simulation
@@ -134,16 +137,16 @@ for expNum in range(1):
 
     '''Boundary and initial conditions'''
     TProofing = 301
-    TStart = 297
+    TStart = 298
     TTop = 200
     TBottom = 200
 
 
     kMSidesOmega = 0.01 # -- external mass transfer coeficient 
-    kMBottomOmega = 0.01 
+    kMBottomOmega = 0.01
 
     alphaG = 10 # -- external heat transfer coeficient 
-    alphaGBottom = 10
+    alphaGBottom = 14
     
      # -- external heat transfer coeficient 
 
