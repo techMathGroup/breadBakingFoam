@@ -264,47 +264,12 @@ void Foam::breadTMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
         if (lambdaEff.boundaryField()[this->patch().index()].size() != 0)
         {
             // -- heat transfer to bread computation
-            // -- patch deltaCoeffs
-            // const volScalarField& lambdaEff = this->db().objectRegistry::lookupObject<volScalarField>(intLamName_);
-            // const fvMesh& mesh = patch().boundaryMesh().mesh();
-            // const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
-            // const surfaceVectorField& Sf = mesh.Sf();
-
-            // vectorField DCells = D.boundaryField()[this->patch().index()].patchInternalField();
-            // vectorField DBound = D.boundaryField()[this->patch().index()];
-            // vectorField SfBound = Sf.boundaryField()[this->patch().index()];
-
-            // Pout << "DBound size" << DBound.size() <<endl;
-            // Pout << "SfBound size" << SfBound.size() <<endl;
-
-            // scalarField Dmag = (DBound - DCells) & SfBound / mag(SfBound);
-
-            surfaceScalarField sumJiHi = this->db().objectRegistry::lookupObject<surfaceScalarField>("sumJiHi");
-            scalarField sumJiHiBound = sumJiHi.boundaryField()[this->patch().index()];
-
-            // Info << "min(sumJiHiBound) " << min(sumJiHiBound) << "max(sumJiHiBound) " << max(sumJiHiBound) << endl;
-            // Info << "BC T" << endl;
-
-            // scalarField DCorrect = (DBound - DCells) & mesh
             const scalar t = this->db().time().timeOutputValue();
             scalarField lambdaEffBound = lambdaEff.boundaryField()[this->patch().index()];
-            // scalarField f = 1.0 / (1.0 + (lambdaEffBound / (mag(this->patch().delta() + (DBound - DCells)))) / (alpha_));
-            // scalarField f = 1.0 / (1.0 + (lambdaEffBound * this->patch().deltaCoeffs()) / (alpha_));
             scalarField f = alpha_ / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
-            scalarField a = (alpha_ * TInfTable_(t) + sumJiHiBound) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
-            // scalarField a = (alpha_ * TInfTable_(t) ) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
-            // scalarField test = 
-            // Info << "min(alpha_ * TInfTable_(t)) " << alpha_ * TInfTable_(t)<< "max(alpha_ * TInfTable_(t)) " << alpha_ * TInfTable_(t) << endl;
-
-            // Info << "min sumJiHiBound " << min(sumJiHiBound) << "max sumJiHiBound " << max(sumJiHiBound) <<endl;
-            // Info << "alpha * T"<< alpha_ * TInfTable_(t) <<endl;
-
-
+            scalarField a = (alpha_ * TInfTable_(t) ) / (lambdaEffBound * this->patch().deltaCoeffs() + alpha_);
             this->valueFraction() = f;
-            // this->refValue() = TInfTable_(t);
             this->refValue() = a / f;
-
-            // Info << "BC Tend" << endl;
         }
     }
 

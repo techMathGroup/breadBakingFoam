@@ -263,107 +263,23 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
         if (DEff.boundaryField()[this->patch().index()].size() != 0)
         {
             const scalar t = this->db().time().timeOutputValue();
-            // const fvMesh& mesh = patch().boundaryMesh().mesh();
-            IOdictionary transportProperties = this->db().objectRegistry::lookupObject<IOdictionary>("transportProperties");
-            // IOdictionary thermophysicalProperties = this->db().objectRegistry::lookupObject<IOdictionary>("thermophysicalProperties");
-            // -- heat transfer to bread computation
-            // -- patch deltaCoeffs
-            // scalar molMRef;
-            // dimensionedScalar permGLViscG, univR;
-            dimensionedScalar univR;
-            // transportProperties.readEntry("kGOver",kG);
-            transportProperties.subDict("genProps").readEntry("univR",univR);
-
-            // thermophysicalProperties.subDict("solid").readEntry("permGLViscG",permGLViscG);
-            // thermophysicalProperties.subDict("mixture").subDict("specie").readEntry("molWeight",molMRef);
-            // molMRef = molMRef * 1e-3;
 
             const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("permGLViscG");
-            // const volScalarField& T = this->db().objectRegistry::lookupObject<volScalarField>("T");
-            // const volScalarField& Mg = this->db().objectRegistry::lookupObject<volScalarField>("Mg");
-            const volScalarField& pG = this->db().objectRegistry::lookupObject<volScalarField>("pG");
-            // const volScalarField& alphaS = this->db().objectRegistry::lookupObject<volScalarField>("alphaS");
-            const volScalarField& alphaG = this->db().objectRegistry::lookupObject<volScalarField>("alphaG");
             const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
             const volScalarField& omegaV = this->db().objectRegistry::lookupObject<volScalarField>("omegaV");
             const volScalarField& alpha = this->db().objectRegistry::lookupObject<volScalarField>("alpha");
 
-            const volVectorField& jC = this->db().objectRegistry::lookupObject<volVectorField>("jC");
-            const surfaceScalarField& jLCorr = this->db().objectRegistry::lookupObject<surfaceScalarField>("jLCorr");
-            // const volVectorField& sumDiffFlux = this->db().objectRegistry::lookupObject<volVectorField>("sumDiffFlux");
-
-            // const volVectorField& D = this->db().objectRegistry::lookupObject<volVectorField>("D");
-            // const surfaceVectorField& Sf = mesh.Sf();
-
-            // vectorField DCells = D.boundaryField()[this->patch().index()].patchInternalField();
-            // vectorField DBound = D.boundaryField()[this->patch().index()];
-            // vectorField SfBound = Sf.boundaryField()[this->patch().index()];
-            // scalarField Dmag =  (DBound - DCells) & SfBound / mag(SfBound);
-
-            // Pout << "min Dmag" <<min(Dmag) << "max(Dmag)" << max(Dmag) <<endl;
-
             scalarField rhoGBound = rhoG.boundaryField()[this->patch().index()];
-            scalarField alphaBound = alpha.boundaryField()[this->patch().index()];
             scalarField permBound = perm.boundaryField()[this->patch().index()];
             scalarField DEffBound = DEff.boundaryField()[this->patch().index()];
-            // scalarField MgBound = Mg.boundaryField()[this->patch().index()];
-            // scalarField MgCells = Mg.boundaryField()[this->patch().index()].patchInternalField();
-            // scalarField TBound = T.boundaryField()[this->patch().index()];
-            scalarField pGBound = pG.boundaryField()[this->patch().index()];
             scalarField omegaVBound = omegaV.boundaryField()[this->patch().index()];
-            scalarField pGCells = pG.boundaryField()[this->patch().index()].patchInternalField();
-
-            vectorField jCBound = jC.boundaryField()[this->patch().index()];
-            scalarField jLCorrBound = jLCorr.boundaryField()[this->patch().index()];
-            
-            // vectorField sumDiffFluxBound = sumDiffFlux.boundaryField()[patch().index()];
-
-            const fvMesh& mesh = patch().boundaryMesh().mesh();
-            const surfaceVectorField& Sf = mesh.Sf();
-            vectorField SfBound = Sf.boundaryField()[this->patch().index()];
-
-            scalarField jCSf = jCBound & SfBound / mag(SfBound);
-            scalarField jLCorrBoundLSf = jLCorr.boundaryField()[this->patch().index()] / mag(SfBound);
-
-            // scalarField jLSf = jLBound & SfBound / mag(SfBound);
-            // scalarField jCSf = jCBound & SfBound ;
-
-            // scalarField sumDiffFluxFaceBound = sumDiffFluxBound & SfBound / mag(SfBound);
                     
-            scalarField alphaGBound = alphaG.boundaryField()[this->patch().index()];
             scalarField K1Bound = rhoGBound * permBound * this->patch().deltaCoeffs();
             scalarField K2Bound = rhoGBound * DEffBound * this->patch().deltaCoeffs();
-            // scalarField K1Bound = rhoGBound * permBound / (mag(this->patch().delta() + (DBound - DCells)));
-            // scalarField K2Bound = rhoGBound * DEff / (mag(this->patch().delta() + (DBound - DCells)));
-
-            // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound * alphaGBound;
-            // scalarField denominator = K1Bound * (pGBound - pGBound) + K2Bound + K2Bound / MgBound * (MgBound - MgCells) + kM_ * rhoGBound;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound - sumDiffFluxFaceBound;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound * alphaGBound + K2Bound /MgBound * (MgBound - MgCells);
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound + K2Bound /MgBound * (MgBound - MgCells) - jCSf;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound - jCSf;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound - jCSf;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + K2Bound + kM_ * rhoGBound - jCSf;
-            // scalarField denominator = K2Bound + kM_ * rhoGBound * alphaGBound;
             scalarField denominator = K2Bound + kM_ * rhoGBound ;
 
-
-            // Info << "min (A): " << min(K1Bound * (pGBound - pGCells)) << " max (A): " << max(K1Bound * (pGBound - pGCells)) << endl;
-            // Info << "min (B): " << min(K2Bound) << " max (B): " << max(K2Bound) << endl;
-            // // Info << "min (C): " << min(K2Bound /MgBound * (MgBound - MgCells)) << " max (C): " << max(K2Bound /MgBound * (MgBound - MgCells)) << endl;
-            // Info << "min (C): " << min(kM_ * rhoGBound) << " max (D): " << max(kM_ * rhoGBound) << endl;
-            // Info << "min (D): " << min(jCSf) << " max (D): " << max(jCSf) << endl;
-            // scalarField denominator = K1Bound * (pGBound - pGCells) + kM_ * rhoGBound;
             scalarField f = 1.0 - K2Bound / denominator;
-            // scalar f = 1.0;
-            // scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t) + jCSf + jLCorrBound) / denominator;
-            // scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t) + jLCorrBoundLSf) / denominator;
             scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t)) / denominator;
-            // scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t) + jCSf) / denominator;
-            // scalarField a = (kM_ * rhoGBound * omegaVInfTable_(t) ) / denominator;
-
-            // Info << "min (f): " << min(f) << " max (f): " << max(f) << endl;
-            // Info << "min (a): " << min(a) << " max (a): " << max(a) << endl;
 
             forAll(omegaVBound, faceI)
             {
@@ -378,8 +294,6 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
                     this->refValue()[faceI] = a[faceI] / f[faceI];
                 }
             }
-            // this->valueFraction() = f;
-            // this->refValue() = a / f;
         }
     }
 
