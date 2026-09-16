@@ -1,4 +1,4 @@
-// -- calculation of the Darcy permeability, effective difusivity and effective heat conductivity
+// -- calculation of the effective model parameters
 
 // -- binary coefficients
 Dvc = dimensionedScalar("Dvc", DG.dimensions(), 2.15e-5) * Foam::pow(T / dimensionedScalar("dummyT", dimTemperature, 300), 1.75); // -- mass difusivity at correct temperature
@@ -8,11 +8,9 @@ Dvc.correctBoundaryConditions();
 Dva.correctBoundaryConditions();
 Dca.correctBoundaryConditions();
 
+// -- gas dynamic viscosity
 nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113); // -- gas viscosity at correct temperature
 nuG.correctBoundaryConditions();
-
-tortField = tortOpen * alpha + (1 - alpha) * tortClosed;
-tortField.correctBoundaryConditions();
 
 // -- effective diffusivity
 DEffvM = alphaG * alpha / tortOpen * 1.0 / ((yC / Dvc + yA / Dva) + yV / (1 - omegaV) * (omegaC / Dvc + omegaAir / Dva));
@@ -33,10 +31,8 @@ scalar logKBaked = Foam::log(kBaked.value());
 permGLViscG = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
 permGLViscG.correctBoundaryConditions();
 
-// Info << "alphaG min: " << min(alphaG).value() << ", max: " << max(alphaG).value() << endl;
-
-
 // -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
+// -- ratio of wall thickness to wall-pore thickness (delta)
 // lambdaEff = dummyLamdba *  (lambdaS.value() - 0.134 * alphaG - 0.219 * Foam::pow(alphaG, 0.5));
 
 forAll(lambdaEff, i)
@@ -73,201 +69,42 @@ forAll(lambdaEff.boundaryField(), patchI)
     }
 }
 
-lambdaEff = lambdaEff * (0.25*Foam::atan((T / dummyT - 273 - 50) / 8) / 3.1415 + 1.1);
+// -- calculation of variables for Lucas closed-cell vapor flux
+volScalarField dPVdT = rhoG * univR / Mg * yV;
+dPVdT.correctBoundaryConditions();
 
+// -- derivation of saturated water pressure with respect to moisture content (Oswin activity)
+dPSatAwWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moistureSafe/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moistureSafe/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureSafe/a),(1.0/nCoef))/(nCoef*moistureSafe*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moistureSafe/a),(1.0/nCoef)) + 1),2))) * pSat;
+dPSatAwWdX.correctBoundaryConditions();
 
+// volScalarField DlVSF = dimensionedScalar("dummyDl", Dl.dimensions(), 1) * 9.75*Foam::exp(-7689.9/(T/dummyT)-0.0858*moisture);
+// dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * DlVSF) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+dKoeffLucas.correctBoundaryConditions();
 
-// -- purlis lambda alternative
+// -- henrys law parameters and dissolution kinetics
+dimensionedScalar KH0("KH0", dimensionSet(0, 0, 0, 0, 0, 0, 0), 0.035);
+volScalarField kH = KH0 * Foam::exp(2400.0 * (1.0 / (T / dummyT) - 1.0 / 298.15));
+dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0.015);
+volScalarField kCO2VSF = kCO2 * availSurf / 8.314 / Foam::pow(T / dummyT, 0.5) * molMC.value();
+mCO2Dis = kCO2VSF * (1e5 * XCO2InL / kH / molMC.value() * dummyP - yC * pG);
+pCSat = 1e5 * XCO2InL / kH / molMC.value() * dummyP;
+
+// -- purlis lambda alternative (legacy)
 // lambdaEff.correctBoundaryConditions();
 // lambdaEff = dummyLamdba *  (lambdaS.value());
 // lambdaEff = dummyLamdba *  (lambdaS.value() * alphaD + 0.02 * alphaG);
 
-// -- lucas lambda alternative
+// -- lucas lambda alternative (legacy)
 // volScalarField phi = (moisture - 0.11111) / (0.8518 - 0.11111);
 // lambdaEff = dummyLamdba *  (0.423 * phi + 0.18 * (1-phi));
 // lambdaEff = dummyLamdba *  (0.37 * phi + 0.18 * (1-phi));
 // lambdaEff = dummyLamdba *  0.3;
 
-// lambdaEff.correctBoundaryConditions();
-
-// -- calculation of variables for Lucas closed-cell vapor flux
-// -- derivation of saturated water pressure with respect to temperature
+// -- derivation of saturated water pressure with respect to temperature (lostie activity -- legacy)
 // dPSatAwdT = 3.81644e6*Foam::exp((81.443*T/dummyT - 22839.16559)/(5.*T/dummyT - 230.65))/(Foam::pow(T/dummyT - 46.13, 2)) * dummyP / dummyT * aw;
 // dPSatAwdT.correctBoundaryConditions();
-
-volScalarField dPVdT = rhoG * univR / Mg * yV;
-dPVdT.correctBoundaryConditions();
-
-// -- derivation of saturated water pressure with respect to moisture content
-dPSatAwWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef))) - Foam::pow(10000,(1.0/nCoef))*Foam::pow((moisture/a),(2.0/nCoef)) + Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef))/(nCoef*moisture*Foam::pow((Foam::pow(100,(1.0/nCoef))*Foam::pow((moisture/a),(1.0/nCoef)) + 1),2))) * pSat;
 // dPSatAwWdX = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture, 0.78)))/(Foam::pow(moisture,1.78)) * pSat;
-
-// forAll(dPSatAwWdX, i)
-// {
-//     if (moisture[i] < SMALL)
-//     {
-//         dPSatAwWdX[i] = 0.0;
-//     }
-//     else
-//     {
-//         dPSatAwWdX[i] = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moisture[i], 0.78)))/(Foam::pow(moisture[i],1.78)) * pSat[i];
-//     }
-// }
-
-// forAll(dPSatAwWdX.boundaryField(), patchI)
-// {
-//     scalarField& dPSatAwWdXP = dPSatAwWdX.boundaryFieldRef()[patchI];
-//     scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
-//     scalarField& pSatP = pSat.boundaryFieldRef()[patchI];
-//     forAll(dPSatAwWdXP, faceI)
-//     {
-//         if (moistureP[faceI] < SMALL)
-//         {
-//             dPSatAwWdXP[faceI] = 0.0;
-//         }
-//         else
-//         {
-//             dPSatAwWdXP[faceI] = 0.06230065326*Foam::exp(-0.07987263239/(Foam::pow(moistureP[faceI], 0.78)))/(Foam::pow(moistureP[faceI],1.78)) * pSatP[faceI];
-//         }
-//     }
-// }
-
-
-// dPWdX = 482363.3441*Foam::exp(0.0071*T/dummyT - 4.5)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), 1.631578947)/(Foam::pow(183298.0708*Foam::pow(moisture,2)*Foam::exp(0.0142*T/dummyT - 9.)*Foam::pow(moisture*Foam::exp(0.0071*T/dummyT - 4.5), (631578947.0/1000000000.0)) + 1.0,2.0)) * pSat;
-// dPSatAwWdX.correctBoundaryConditions();
-
-// -- ratio of cell wall to all thickness
-// delta = 1 - Foam::pow((alphaG), 1.0/3.0);
-// delta = 1.0;
-// delta = deltaSc;
-// delta.correctBoundaryConditions();
-
-volScalarField DlVSF = dimensionedScalar("dummyDl", Dl.dimensions(), 1) * 9.75*Foam::exp(-7689.9/(T/dummyT)-0.0858*moisture);
-dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * DlVSF) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
-// dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
-// dKoeffLucas =  alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
-dKoeffLucas.correctBoundaryConditions();
-
-// Info << "tu OK" << endl;
-
-
-// volScalarField a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
-// volScalarField aw = Foam::pow(moisture * 100 / a, (1.0 / nCoef)) / (Foam::pow(moisture * 100/ a, (1.0 / nCoef)) + 1); 
-
-
-// Info << "min(dPSatdT) " << min(dPSatdT).value() << endl;
-// Info << "max(dPSatdT) " << max(dPSatdT).value() << endl;
-
-// Info << "min(aw) " << (1 - alpha) * alphaG * DEff * aw * (-dHT) / univR / T * dPSatdT * dummyP / dummyT * molMV << endl;
-// -- zhang lambda alternative
-// volScalarField addToLam = (1 - alpha) * alphaG * D * aw * (-dHT) / univR / T * dPSatdT * dummyP / dummyT * molMV * 5;
-// volScalarField addToLam = (1 - alpha) * alphaG * Dvc * aw * (-dHT) / univR / T * dPSatdT * molMV;
-// volScalarField addToLam = (1 - alpha) * alphaG * Dvc * aw * (-dHT) / univR / T * dPSatdT * molMV;
-// volScalarField addToLam = (1 - alpha) * alphaG * Dvc * (-dHT) / univR / T * dPVdT * molMV;
-// volScalarField addToLam = dKoeffLucas * (dHConst) * aw * dPSatdT;
-
-// lambdaEff += addToLam;
-// lambdaEff.correctBoundaryConditions();
-
-// Info << "min(addToLam) " << min(addToLam).value() << endl;
-// Info << "max(addToLam) " << max(addToLam).value() << endl;
- 
-// forAll(lambdaEff, cellI)
-// {
-//     scalar dTepl = 4e-3;
-//     scalar yC = 1.0417e-2;
-//     vector cellReal = physics->mesh().C()[cellI] + physics->D()[cellI];
-//     if (cellReal[0] > 4.45e-2 && cellReal[1] > yC - dTepl/2 && cellReal[1] < yC + dTepl/2)
-//     {
-//         lambdaEff[cellI] = 0.2;
-//     }
-// }
-// lambdaEff.correctBoundaryConditions();
-
-
-
-
-// -- legacy from Zhang 2005
-// kGForPerm = (1 - 1.1 * (alphaL / (1 - alphaS))); // -- relative permeability (Zhang Transport Processes and Large Deformation During Baking of Bread 2005)
-// kGForPerm.correctBoundaryConditions();
-// forAll(permGLViscG, cellI)
-// {
-//     // -- crop for low values of alphaG
-//     // if(kGForPerm[cellI] > 1e-4)
-//     // if(alphaCrust[cellI] > 0.15)
-//     if ((alphaL[cellI] / (1 - alphaS[cellI])) < 0.9)
-//     {
-//         permGLViscG[cellI] = permGLViscGSc.value() / nuG[cellI] * kGForPerm[cellI];
-//     }
-//     else
-//     {
-//         permGLViscG[cellI] = 0;
-//     }
-//     // {
-//         // permGLViscG[cellI] = permGLViscGSc.value() * kGForPerm[cellI] * (1 - alphaS[cellI] - alphaL[cellI]);
-//         // DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333) * (1 - alphaS[cellI] - alphaL[cellI]);
-//         // permGLViscG[cellI] = permGLViscGSc.value() / nuG[cellI] * kGForPerm[cellI];
-//         // DEff[cellI] = D[cellI] * Foam::pow(kGForPerm[cellI] * (1 - alphaS[cellI]), 1.333);
-//         // DEff[cellI] = D[cellI] * 0.1;
-//     // }
-//     // else
-//     // {
-//     //     permGLViscG[cellI] = 1e-11 ;
-//     //     // DEff[cellI] = 1e-9;
-//     // }
-//     // if((1 - alphaL[cellI] - alphaS[cellI]) > 0.75)
-//     // {
-//     //     permGLViscG[cellI] = permGLViscG[cellI] * 10;
-//     // }
-// }
-
-// DEff = D * (1 - (Foam::atan(100*(alphaCrust-0.1))/(3.14/2) + 1)/2);
-
-// permGLViscG = permGLViscGSc / nuG * kGForPerm;
-// DEff = D * (1 - alphaL - alphaS) * Foam::pow(kGForPerm * (1 - alphaS), 1.333);
-
-
-// DEff = D * (1 - alphaL - alphaS) / 3.5;
-// Info << "min(nuG) " << min(nuG).value() << endl;
-// Info << "min(permGLViscG) " << min(permGLViscG).value() << endl;
-
-// permGLViscG = permGLViscGSc / nuG * (Foam::atan(T / dummyT - 323) / 3.14 + 0.5);
-
-// DEff = alphaCrust * dimensionedScalar("smallDEff", DEff.dimensions(), 1e-11) + (1 - alphaCrust) * D;
-
-// permGLViscG = permGLViscGSc / nuG;
-
-// permGLViscG *= (1 - alphaL - alphaS); 
-
-// -- effective heat conductivity 
-
-// -- gas heat conductivity
-// volScalarField kappa (kappaA + kappaB * T + kappaC * Foam::pow(T, 2) + kappaD * Foam::pow(T, 3));
-// volScalarField lambdaG = dummyLamdba * 2.56008e-3 * Foam::pow(T / dummyT, 0.5 / (1 + 207.009 / T * dummyT));
-
-// -- effective thermal conductivity (different approaches)
-// lambdaEff = dummyLamdba * 
-//           Foam::pow(lambdaS / dummyLamdba, alphaS) * 
-//           Foam::pow(lambdaL / dummyLamdba, alphaL) * 
-//           Foam::pow(lambdaG / dummyLamdba, 1 - alphaS - alphaL);
-
-// lambdaEff = (alphaS - alphaS + 1) * lambdaS;
-// lambdaEff.correctBoundaryConditions();
-
-// kappaPM = (kappaS * alphaS) + 
-//           (kappaL * alphaF * phiL) + 
-//           (kappa * alphaF * phiG);
-// lambdaEff = (lambdaS * alphaS) + 
-//             (lambdaL * alphaL) + 
-//             (lambdaG * (1 - alphaS - alphaL));
-// lambdaEff = dummyLamdba * (0.03-(0.02/(moisture-0.6)));
-// forAll(lambdaEff, cellI)
-// {
-//     if (lambdaEff[cellI] > 0.3)
-//     {
-//         lambdaEff[cellI] = 0.3;
-//     }
-// }
 
 
 

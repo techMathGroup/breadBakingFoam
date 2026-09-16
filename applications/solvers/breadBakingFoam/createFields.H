@@ -278,21 +278,6 @@ volScalarField alpha
 );
 alpha.correctBoundaryConditions();
 
-volScalarField tortField 
-(
-    IOobject
-    (
-        "tortField", 
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    tortOpen * alpha + (1 - alpha) * tortClosed,
-    "calculated"
-);
-tortField.correctBoundaryConditions();
-
 // -- Darcy gas flux
 volTensorField jGTilda
 (
@@ -500,7 +485,7 @@ volScalarField availSurf
         writeOption2
     ),
     physics->mesh(),
-    dimensionedScalar("availSurf", dimless, 0),
+    dimensionedScalar("availSurf", dimless, 1),
     "calculated"
 );
 availSurf.correctBoundaryConditions();
@@ -596,20 +581,20 @@ volVectorField jAE
 );
 jAE.correctBoundaryConditions();
 
-surfaceScalarField sumJiHi
-(
-    IOobject
-    (
-        "sumJiHi",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    0 * (fvc::interpolate((jVE * (CpVapor * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf())),
-    "calculated"
-);
-sumJiHi.correctBoundaryConditions();
+// surfaceScalarField sumJiHi
+// (
+//     IOobject
+//     (
+//         "sumJiHi",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::NO_WRITE
+//     ),
+//     0 * (fvc::interpolate((jVE * (CpVapor * (T - TRef)))) & physics->mesh().Sf() / mag(physics->mesh().Sf())),
+//     "calculated"
+// );
+// sumJiHi.correctBoundaryConditions();
 
 volScalarField dPSatAwdT
 (
@@ -702,32 +687,32 @@ volScalarField mCO2Dis
 );
 mCO2Dis.correctBoundaryConditions();
 
-volVectorField jL
-(
-    IOobject
-    (
-        "jL",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        writeOption2
-    ),
-    - dKoeffLucas * ((Finv.T() & fvc::grad(pV)))
-);
-jL.correctBoundaryConditions();
+// volVectorField jL
+// (
+//     IOobject
+//     (
+//         "jL",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         writeOption2
+//     ),
+    
+// );
+// jL.correctBoundaryConditions();
 
-surfaceScalarField jLCorr
-(
-    IOobject
-    (
-        "jLCorr",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
-    ),
-    linearInterpolate(Finv & jL) & physics->mesh().Sf()
-);
+// surfaceScalarField jLSurf
+// (
+//     IOobject
+//     (
+//         "jLSurf",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::NO_WRITE
+//     ),
+//     - linearInterpolate(Finv & (dKoeffLucas * ((Finv.T() & fvc::grad(pV))))) & physics->mesh().Sf()
+// );
 
 volScalarField pCSat
 (
@@ -743,17 +728,19 @@ volScalarField pCSat
     "calculated"
 );
 
-volScalarField odtokMoisture
+surfaceScalarField jLSurf = - linearInterpolate(Finv & (dKoeffLucas * ((Finv.T() & fvc::grad(pV))))) & physics->mesh().Sf();
+
+volScalarField liquidOutFlux
 (
     IOobject
     (
-        "odtokMoisture",
+        "liquidOutFlux",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    fvc::div(fvc::interpolate(J) * jLCorr),
+    fvc::div(jLSurf),
     "calculated"
 );
 

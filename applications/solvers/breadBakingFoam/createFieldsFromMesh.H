@@ -26,18 +26,18 @@ volScalarField omegaC
     physics->mesh()
 );
 
-volScalarField rhoDC
-(
-    IOobject
-    (
-        "rhoDC",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh()
-);
+// volScalarField rhoDC
+// (
+//     IOobject
+//     (
+//         "rhoDC",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::MUST_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh()
+// );
 
 // volScalarField omegaC
 // (
@@ -138,17 +138,17 @@ volScalarField T
 );
 
 // -- crust of bread
-volScalarField alphaCrust
-(
-    IOobject
-    (
-        "alphaCrust",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh()
-);
+// volScalarField alphaCrust
+// (
+//     IOobject
+//     (
+//         "alphaCrust",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::MUST_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh()
+// );
 
 // ************************************************************************* //

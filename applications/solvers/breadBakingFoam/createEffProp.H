@@ -1,4 +1,20 @@
 // -- placeholder for effective heat conductivity
+dimensionedScalar moistureFloor("moistureFloor", dimless, SMALL);
+
+volScalarField moistureSafe
+(
+    IOobject
+    (
+        "moistureSafe",
+        runTime.timeName(),
+        physics->mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    max(moisture, moistureFloor),
+    "calculated"
+);
+
 volScalarField lambdaEff
 (
     IOobject
