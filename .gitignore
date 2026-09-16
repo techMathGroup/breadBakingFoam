@@ -28,5 +28,6 @@ pyCtrlScripts/*GAB*
 pyCtrlScripts/*Opt*
 
 pyCtrlScripts/latex_data
+pyCtrlScripts/*.out
 pyCtrlScripts/bakingCurves*
 Experiments*
