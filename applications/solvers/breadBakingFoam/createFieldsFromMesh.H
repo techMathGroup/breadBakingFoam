@@ -95,19 +95,19 @@ volScalarField moisture
 );
 moisture.correctBoundaryConditions();
 
-// -- dough matrix density
-volScalarField rhoD
-(
-    IOobject
-    (
-        "rhoD",
-        runTime.timeName(),
-        physics->mesh(),
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    physics->mesh()
-);
+// // -- dough matrix density
+// volScalarField rhoD
+// (
+//     IOobject
+//     (
+//         "rhoD",
+//         runTime.timeName(),
+//         physics->mesh(),
+//         IOobject::MUST_READ,
+//         IOobject::AUTO_WRITE
+//     ),
+//     physics->mesh()
+// );
 
 // -- gas pressure
 volScalarField pG

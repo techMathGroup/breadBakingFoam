@@ -682,7 +682,7 @@ volScalarField mCO2Dis
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-     0.067275 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoD * alphaD / dummyT,
+    0.0 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoSScalar * alphaD / dummyT,
     "calculated"
 );
 mCO2Dis.correctBoundaryConditions();
