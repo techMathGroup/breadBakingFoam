@@ -210,10 +210,10 @@ rhoD.relax();
 // mCO2Dis = 0.067275 * Foam::exp(-0.00207 * (T / dummyT - 273)) * fvc::ddt(T) * 1e-3 * rhoD * alphaD * omegaL / dummyT;
 dimensionedScalar KH0("KH0", dimensionSet(0, 0, 0, 0, 0, 0, 0), 0.035);
 volScalarField kH = KH0 * Foam::exp(2400.0 * (1.0 / (T / dummyT) - 1.0 / 298.15));
-dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0.2);
+dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0.015);
 volScalarField kCO2VSF = kCO2 * availSurf / 8.314 / Foam::pow(T / dummyT, 0.5) * molMC.value();
 // dimensionedScalar kCO2("kCO2", dimensionSet(0, -2, 1, 0, 0, 0, 0), 0);
-mCO2Dis = kCO2VSF * alphaG * (1e5 * XCO2InL / kH / molMC.value() * dummyP - yC * pG);
+mCO2Dis = kCO2VSF * (1e5 * XCO2InL / kH / molMC.value() * dummyP - yC * pG);
 pCSat = 1e5 * XCO2InL / kH / molMC.value() * dummyP;
 
 fvScalarMatrix CO2inLEqn
@@ -227,7 +227,7 @@ fvScalarMatrix CO2inLEqn
     // - (kCO2 * (1e5 / kH / molMC.value() * rhoD / dummyRho * omegaL * dummyP) * XCO2InL)
     + J * kCO2VSF * yC * pG
 
-    // - mCO2Dis
+    // - J * mCO2Dis
 );
 
 // Info << "Min (XCO2InL): " << min(XCO2InL).value() << ", max (XCO2InL): " << max(XCO2InL).value() << "." << endl;

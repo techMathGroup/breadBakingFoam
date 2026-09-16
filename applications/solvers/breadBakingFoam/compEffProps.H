@@ -44,12 +44,12 @@ forAll(lambdaEff, i)
     if (alphaG[i] > SMALL)
     {
         lambdaEff[i] = lambdaS.value() - 0.134 * alphaG[i] - 0.219 * Foam::pow(alphaG[i], 0.5);
-        // delta[i] = 1 - Foam::pow((alphaG[i]), 1.0/3.0);
+        delta[i] = 1 - Foam::pow((alphaG[i]), 1.0/3.0);
     }
     else
     {
         lambdaEff[i] = lambdaS.value();
-        // delta[i] = 1 - SMALL;
+        delta[i] = 1 - SMALL;
     }
 }
 
@@ -63,12 +63,12 @@ forAll(lambdaEff.boundaryField(), patchI)
         if (alphaGP[faceI] > SMALL)
         {
             lambdaEffP[faceI] = (lambdaS.value() - 0.134 * alphaGP[faceI] - 0.219 * Foam::pow(alphaGP[faceI], 0.5));
-            // deltaP[faceI] = 1 - Foam::pow((alphaGP[faceI]), 1.0/3.0);
+            deltaP[faceI] = 1 - Foam::pow((alphaGP[faceI]), 1.0/3.0);
         }
         else
         {
             lambdaEffP[faceI] = lambdaS.value();
-            // deltaP[faceI] = 1 - SMALL;
+            deltaP[faceI] = 1 - SMALL;
         }
     }
 }
@@ -141,7 +141,9 @@ dPSatAwWdX = ((Foam::pow(100,(2.0/nCoef)))*(Foam::pow((moisture/a),(2.0/nCoef)))
 // delta = 1.0;
 // delta = deltaSc;
 // delta.correctBoundaryConditions();
-dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
+
+volScalarField DlVSF = dimensionedScalar("dummyDl", Dl.dimensions(), 1) * 9.75*Foam::exp(-7689.9/(T/dummyT)-0.0858*moisture);
+dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * DlVSF) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 // dKoeffLucas = (1 - alpha) * alphaG / ((1 - delta) * (univR * T / molMV  * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 // dKoeffLucas =  alphaG / ((1 - delta) * (univR * T / molMV * (1 - yV) / Dvc) + delta * (1.0 / (rhoL * Dl) * dPSatAwWdX + dHConst / lambdaS * dPSatAwdT) );
 dKoeffLucas.correctBoundaryConditions();
