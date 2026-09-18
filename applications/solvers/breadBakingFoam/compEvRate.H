@@ -10,7 +10,7 @@ aw = Foam::pow(moistureSafe * 100.0 / a, invNCoeff) / (Foam::pow(moistureSafe * 
 
 // -- regime transition function
 // alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
-alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen)) / 3.1415 + 0.5;
+alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
 
 
 // -- boundary conditions are opened

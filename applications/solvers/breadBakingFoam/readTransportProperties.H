@@ -39,18 +39,34 @@ IOdictionary reactiveProperties
     )
 );
 
+// -- fvSolution dictionary
+IOdictionary fvSolution
+(
+    IOobject
+    (
+        "fvSolution",      // dictionary name
+        runTime.system(),            // dict is found in "constant"
+        physics->mesh(),                      // registry for the dict
+        IOobject::MUST_READ,        // must exist, otherwise failure
+        IOobject::NO_WRITE          // dict is only read by the solver
+    )
+);
+
+
 // -- model transport parameters 
-dimensionedScalar univR, permGLViscGSc, kappaS;
-scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang, deltaSc, moistureMin;
+dimensionedScalar univR, gasPermeabilityRaw, gasPermeabilityBaked, kappaS;
+scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang, deltaSc, moistureMin, nItersAfter;
 transportProperties.subDict("genProps").readEntry("univR", univR); // -- universal gas constant
 transportProperties.readEntry("withDeformation", withDeformation);
-transportProperties.readEntry("permGLViscG",permGLViscGSc);
+transportProperties.readEntry("gasPermeabilityRaw", gasPermeabilityRaw);
+transportProperties.readEntry("gasPermeabilityBaked", gasPermeabilityBaked);
 transportProperties.readEntry("tortOpen", tortOpen);
 transportProperties.readEntry("tortClosed", tortClosed);
 transportProperties.readEntry("alphaD0",alphaD0);
 transportProperties.readEntry("zhang",zhang);
 transportProperties.readEntry("delta",deltaSc);
 transportProperties.readEntry("moistureMin",moistureMin);
+fvSolution.subDict("PIMPLE").readEntry("nItersAfter",nItersAfter);
 
 // -- model thermophysical parameters 
 dimensionedScalar rhoSScalar, rhoL, CpS, CpL, CpVapor, CpCO2, molMC, molMV, lambdaS, lambdaL, DG, Dl;
@@ -103,6 +119,12 @@ dimensionedScalar dummyCp (dimensionedScalar("dummyp", CpS.dimensions(), 1));
 dimensionedScalar dummyLamdba (dimensionedScalar("dummyLamdba", lambdaS.dimensions(), 1));
 dimensionedScalar dummyRho (dimensionedScalar("dummyRho", rhoSScalar.dimensions(), 1));
 dimensionedScalar dummyD (dimensionedScalar("dummyD", DG.dimensions(), 1));
+dimensionedScalar gasDynamicViscosityPrefactor
+(
+    "gasDynamicViscosityPrefactor",
+    dimMass/dimLength/dimTime,
+    1.52451e-6
+);
 
 double pResidual = 1;
 double omegaVResidual = 1;

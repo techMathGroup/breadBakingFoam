@@ -61,7 +61,7 @@ def saveFigPostProcess(kynuti, simDir):
         TPoint = readDataFromLogFile("%s/log.TPoint%d" %(simDir, j+1))
         simData[f'sim{j+1}'] = TPoint
         
-    simData['weight'] = readDataFromLogFile("%s/log.intWeigth" %simDir)
+    # simData['weight'] = readDataFromLogFile("%s/log.intWeigth" %simDir)
     simData['moisture'] = readDataFromLogFile("%s/log.intMoisture" %simDir)
 
 
@@ -102,21 +102,21 @@ def saveFigPostProcess(kynuti, simDir):
     ax2.plot(x_exp_w, y_exp_w, color='k', linewidth=2, label='Exp Moisture')
     save_for_latex(os.path.join(out_dir, 'moisture_exp.dat'), x_exp_w, y_exp_w, "Time(min)\tMoistureRatio")
 
-    rhoData = simData['weight'][:,1]
-    x_sim_w = simData['weight'][:,0] / 60 - kynuti / 60
-    weight_sim_data = rhoData * 36  * 1000
-    print(simData['weight'])
-    print(simData['weight'].shape)
+    # rhoData = simData['weight'][:,1]
+    # x_sim_w = simData['weight'][:,0] / 60 - kynuti / 60
+    # weight_sim_data = rhoData * 36  * 1000
+    # print(simData['weight'])
+    # print(simData['weight'].shape)
     # print(simData['moisture'])
     # print(simData['moisture'].shape)
     # loss_sim = (weight_sim_data[110] - weight_sim_data)
     # loss_sim = (weight_sim_data[10] - weight_sim_data)
-    loss_sim = (weight_sim_data[0] - weight_sim_data)
-    y_sim_w = rhoData * 72 * 1000
-    ax3.plot(x_sim_w, y_sim_w, '--', color='k', linewidth=2, label='Sim Moisture')
-    ax3.plot(expData['weightData'][:,0], expData['weightData'][:,1]-expData['weightData'][5,1]+y_sim_w[0], '--', color='k', linewidth=2, label='Sim Moisture')
-    ax2.plot(simData['weight'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1], '--', color='k', linewidth=2, label='Sim Moisture')
-    save_for_latex(os.path.join(out_dir, 'moisture_sim.dat'), x_sim_w, y_sim_w, "Time(min)\tMoistureRatio")
+    # loss_sim = (weight_sim_data[0] - weight_sim_data)
+    # y_sim_w = rhoData * 72 * 1000
+    # ax3.plot(x_sim_w, y_sim_w, '--', color='k', linewidth=2, label='Sim Moisture')
+    # ax3.plot(expData['weightData'][:,0], expData['weightData'][:,1]-expData['weightData'][5,1]+y_sim_w[0], '--', color='k', linewidth=2, label='Sim Moisture')
+    ax2.plot(simData['moisture'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1], '--', color='k', linewidth=2, label='Sim Moisture')
+    # save_for_latex(os.path.join(out_dir, 'moisture_sim.dat'), x_sim_w, y_sim_w, "Time(min)\tMoistureRatio")
     ax3.set_xlim(0, 25)
 
     ax2.set_xlabel('Time (min)', fontsize=12)
@@ -169,9 +169,9 @@ def saveFigPostProcess(kynuti, simDir):
         unified_data.extend([y_sim_interp, y_exp_interp, y_exp_mean, y_exp_std])
         header.extend([f"Sim_TC{j+1}", f"Exp_TC{j+1}", f"Exp_Mean_TC{j+1}", f"Exp_Std_TC{j+1}"])
 
-    t_unifiedHere = simData['weight'][:,0] / 60 - kynuti / 60
+    t_unifiedHere = simData['moisture'][:,0] / 60 - kynuti / 60
 
-    y_sim_w_interp = np.interp(t_unified, simData['weight'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1])
+    y_sim_w_interp = np.interp(t_unified, simData['moisture'][:,0] / 60 - kynuti / 60, simData['moisture'][:,1])
     y_exp_w_interp = np.interp(t_unified, x_exp_w, y_exp_w)
     
     # Calculate mean and std across all experiments for moisture

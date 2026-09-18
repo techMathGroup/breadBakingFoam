@@ -26,23 +26,6 @@ boundaryField
     {
         type  symmetry;
     }
-
-    // custom experiment
-    top
-	{
-        type breadTMixed;
-        refValue        uniform 300;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 300;
-        alpha           9.5;
-        TInfTableDict   
-        {
-            file "$FOAM_CASE/constant/TInfTable";
-            outOfBounds warn;
-        }
-	}
-
     sides
 	{
         type breadTMixed;
@@ -50,7 +33,7 @@ boundaryField
         refGradient     uniform 0;
         valueFraction   uniform 0;
         value           uniform 300;
-        alpha           9.5;
+        alpha           10;
         TInfTableDict   
         {
             file "$FOAM_CASE/constant/TInfTable";
@@ -66,27 +49,7 @@ boundaryField
         refGradient     uniform 0;
         valueFraction   uniform 0;
         value           uniform 300;
-        alpha           9.5;
-        TInfTableDict   
-        {
-            file "$FOAM_CASE/constant/TInfTableBottom";
-            outOfBounds warn;
-        }
-        qInfTableDict   
-        {
-            file "$FOAM_CASE/constant/qInfTableBottom";
-            outOfBounds warn;
-        }
-	}
-    bottom2
-	{
-        // type breadTMixed;
-        type breadTBottom;
-        refValue        uniform 300;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 300;
-        alpha           9.5;
+        alpha           10;
         TInfTableDict   
         {
             file "$FOAM_CASE/constant/TInfTableBottom";

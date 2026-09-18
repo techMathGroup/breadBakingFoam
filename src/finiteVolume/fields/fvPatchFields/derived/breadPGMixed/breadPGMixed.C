@@ -249,9 +249,9 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    if(this->db().objectRegistry::foundObject<volScalarField>("permGLViscG"))
+    if(this->db().objectRegistry::foundObject<volScalarField>("gasDarcyMobility"))
     {
-        const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("permGLViscG");
+        const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("gasDarcyMobility");
         if (perm.boundaryField()[this->patch().index()].size() != 0)
         {
             IOdictionary transportProperties = this->db().objectRegistry::lookupObject<IOdictionary>("transportProperties");
@@ -259,12 +259,12 @@ void Foam::breadPGMixedFvPatchScalarField::evaluate(const Pstream::commsTypes)
             // -- heat transfer to bread computation
             // -- patch deltaCoeffs
             scalar molMRef;
-            // dimensionedScalar permGLViscG, univR;
+            // dimensionedScalar gasDarcyMobility, univR;
             dimensionedScalar univR;
             // transportProperties.readEntry("kGOver",kG);
             transportProperties.subDict("genProps").readEntry("univR",univR);
 
-            // thermophysicalProperties.subDict("solid").readEntry("permGLViscG",permGLViscG);
+            // thermophysicalProperties.subDict("solid").readEntry("gasDarcyMobility",gasDarcyMobility);
             thermophysicalProperties.subDict("mixture").subDict("specie").readEntry("molWeight",molMRef);
             molMRef = molMRef * 1e-3;
 

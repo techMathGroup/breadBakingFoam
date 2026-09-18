@@ -29,7 +29,8 @@ withDeformation 1;
 
 withEq 1;
 
-permGLViscG permGLViscG [-1 3 1 0 0 0 0] 9e-13;
+gasPermeabilityRaw gasPermeabilityRaw [0 2 0 0 0 0 0] 9e-13;
+gasPermeabilityBaked gasPermeabilityBaked [0 2 0 0 0 0 0] 1e-11;
 
 tortOpen 2;
 tortClosed 10;
@@ -53,4 +54,3 @@ omegaVInfTableDict
     file "$FOAM_CASE/constant/omegaVInfTable";
     outOfBounds warn;
 }
-

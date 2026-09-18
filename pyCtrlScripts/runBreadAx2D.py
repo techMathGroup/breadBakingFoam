@@ -43,7 +43,7 @@ arcL = 0.008    # -- length of the arc at the side of the bread
 
 '''Internal transport parameters'''
 DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-Dl = 6e-12  # -- liquid water difusivity in the dough
+Dl = 5e-12  # -- liquid water difusivity in the dough
 tortOpen = 2.4   # -- tortuosity
 tortClosed = 70   # -- tortuosity
 
@@ -52,11 +52,12 @@ tortClosed = 70   # -- tortuosity
 # -- https://doi.org/10.1016/j.fbp.2008.04.002
 lambdaS = 0.42
 
-# -- closed-cell bread intristic permeability
-# perm = 1.3e-14  # -- bread permeability 
-# perm = 3.7e-14  # -- bread permeability 
-perm = 5e-14  # -- bread permeability 
-# perm = 2e-14  # -- bread permeability 
+# -- intrinsic gas permeabilities of raw and baked bread
+# gasPermeabilityRaw = 1.3e-14
+# gasPermeabilityRaw = 3.7e-14
+gasPermeabilityRaw = 4.5e-14
+# gasPermeabilityRaw = 2e-14
+gasPermeabilityBaked = 1e-11
 
 # -- heat capacities for the individual phases
 CpS = 1130   # -- solid phase
@@ -101,7 +102,7 @@ tau1 = 1.6
 
 
 '''Numerics'''
-timeStep = 0.2    # -- computational time step
+timeStep = 0.25    # -- computational time step
 plusTime1 = 360 # -- how long to run with deformation
 plusTime2 = 540 # -- how long to run without deformation
 writeInt = 10   # -- how often to write results
@@ -122,8 +123,8 @@ alphaG = 10 # -- external heat transfer coeficient
 '''Post-processing'''
 fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
 
-outFolder = '../ZZ_cases/00_breads/016_coarse_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
-# baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, perm)
+outFolder = '../ZZ_cases/00_breads/008_newTau_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, gasPermeabilityRaw)
+# baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, gasPermeabilityRaw)
 
 
 # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
@@ -176,7 +177,8 @@ if withKynuti:
 baseCase.setParameters(
     [
         ['constant/transportProperties', 'withDeformation', str(withDeformation), ''],
-        ['constant/transportProperties', 'permGLViscG', str(perm), ''],
+        ['constant/transportProperties', 'gasPermeabilityRaw', str(gasPermeabilityRaw), ''],
+        ['constant/transportProperties', 'gasPermeabilityBaked', str(gasPermeabilityBaked), ''],
         # ['constant/transportProperties', 'tort', str(tort), ''],
         ['constant/transportProperties', 'tortOpen', str(tortOpen), ''],
         ['constant/transportProperties', 'tortClosed', str(tortClosed), ''],

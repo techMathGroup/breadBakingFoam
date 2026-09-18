@@ -27,8 +27,6 @@ boundaryField
 
     sides
     {
-        // type fixedValue;
-        // value uniform 1.5e-2;
         type breadOmegaVMixed;
         kM               0.01; // -- heat transfer coefficient
 
@@ -42,10 +40,7 @@ boundaryField
             file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffvM;
-        // type zeroGradient;
-        // type fixedValue;
-        // value $internalFiesld;
+        DFieldName      DEffvM; // -- name of the diffusion coeficient field
     }
     "(wedgeZ0|wedgeZE)"
 	{
@@ -54,11 +49,8 @@ boundaryField
 
     bottom
     {
-        // type fixedValue;
-        // value uniform 1.5e-2;
-        // // type zeroGradient;
         type breadOmegaVMixed;
-        kM               1e-5; // -- heat transfer coefficient
+        kM               0.01; // -- heat transfer coefficient
 
         // -- mixed BC mandatory entires
         refValue        uniform 8e-3;
@@ -70,34 +62,8 @@ boundaryField
             file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffvM;
-        // type zeroGradient;
-        // type fixedValue;
-        // value $internalField;
-        // type zeroGradient;
+        DFieldName      DEffvM; // -- name of the diffusion coeficient field
 
-    }
-    bottom2
-    {
-        // type zeroGradient;
-        type breadOmegaVMixed;
-        kM               1e-5; // -- heat transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 8e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 8e-3;
-        omegaVInfTableDict   
-        {
-            file "$FOAM_CASE/constant/omegaVInfTable";
-            outOfBounds warn;
-        }
-        DFieldName      DEffvM;
-        // type zeroGradient;
-        // type fixedValue;
-        // value $internalField;
-        // type zeroGradient;
     }
 }
 

@@ -72,6 +72,7 @@ PIMPLE
 {
     nOuterCorrectors 250;
     debug 2;    // -- debug level
+    nItersAfter 1;
     residualControl
     {
         omegaV        

@@ -32,10 +32,8 @@ boundaryField
     
     sides
     {
-        // type fixedValue;
-        // value uniform 1e-3;
         type breadOmegaVMixed;;
-        kM               1e-5; // -- mass transfer coefficient
+        kM               0.01; // -- mass transfer coefficient
 
         // -- mixed BC mandatory entires
         refValue        uniform 1e-3;
@@ -47,20 +45,13 @@ boundaryField
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM;
-        // type fixedValue;
-        // value $internalField;
-        // type calculated;
-        // type fixedValue;
-        // value uniform 0.01;
-        // type zeroGradient;
+        DFieldName      DEffcM; // -- name of the diffusion coeficient field
 	}
+
     bottom
     {
-        // type fixedValue;
-        // value uniform 1e-3;
         type breadOmegaVMixed;;
-        kM               1e-5; // -- mass transfer coefficient
+        kM               0.01; // -- mass transfer coefficient
 
         // -- mixed BC mandatory entires
         refValue        uniform 1e-3;
@@ -72,31 +63,7 @@ boundaryField
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM;
-        // type fixedValue;
-        // value $internalField;
-        // type zeroGradient;
-	}
-    bottom2
-    {
-        type breadOmegaVMixed;;
-        kM               1e-5; // -- mass transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e-3;
-        omegaVInfTableDict   
-        {
-            file "$FOAM_CASE/constant/omegaCInfTable";
-            outOfBounds warn;
-        }
-        DFieldName      DEffcM;
-        // type fixedValue;
-        // value $internalField;
-                // type zeroGradient;
-
+        DFieldName      DEffcM; // -- name of the diffusion coeficient field
 	}
 }
 

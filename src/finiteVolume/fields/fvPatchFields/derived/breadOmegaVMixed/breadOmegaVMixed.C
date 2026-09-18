@@ -264,10 +264,9 @@ void Foam::breadOmegaVMixedFvPatchScalarField::evaluate(const Pstream::commsType
         {
             const scalar t = this->db().time().timeOutputValue();
 
-            const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("permGLViscG");
+            const volScalarField& perm = this->db().objectRegistry::lookupObject<volScalarField>("gasDarcyMobility");
             const volScalarField& rhoG = this->db().objectRegistry::lookupObject<volScalarField>("rhoG");
             const volScalarField& omegaV = this->db().objectRegistry::lookupObject<volScalarField>("omegaV");
-            const volScalarField& alpha = this->db().objectRegistry::lookupObject<volScalarField>("alpha");
 
             scalarField rhoGBound = rhoG.boundaryField()[this->patch().index()];
             scalarField permBound = perm.boundaryField()[this->patch().index()];

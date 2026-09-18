@@ -241,26 +241,26 @@ volScalarField nuG
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE
     ),
-    1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113),
+    gasDynamicViscosityPrefactor * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113),
     "calculated"
 );
 nuG.correctBoundaryConditions();
 
-// -- permeability
-volScalarField permGLViscG
+// -- gas Darcy mobility: intrinsic permeability / dynamic viscosity
+volScalarField gasDarcyMobility
 (
     IOobject
     (
-        "permGLViscG",
+        "gasDarcyMobility",
         runTime.timeName(),
         physics->mesh(),
         IOobject::READ_IF_PRESENT,
         writeOption2
     ),
-    permGLViscGSc / nuG,
+    gasPermeabilityRaw / nuG,
     "calculated"
 );
-permGLViscG.correctBoundaryConditions();
+gasDarcyMobility.correctBoundaryConditions();
 
 // -- pores opening function
 volScalarField alpha
@@ -289,7 +289,7 @@ volTensorField jGTilda
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE
     ),
-    - rhoG * permGLViscG * Finv.T(),
+    - rhoG * gasDarcyMobility * Finv.T(),
     "calculated"
 );
 jGTilda.correctBoundaryConditions();
@@ -368,7 +368,7 @@ jC.correctBoundaryConditions();
 //         IOobject::READ_IF_PRESENT,
 //         writeOption2
 //     ),
-//     - rhoG * permGLViscG * fvc::grad(pG)
+//     - rhoG * gasDarcyMobility * fvc::grad(pG)
 // );
 
 volScalarField alphaD
@@ -401,7 +401,7 @@ volScalarField alphaG
 );
 alphaG.correctBoundaryConditions();
 
-// volScalarField preCoef = - alphaG * rhoG * permGLViscG;
+// volScalarField preCoef = - alphaG * rhoG * gasDarcyMobility;
 
 // surfaceScalarField CO2Flux
 // (
@@ -755,7 +755,7 @@ Info << "Min (rhoG): " << min(rhoG).value() << ", max (rhoG): " << max(rhoG).val
 Info << "Min (T): " << min(T).value() << ", max (T): " << max(T).value() << "." << endl;
 Info << "univR: " << univR.value() << endl;
 Info << "Min (moisture): " << min(moisture).value() << ", max (moisture): " << max(moisture) << "." << endl;
-Info << "Min (permGLViscG): " << min(permGLViscG).value() << ", max (permGLViscG): " << max(permGLViscG) << "." << endl;
+Info << "Min (gasDarcyMobility): " << min(gasDarcyMobility).value() << ", max (gasDarcyMobility): " << max(gasDarcyMobility) << "." << endl;
 Info << "Min (moistureMin): " << moistureMin << endl;
 
 // ************************************************************************* //

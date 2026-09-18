@@ -54,6 +54,7 @@ PIMPLE
 {
     nOuterCorrectors 250;
     debug 2;    // -- debug level
+    nItersAfter 200;
     residualControl
     {
         omegaV        
@@ -83,8 +84,8 @@ relaxationFactors
         omegaV 0.2;
         omegaC 0.2;
         // // // // omegaAir 0.1;
-        // T 0.05;
-        // pG 0.05;
+        T 0.2;
+        pG 0.2;
         // rhoG 0.1;
     }
     equations

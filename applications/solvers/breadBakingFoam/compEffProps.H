@@ -9,7 +9,7 @@ Dva.correctBoundaryConditions();
 Dca.correctBoundaryConditions();
 
 // -- gas dynamic viscosity
-nuG = 1.52451e-6 * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113); // -- gas viscosity at correct temperature
+nuG = gasDynamicViscosityPrefactor * Foam::pow(T / dummyT, 1.5) / (T / dummyT + 232.113); // -- gas viscosity at correct temperature
 nuG.correctBoundaryConditions();
 
 // -- effective diffusivity
@@ -20,16 +20,16 @@ DEffvM.correctBoundaryConditions();
 DEffcM.correctBoundaryConditions();
 DEffaM.correctBoundaryConditions();
 
-// -- permeability computation
-dimensionedScalar kBaked("k_baked", permGLViscGSc.dimensions(), 1e-11);   
-
 // -- logarithmic interpolation constants
-scalar logKRaw = Foam::log(permGLViscGSc.value());
-scalar logKBaked = Foam::log(kBaked.value());
+scalar logKRaw = Foam::log(gasPermeabilityRaw.value());
+scalar logKBaked = Foam::log(gasPermeabilityBaked.value());
+
+// volScalarField alphaGP = 0.5 + Foam::atan((T/dummyT - 273 - 65) / 10.0) / 3.14159; // Smooth transition from 0 to 1 around T = 65°C
 
 // -- permiability MPC Zhang 2025
-permGLViscG = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("permGLViscGSc", permGLViscGSc.dimensions(), 1.0) / nuG; 
-permGLViscG.correctBoundaryConditions();
+gasDarcyMobility = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
+// gasDarcyMobility = Foam::exp(logKRaw + alphaGP * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
+gasDarcyMobility.correctBoundaryConditions();
 
 // -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
 // -- ratio of wall thickness to wall-pore thickness (delta)

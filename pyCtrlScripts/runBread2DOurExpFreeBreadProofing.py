@@ -19,14 +19,17 @@ import os
 from compExpSimSingleGraph import saveFigPostProcess
 
 # CASE FOLDERS==========================================================
-baseCaseDir = '../tutorials/bread3DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_bread3DOurExp/V9_DlTDep/'
+baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
+outFolder = '../ZZ_cases/01_breadAx2DOurExp/V21/'
 # expDir = os.path.join('..', 'Experiments2026') # -- when comparing experiments
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
 makeGeom = True # -- creation of the geometry for computation
 runDynSim = True    # -- run simulation
+# prepBlockMesh = False    # -- preparation of the blockMeshDict script
+# makeGeom = False # -- creation of the geometry for computation
+# runDynSim = False    # -- run simulation
 runPostProcess = True   # -- run post-processing
 
 proofing = False  # -- proofing included
@@ -50,8 +53,9 @@ for expNum in range(1):
     # -- https://doi.org/10.1016/j.fbp.2008.04.002
     lambdaS = 0.42  # -- heat conductivity of the solid phase (works with addiditional)
 
-    # -- closed-cell bread intristic permeability
-    perm = 0.9e-15  # -- bread permeability 
+    # -- intrinsic gas permeabilities of raw and baked bread
+    gasPermeabilityRaw = 0.9e-15
+    gasPermeabilityBaked = 1e-11
 
     # -- heat capacities for the individual phases
     CpS = 1130   # -- solid phase
@@ -63,7 +67,6 @@ for expNum in range(1):
     rhoS = 865
 
     # -- initial dough volumetric fraction
-    alphaD0 = 0.84 
     alphaD0 = 0.91 
     if not proofing:
         alphaD0 = 0.43
@@ -71,8 +74,8 @@ for expNum in range(1):
 
     '''Evaporation and CO2 generation parameters'''
     # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.015
-    kMPCClosed = 0.015
+    kMPCOpen = 0.01
+    kMPCClosed = 0.01
 
     # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
     evCoef1 = -0.0071
@@ -81,6 +84,7 @@ for expNum in range(1):
 
     # -- pre-exponential factor and Tm in CO2 generation kinetics in equation (32) in https://doi.org/10.1002/aic.10518  in (kg/m3/s)
     R0 = 2.3e-3  
+    # R0 = 1.8e-3  
     Tm = 313
     deltaT = 14
 
@@ -99,16 +103,16 @@ for expNum in range(1):
         timeProofing = 2400
     else:
         timeProofing = 200
-    timeStepProofing = 200 # -- computational time step for proofing
+    timeStepProofing = 20 # -- computational time step for proofing
     timeStepSim = 0.5  # -- computational time step for deformable simulation
     timeStepSimNonDef = 0.5  # -- computational time step non-deformable simulation
     plusTime1 = 450 # -- how long to run with deformation 
-    plusTime2 = 800 # -- how long to run without deformation
+    plusTime2 = 750 # -- how long to run without deformation
 
     writeInt = 30   # -- how often to write results
     writeIntProofing = 200    # -- how often to write results during proofing
-    nIterProofing = 200  # -- number of iterations in each time step
-    nIterSim = 300  # -- number of iterations in each time step
+    nIterProofing = 300  # -- number of iterations in each time step
+    nIterSim = 250  # -- number of iterations in each time step
     nIterSimNonDef = 50  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
     # dynSolver = 'breadBakingFoamScratch'   # -- used solver
@@ -128,6 +132,7 @@ for expNum in range(1):
     omegaCRelax = 0.2
     pGRelax = 0.2
     DRelax = 1
+    TRelaxNonDef = 0.2
 
     # -- non-deformation simulation
     pGRelaxNonDef = 1
@@ -196,16 +201,16 @@ for expNum in range(1):
         [
             ['0.org/omegaV', 'kM', str(kMSidesOmega), 'sides'],
             ['0.org/omegaV', 'kM', str(kMBottomOmega), 'bottom'],
-            ['0.org/omegaV', 'kM', str(kMBottomOmega), 'bottom2'],
+            # ['0.org/omegaV', 'kM', str(kMBottomOmega), 'bottom2'],
             ['0.org/omegaC', 'kM', str(kMSidesOmega), 'sides'],
             ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom'],
-            ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom2'],
+            # ['0.org/omegaC', 'kM', str(kMBottomOmega), 'bottom2'],
             # ['0.org/pG', 'kM', str(kMSides), 'sides'],
             # ['0.org/pG', 'kM', str(kMBottom), 'bottom'],
             # ['0.org/pG', 'kM', str(kMBottom), 'bottom2'],
             ['0.org/T', 'alpha', str(alphaG), 'sides'],
             ['0.org/T', 'alpha', str(alphaGBottom), 'bottom'],
-            ['0.org/T', 'alpha', str(alphaGBottom), 'bottom2'],
+            # ['0.org/T', 'alpha', str(alphaGBottom), 'bottom2'],
             # ['0.org/alphaL', 'internalField', 'uniform %g'% (alphaL), ''],
             # ['0.org/alphaS', 'internalField', 'uniform %g'% (alphaS), ''],
             ['0.org/T', 'internalField', 'uniform %g'% (TStart), ''],
@@ -251,7 +256,8 @@ for expNum in range(1):
     baseCase.setParameters(
         [
             ['constant/transportProperties', 'withDeformation', str(withDeformation), ''],
-            ['constant/transportProperties', 'permGLViscG', str(perm), ''],
+            ['constant/transportProperties', 'gasPermeabilityRaw', str(gasPermeabilityRaw), ''],
+            ['constant/transportProperties', 'gasPermeabilityBaked', str(gasPermeabilityBaked), ''],
             ['constant/transportProperties', 'tortOpen', str(tortOpen), ''],
             ['constant/transportProperties', 'tortClosed', str(tortClosed), ''],
             ['constant/transportProperties', 'alphaD0', str(alphaD0), ''],
@@ -308,6 +314,7 @@ for expNum in range(1):
             ['system/fvSolution', 'DFinal', str(DFinalRelax), 'fields'],
             ['system/fvSolution', 'omegaV', str(omegaVRelaxKyn), 'fields'],
             ['system/fvSolution', 'omegaC', str(omegaCRelaxKyn), 'fields'],
+            ['system/fvSolution', 'T', str(TRelaxNonDef), 'fields'],
             ['system/fvSolution', 'pG', str(pGRelaxKyn), 'fields'],
         ]
     )
@@ -472,7 +479,7 @@ for expNum in range(1):
                     # 'foamJob -parallel -screen TLFProbe -point "(0.037 0.047 0)" > log.TPoint55',
                     # 'foamJob -parallel -screen TLFProbe -point "(0.042 0.041 0)" > log.TPoint88',
                     'foamJob -parallel -screen intMoisture > log.intMoisture',
-                    'foamJob -parallel -screen intWeigth > log.intWeigth',
+                    # 'foamJob -parallel -screen intWeigth > log.intWeigth',
                     'foamJob -parallel -screen getBoundPoints > log.getBoundPoints'
                 ]
             )

@@ -91,7 +91,6 @@ int main(int argc, char *argv[])
         while (pimple.loop())
         {
             iter++;
-            physics().setICorr(iter);
             if (withDeformation == 1)
             {
                 // -- deformation laws --> solids4foam with custom visco-elastic model
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
             int nIter = 1;
             if (pimple.finalIter())
             {
-                nIter = 10;
+                nIter = nItersAfter;
             }
 
             for (int i = 0; i < nIter; ++i)
@@ -143,7 +142,7 @@ int main(int argc, char *argv[])
                 mCO2.correctBoundaryConditions();
                 
                 // -- calculation of pre-coefficients for flux calculations
-                jGTilda = - rhoG * permGLViscG * Finv.T();
+                jGTilda = - rhoG * gasDarcyMobility * Finv.T();
                 jGTilda.correctBoundaryConditions();
 
                 jDVTilda = - rhoG * DEffvM * Finv.T();
@@ -164,18 +163,51 @@ int main(int argc, char *argv[])
                 jCE.correctBoundaryConditions();
                 jAE.correctBoundaryConditions();
 
-                // -- overall gas-phase balance
-                #include "concEqG.H"
-                    
-                #include "EEqn.H"
+                if (i % 2 == 0)
+                {
+                    // -- overall gas-phase balance
+                    #include "concEqG.H"
+                        
+                    #include "EEqn.H"
 
-                // -- gas density calculation
-                rhoG = Mg / univR / T * pG;
-                rhoG.correctBoundaryConditions();
-                
-                // -- species equations
-                #include "concEqC.H"
-                #include "concEqV.H"
+                    // -- gas density calculation
+                    rhoG = Mg / univR / T * pG;
+                    rhoG.correctBoundaryConditions();
+                    
+                    // -- species equations
+                    
+                    #include "concEqC.H"
+                    #include "concEqV.H"
+
+
+                    // -- last species
+                    omegaAir = 1.0 - omegaV - omegaC;
+                    omegaAir.correctBoundaryConditions();
+
+                }
+
+                else
+                {
+
+                    // -- species equations
+                    #include "concEqV.H"
+                    #include "concEqC.H"
+
+                    
+                    // -- last species
+                    omegaAir = 1.0 - omegaV - omegaC;
+                    omegaAir.correctBoundaryConditions();
+
+                    
+                    // -- overall gas-phase balance
+                    #include "concEqG.H"
+                        
+                    #include "EEqn.H"
+
+                    // -- gas density calculation
+                    rhoG = Mg / univR / T * pG;
+                    rhoG.correctBoundaryConditions();
+                }
 
                 // -- last species
                 omegaAir = 1.0 - omegaV - omegaC;
@@ -212,7 +244,7 @@ int main(int argc, char *argv[])
                 Info << "omC    : res: " << omegaCResidual << " Min (omegaC): " << min(omegaC).value() << ", max (omegaC): " << max(omegaC).value() << "." << endl;
                 Info << "Min (alphaG): " << min(alphaG).value() << ", max (alphaG): " << max(alphaG).value() << "." << endl;
                 Info << "Min (J): " << min(J).value() << ", max (J): " << max(J).value() << "." << endl;
-                Info << "Min (permGLViscG): " << min(permGLViscG).value() << ", max (permGLViscG): " << max(permGLViscG) << "." << endl;
+                Info << "Min (gasDarcyMobility): " << min(gasDarcyMobility).value() << ", max (gasDarcyMobility): " << max(gasDarcyMobility) << "." << endl;
                 Info << endl;
             }
         }
