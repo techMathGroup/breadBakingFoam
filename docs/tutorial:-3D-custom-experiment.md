@@ -1,4 +1,7 @@
 # 3D our custom experiment
+
+# NOTE: legacy tutorial for version v1.0, needs to be updated
+
 ## Case description and setup
 This tutorial shows a three-dimensional internal simulation of the bread in our laboratory oven. External transport is resolved by a custom mixed boundary conditions. The tutorial is located in `tutorials/bread3DOurExp` and can be:
 1. run directly as prepared by `Allrun` script in `tutorials/bread3DOurExp` folder, or
