@@ -208,10 +208,44 @@ bool breadBakingSolid::evolve()
 
     do
     {
-        // -- bread composition
-        const volScalarField& alphaD = mesh().lookupObject<volScalarField>("alphaD");
 
-        volScalarField rhoD = mesh().lookupObject<volScalarField>("rhoD");
+        // -- thermophysicalProperties dictionary
+        IOdictionary thermophysicalProperties
+        (
+            IOobject
+            (
+            "thermophysicalProperties",    // dictionary name
+            mesh().time().constant(),     // dict is found in "constant"
+            mesh(),                   // registry for the dict
+            IOobject::MUST_READ,    // must exist, otherwise failure
+            IOobject::NO_WRITE      // dict is only read by the solver
+            )
+        );
+
+        // -- transportProperties dictionary
+        IOdictionary transportProperties
+        (
+            IOobject
+            (
+            "transportProperties",    // dictionary name
+            mesh().time().constant(),     // dict is found in "constant"
+            mesh(),                   // registry for the dict
+            IOobject::MUST_READ,    // must exist, otherwise failure
+            IOobject::NO_WRITE      // dict is only read by the solver
+            )
+        );
+
+        dimensionedScalar rhoSScalar;
+        scalar alphaD0;
+        thermophysicalProperties.subDict("solid").readEntry("rho", rhoSScalar);
+        transportProperties.readEntry("alphaD0",alphaD0);
+        dimensionedScalar rhoL("rhoL", dimMass/dimVolume, 1000);
+
+
+        // -- bread composition
+        // const volScalarField& alphaD = mesh().lookupObject<volScalarField>("alphaD");
+
+        volScalarField moisture = mesh().lookupObject<volScalarField>("moisture");
 
         const volScalarField& pG = mesh().lookupObject<volScalarField>("pG");
         // volScalarField deltaP = pG;
@@ -231,7 +265,7 @@ bool breadBakingSolid::evolve()
 
             fvVectorMatrix DEqn
             (
-                J_*alphaD*rhoD*fvm::d2dt2(D())
+                alphaD0 * (rhoSScalar + moisture * rhoL)*fvm::d2dt2(D())
             //   +  J_*fvc::ddt(alphaD*rhoD)*fvc::ddt(D())
             == 
                 fvm::laplacian(impKf_, D(), "laplacian(DD,D)")
@@ -239,7 +273,7 @@ bool breadBakingSolid::evolve()
             + fvc::div( J_ * ( Finv_ & sigma() ), "div(sigma)" )
             //   - fvc::div(J_*Finv_ & deltaP*I)
             - (J_*Finv_.T() & fvc::grad(pG))
-            + J_*alphaD*rhoD*g()
+            + alphaD0 * (rhoSScalar + moisture * rhoL) *g()
             );        
         
 

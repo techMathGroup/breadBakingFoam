@@ -697,11 +697,11 @@ void Foam::viscoBread::correct(volSymmTensorField& sigma)
 
     // -- Compute current gelatinization state based on temperature field T
     // volScalarField kappaGel = 0.5 * (1.0 + Foam::tanh((T_ - 50) / 10.0));
-    volScalarField kappaGel = 0.5 + Foam::atan((T_ - 65) / 2.0) / 3.1415; // Smooth transition from 0 to 1 around T = 65°C
+    volScalarField kappaGel = 0.5 + Foam::atan((T_ - 65) / 2.0) / 3.14159; // Smooth transition from 0 to 1 around T = 65°C
 
     // -- Dynamically blend the elastostatic ground state (from soft paste to rigid crumb)
     volScalarField mu0 = (1-alphaG_) * ((1.0 - kappaGel) * mu0Raw_ + kappaGel * mu0Baked_);
-    volScalarField kappa0 = (1-alphaG_) * (((1.0 - kappaGel) * kappa0Raw_ + kappaGel * kappa0Baked_)* (1 + (100 - 1) * (0.5 - Foam::atan((alphaG_ - 0.05) / 0.01) / 3.1415)));
+    volScalarField kappa0 = (1-alphaG_) * (((1.0 - kappaGel) * kappa0Raw_ + kappaGel * kappa0Baked_)* (1 + (100 - 1) * (0.5 - Foam::atan((alphaG_ - 0.05) / 0.01) / 3.141592)));
     // volScalarField kappa0 = ((1.0 - kappaGel) * kappa0Raw_ + kappaGel * kappa0Baked_);
 
     volScalarField muV1 = (1.0 - kappaGel) * muV1Raw_ + kappaGel * muV1Raw_;
@@ -710,6 +710,9 @@ void Foam::viscoBread::correct(volSymmTensorField& sigma)
 
     // tau_ = tau0_ / (1.0 - kappaGel + 1e-5) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
     tau1VSF_ = tau1_ * (2.0 * (1.0 - kappaGel) + 20.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    // scalar logTauRaw = Foam::log(2.0);
+    // scalar logTauBaked = Foam::log(200.0);
+    // tau1VSF_ = tau1_ * Foam::exp(logTauRaw + kappaGel * (logTauBaked - logTauRaw)) * dimensionedScalar("dummyTime", dimTime, 1);
     tau2VSF_ = tau2_ * (2.0 * (1.0 - kappaGel) + 20.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
     tau1VSF_.correctBoundaryConditions();
     tau2VSF_.correctBoundaryConditions();
