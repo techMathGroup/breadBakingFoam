@@ -17,6 +17,7 @@ import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
+outFolder = '../ZZ_cases/breadAx2D/'
 # outFolder = '../ZZ_cases/00_breads/newImpl_lambda04const_tortClo40_tortOpen10_3_kmpClosed1_open02_newKin/'
 
 # WHAT SHOULD RUN=======================================================

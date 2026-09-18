@@ -20,7 +20,7 @@ from compExpSimSingleGraph import saveFigPostProcess
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_breadAx2DOurExp/V21/'
+outFolder = '../ZZ_cases/01_breadAx2DOurExp/'
 # expDir = os.path.join('..', 'Experiments2026') # -- when comparing experiments
 
 # WHAT SHOULD RUN=======================================================
