@@ -239,7 +239,7 @@ bool breadBakingSolid::evolve()
         scalar alphaD0;
         thermophysicalProperties.subDict("solid").readEntry("rho", rhoSScalar);
         transportProperties.readEntry("alphaD0",alphaD0);
-        dimensionedScalar rhoL("rhoL", dimMass/dimVolume, 1000);
+        // dimensionedScalar rhoL("rhoL", dimMass/dimVolume, 1000);
 
 
         // -- bread composition
@@ -265,7 +265,7 @@ bool breadBakingSolid::evolve()
 
             fvVectorMatrix DEqn
             (
-                alphaD0 * (rhoSScalar + moisture * rhoL)*fvm::d2dt2(D())
+                alphaD0 * rhoSScalar * (1 + moisture) * fvm::d2dt2(D())
             //   +  J_*fvc::ddt(alphaD*rhoD)*fvc::ddt(D())
             == 
                 fvm::laplacian(impKf_, D(), "laplacian(DD,D)")
@@ -273,7 +273,7 @@ bool breadBakingSolid::evolve()
             + fvc::div( J_ * ( Finv_ & sigma() ), "div(sigma)" )
             //   - fvc::div(J_*Finv_ & deltaP*I)
             - (J_*Finv_.T() & fvc::grad(pG))
-            + alphaD0 * (rhoSScalar + moisture * rhoL) *g()
+            + alphaD0 * rhoSScalar * (1 + moisture) *g()
             );        
         
 
