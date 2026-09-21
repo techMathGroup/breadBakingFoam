@@ -1,8 +1,6 @@
-# 2D our custom experiment
+# 2D custom experiment with proofing
 ## Case description and setup
-This tutorial shows a two-dimensional internal simulation of the bread free proofing and baking in our laboratory oven. External transport is resolved by custom mixed boundary conditions. The tutorial is located in `tutorials/breadAx2D` and can be:
-1. run directly as prepared by `Allrun` script in `tutorials/breadAx2DOurExp` folder, or
-2. modified and run by `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py` control script.
+This tutorial shows a two-dimensional internal simulation of bread proofing and baking in our laboratory oven. External transport is resolved by custom mixed boundary conditions. The tutorial case is located in `tutorials/breadAx2DOurExp`. Its `Allrun` script runs the basic single-stage case; the proofing, deformable-baking, and non-deformable-baking stages described here are controlled by `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py`.
 
 The description of the solved equations and variables is in greater detail discussed in https://doi.org/10.14311/TPFM.2025.015. Furthermore in the solver, the solved variables are noted as: 
 * `moisture` - relative mass fraction of liquid water with respect to solid mass
@@ -17,63 +15,60 @@ Geometry is based on our custom experiments conducted in the laboratories at Uni
 
 <img alt="tutBreadCustomExpDescr" src="tutBread2DOurGeom.png" />
 
-The geometry for the tutorial is taken as a simple wedge with three different boundaries:
-* wedge,
-* bottom, and
-* side.
+The geometry for the tutorial is a two-dimensional wedge with the following patch groups:
+* `wedgeZ0` and `wedgeZE` - wedge patches,
+* `bottom` - the bottom boundary,
+* `sides` - the bread side boundary, and
+* `symmetryPatch` - the symmetry boundary.
 
 ### Boundary conditions
-For the wedge boundary, we prescribe standard OpenFOAM _wedge_ boundary condition for all the variables. For the mass transfer (`omegaV` and `omegaC` variables), we prepared custom Robin external mass transfer boundary conditions _breadOmegaVMixed_. The boundary conditions can be changed similarly as in other OpenFOAM software in `0.org/` directory. The boundary condition for the bottom, side and top patches differ only in the external mass transfer coefficient `kM`. Furthermore, the temporal evolution of the water vapors and carbon dioxide in oven can be changed in `constant/omegaVInfTable` `constant/omegaCInfTable` as standard OpenFOAM interpolation table.
+For the wedge and symmetry patches, standard OpenFOAM _wedge_ and _symmetry_ boundary conditions are used. For the mass transfer (`omegaV` and `omegaC`), the custom Robin boundary condition _breadOmegaVMixed_ is used on the `sides` and `bottom` patches. The boundary conditions can be changed in the corresponding files in `0.org/`. The external mass-transfer histories are read from `constant/omegaVInfTable` and `constant/omegaCInfTable`.
 
 `0.org/omegaV`
 ```
 boundaryField
 {
-    // Zhang experiment
-    "(wedgeZ0|wedgeZE)"
-	{
-		type wedge;
-	}   
     "symmetryPatch"
     {
-        type  symmetry;
+        type symmetry;
     }
-    
+
     sides
     {
-        type breadOmegaVMixed;;
-        kM               1e-5; // -- mass transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e-3;
-        omegaVInfTableDict   
+        type breadOmegaVMixed;
+        kM 0.01;
+        refValue uniform 8e-3;
+        refGradient uniform 0;
+        valueFraction uniform 0;
+        value uniform 8e-3;
+        omegaVInfTableDict
         {
-            file "$FOAM_CASE/constant/omegaCInfTable";
+            file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM; // -- name of the diffusion coeficient field
-	}
+        DFieldName DEffvM;
+    }
 
     bottom
     {
-        type breadOmegaVMixed;;
-        kM               0.01; // -- mass transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e-3;
-        omegaVInfTableDict   
+        type breadOmegaVMixed;
+        kM 0.01;
+        refValue uniform 8e-3;
+        refGradient uniform 0;
+        valueFraction uniform 0;
+        value uniform 8e-3;
+        omegaVInfTableDict
         {
-            file "$FOAM_CASE/constant/omegaCInfTable";
+            file "$FOAM_CASE/constant/omegaVInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM; // -- name of the diffusion coeficient field
-	}
+        DFieldName DEffvM;
+    }
+
+    "(wedgeZ0|wedgeZE)"
+    {
+        type wedge;
+    }
 }
 ```
 
@@ -81,55 +76,51 @@ boundaryField
 ```
 boundaryField
 {
-    // Zhang experiment
-    "(wedgeZ0|wedgeZE)"
-	{
-		type wedge;
-	}   
     "symmetryPatch"
     {
-        type  symmetry;
+        type symmetry;
     }
-    
+
     sides
     {
-        type breadOmegaVMixed;;
-        kM               0.01; // -- mass transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e-3;
-        omegaVInfTableDict   
+        type breadOmegaVMixed;
+        kM 0.01;
+        refValue uniform 1e-3;
+        refGradient uniform 0;
+        valueFraction uniform 0;
+        value uniform 1e-3;
+        omegaVInfTableDict
         {
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM; // -- name of the diffusion coeficient field
-	}
+        DFieldName DEffcM;
+    }
 
     bottom
     {
-        type breadOmegaVMixed;;
-        kM               0.01; // -- mass transfer coefficient
-
-        // -- mixed BC mandatory entires
-        refValue        uniform 1e-3;
-        refGradient     uniform 0;
-        valueFraction   uniform 0;
-        value           uniform 1e-3;
-        omegaVInfTableDict   
+        type breadOmegaVMixed;
+        kM 0.01;
+        refValue uniform 1e-3;
+        refGradient uniform 0;
+        valueFraction uniform 0;
+        value uniform 1e-3;
+        omegaVInfTableDict
         {
             file "$FOAM_CASE/constant/omegaCInfTable";
             outOfBounds warn;
         }
-        DFieldName      DEffcM; // -- name of the diffusion coeficient field
-	}
+        DFieldName DEffcM;
+    }
+
+    "(wedgeZ0|wedgeZE)"
+    {
+        type wedge;
+    }
 }
 ```
 
-for pressure fixed Dirichlet value is prescribed
+For pressure, a fixed Dirichlet value equal to `$internalField` is prescribed on `sides` and `bottom`.
 
 `0.org/pG`
 
@@ -138,18 +129,18 @@ boundaryField
 {
     "symmetryPatch"
     {
-        type  symmetry;
+        type symmetry;
     }
-    
+
     sides
     {
         type fixedValue;
         value $internalField;
     }
     "(wedgeZ0|wedgeZE)"
-	{
-		type wedge;
-	}
+    {
+        type wedge;
+    }
     bottom
     {
         type fixedValue;
@@ -157,17 +148,17 @@ boundaryField
     }
 }
 ```
-Similarly for the temperature, the external transport in the oven is approximated by the custom Robin boundary condition which is assumed to be same at all boundaries and can be changed in `0.org/T`.
+Similarly, external heat transfer is approximated by _breadTMixed_ in `0.org/T`. The `sides` and `bottom` patches use separate interpolation tables.
 ``` 
 boundaryField
 {
-	
     "symmetryPatch"
     {
-        type  symmetry;
+        type symmetry;
     }
+
     sides
-	{
+    {
         type breadTMixed;
         refValue        uniform 300;
         refGradient     uniform 0;
@@ -179,10 +170,10 @@ boundaryField
             file "$FOAM_CASE/constant/TInfTable";
             outOfBounds warn;
         }
-	}
+    }
 
     bottom
-	{
+    {
         type breadTMixed;
         // type breadTBottom;
         refValue        uniform 300;
@@ -195,21 +186,22 @@ boundaryField
             file "$FOAM_CASE/constant/TInfTableBottom";
             outOfBounds warn;
         }
-	}
+    }
     "(wedgeZ0|wedgeZE)"
-	{
-		type wedge;
-	}
+    {
+        type wedge;
+    }
 }
 ```
 
-Here, `alpha` is the external heat transfer coefficient, and again, the temporal evolution of the oven temperature (i.e. baking curve) can be set in `constant/TInfTable` as OpenFOAM interpolation table. Finally, the _fixedDisplacementZeroShear_ boundary condition is prescribed for the deformation at the bottom  and side patches, and the custom _breadDSide_ boundary condition is prescribed for the top patch.
+Here, `alpha` is the external heat transfer coefficient. The baking curves are generated by the control script in `constant/TInfTable` and `constant/TInfTableBottom`. For deformation, _fixedDisplacementZeroShear_ is used on `bottom`, while _breadDFloor_ is used on `sides`.
 
 ```
-top
+"(sides)"
 {
-    type            breadDSide;
-    sidePos         5.8e-2;
+    type breadDFloor;
+    floorPos 1e-5;
+    sidePos 0;
     refValue        uniform (0 0 0);
     refGradient     uniform (0 0 0);
     valueFraction   uniform 1;
@@ -237,78 +229,77 @@ alphaGBottom = 14
 The parameters for the internal transfer in the bread can be changed directly in the `constant/transportProperties` and `constant/thermophysicalProperties` or in `'''Internal transport parameters'''` section of the control python script (`pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py`).
 
 ```
-    '''Internal transport parameters'''
-    DFree = 2.6e-5    # -- free volumetric difusivity of the water vapors in CO2 at 300 K
-    Dl = 6e-11  # -- liquid water difusivity in the dough
-    tortOpen = 2.4   # -- tortuosity
-    tortClosed = 70   # -- tortuosity (not used)
+'''Internal transport parameters'''
+DFree = 2.6e-5    # -- free volumetric diffusivity of water vapour in CO2 at 300 K
+Dl = 6e-11       # -- liquid water diffusivity in the dough
+tortOpen = 2.4   # -- tortuosity
+tortClosed = 70  # -- tortuosity (not used)
 
-    # -- heat conductivity of the dough material with porosity 0, i.e. the 
-    # -- absolute term in equation (5) in 
-    # -- https://doi.org/10.1016/j.fbp.2008.04.002
-    lambdaS = 0.42  # -- heat conductivity of the solid phase (works with addiditional)
+# -- heat conductivity of the dough material with porosity 0
+lambdaS = 0.42
 
-    # -- closed-cell bread intristic permeability
-    perm = 0.9e-15  # -- bread permeability 
+# -- intrinsic gas permeabilities of raw and baked bread
+gasPermeabilityRaw = 0.9e-15
+gasPermeabilityBaked = 1e-11
 
-    # -- heat capacities for the individual phases
-    CpS = 1130   # -- solid phase
-    CpG = 853  # -- CO2
-    CpVapor = 1878 # -- water vapors
-    CpL = 4200  # -- liquid phase
+# -- heat capacities for the individual phases
+CpS = 1130
+CpG = 853
+CpVapor = 1878
+CpL = 4200
 
-    # -- mass density for the individual phases
-    rhoS = 865
+# -- mass density for the solid phase
+rhoS = 865
 
-    # -- initial dough volumetric fraction
-    alphaD0 = 0.91 
-    if not proofing:
-        alphaD0 = 0.43
-        rhoS = 1387
+# -- initial dough volumetric fraction
+alphaD0 = 0.91
+if not proofing:
+    alphaD0 = 0.43
+    rhoS = 1387
 ```
 
-`DFree` parameter sets up the free volumetric diffusivity of the water vapors in carbon dioxide. The temperature and composition dependence of the effective diffusivity is then calculated directly in the solver. `lambdaS` sets up the heat conductivity of the dough material with zero porosity, i.e. the absolute term in equation (5) in https://doi.org/10.1016/j.fbp.2008.04.002 that is used for calculation of the effective heat conductivity. Specific heat capacities and mass densities can be then changed by `Cp` and `rho` parameters.
+`DFree` and `Dl` set the free gas and liquid-water diffusivities. The temperature and composition dependence of the effective gas diffusivity is calculated in the solver. `gasPermeabilityRaw` and `gasPermeabilityBaked` replace the older single `perm` parameter. `lambdaS` sets the heat conductivity of the dough material with zero porosity. Specific heat capacities and mass density are changed through the corresponding `Cp` and `rho` parameters.
 
 ### Evaporation and fermentation
-Evaporation is calculated using Hertz-Knudsen equation while the needed water activity is calculated using Oswin model with parameters measured in https://doi.org/10.1016/0260-8774(91)90020-S. Fermentation kinetics is taken directly from equation (32) in https://doi.org/10.1002/aic.10518. The parameters for all the relations for evaporation and fermentation evaluation can be changed in `constant/reactiveProperties` file or in `'''Evaporation and CO2 generation parameters'''` section of the control python script (`pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py`).
+Evaporation is calculated using the Hertz-Knudsen equation. Fermentation kinetics is taken from equation (32) in https://doi.org/10.1002/aic.10518. The parameters can be changed in `constant/reactiveProperties` or in the `'''Evaporation and CO2 generation parameters'''` section of the control script.
 ```
-    '''Evaporation and CO2 generation parameters'''
-    # -- evaporation / condensation coeficient in Hertz-Knudsen equation
-    kMPCOpen = 0.015
-    kMPCClosed = 0.015
+'''Evaporation and CO2 generation parameters'''
+# -- evaporation / condensation coefficients in the Hertz-Knudsen equation
+kMPCOpen = 0.01
+kMPCClosed = 0.01
 
-    # -- parameters for Oswin model (https://doi.org/10.1016/0260-8774(91)90020-S) (legacy -- not used)
-    evCoef1 = -0.0071
-    evCoef2 = 4.5
-    n = 0.38
+# -- Oswin-model parameters (legacy -- not used)
+evCoef1 = -0.0071
+evCoef2 = 4.5
+n = 0.38
 
-    # -- pre-exponential factor and Tm in CO2 generation kinetics in equation (32) in https://doi.org/10.1002/aic.10518  in (kg/m3/s)
-    R0 = 2.3e-3  
-    Tm = 313
-    deltaT = 14
+# -- CO2-generation kinetics parameters
+R0 = 2.3e-3
+Tm = 313
+deltaT = 14
 ```
-`kMPC` sets up the evaporation coefficient in the Hertz-Knudsen formula. `evCoef1` and `evCoef` are the coefficients for the Oswin model for water activity. Finally, `R0` and `Tm` are the pre-exponential factor and temperature of the fermentation maximum in CO2 generation kinetics.
+`kMPCOpen` and `kMPCClosed` set the evaporation coefficients in the Hertz-Knudsen formula. `evCoef1`, `evCoef2`, and `n` are retained for the legacy Oswin model. Finally, `R0`, `Tm`, and `deltaT` control the CO2-generation kinetics.
 
 ### Mechanical properties
-Bread equalibrium shear and viscous moduli, Poisson ratio and relaxation time can be changed directly in `constant/mechanicalProperties` file or in `'''Mechanical properties'''` section of the control python script (`pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py`).
+Bread equilibrium shear and viscous moduli, Poisson ratio, and relaxation time can be changed directly in `constant/mechanicalProperties` or in the `'''Mechanical properties'''` section of the control script.
 ```
-    '''Mechanical properties'''
-    withDeformation = 1 # -- turn on (1) /off (0) deformation
+'''Mechanical properties'''
+withDeformation = 1 # -- turn on (1) / off (0) deformation
 
-    nu = 0.14   # -- Poisson ratio
-    E = 30000   # -- Youngs modulus (legacy -- not used) 
-    mu0Raw = 147   # kappa = 2*mu*nu/(1-2*nu)   
-    muV1Raw = 7400 
-    bakedCoeff = 25
-    tau1 = 1.6
+nu = 0.14
+E = 30000       # -- legacy parameter, not used by the current model
+mu0Raw = 147
+muV1Raw = 7400
+bakedCoeff = 25
+tau1 = 1.6
 ```
 
 ## Running the tutorial
-As written above, the tutorial can be either run directly by `Allrun` script in tutorial directory `tutorials/breadAx2DOurExp` or by control python script `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py` which allows further setup. 
+The basic case can be run directly with `Allrun` in `tutorials/breadAx2DOurExp`. Use `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py` for the staged proofing and baking workflow described in this tutorial.
 ```
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_breadAx2DOurExp/V9_DlTDep/'
+outFolder = '../ZZ_cases/01_breadAx2DOurExp/'
 
 # WHAT SHOULD RUN=======================================================
 prepBlockMesh = True    # -- preparation of the blockMeshDict script
@@ -316,11 +307,15 @@ makeGeom = True # -- creation of the geometry for computation
 runDynSim = True    # -- run simulation
 runPostProcess = True   # -- run post-processing
 
-proofing = False  # -- proofing included
-proofing = True  # -- proofing included
+proofing = True  # -- include the proofing stage
 ```
-`baseCaseDir` sets up the tutorial directory, `outFolder` specifies path where the tutorial will be copied, modified and run. 
+`baseCaseDir` identifies the case template. The control script copies and modifies it under `outFolder`. With `proofing = True`, the default workflow runs a 2400-second proofing stage, a 450-second deformable baking stage, and a 750-second non-deformable baking stage. Set `proofing = False` only when intentionally running the baking-only variant.
+
+The script prepares the mesh, runs `breadBakingFoam` in up to three stages, and updates `controlDict` and `fvSolution` between stages. The default script uses `nCores = 8`; set `nCores = 1` for a serial run.
 
 ### Parallel run
-The tutorial is prepared to run also in parallel. It is possible to run it by changing `nCores` parameter in `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py` to number higher than 1.
+The tutorial is prepared to run in parallel. Change `nCores` in `pyCtrlScripts/runBread2DOurExpFreeBreadProofing.py` to the desired number of subdomains. Parallel post-processing also requires the `TLFProbe`, `intMoisture`, and `getBoundPoints` utilities built by the repository.
 
+## Post-processing
+
+When `runPostProcess = True`, the control script reads experimental data from `tutorials/breadAx2DOurExp/ZZ_dataForPostProcessing/`, probes the computed fields, integrates moisture and boundary points, and writes comparison plots to `outFolder`.
