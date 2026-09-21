@@ -17,7 +17,6 @@ Tutorials
 ---------
 1. [2D Axisymmetrical geometry acording to https://doi.org/10.1002/aic.10518](docs/tutorial:-2D-axisymmetrical-bread.md)
 2. [2D Axisymmetrical geometry acording to our custom experiments with proofing included](docs/tutorial:-2D-our-custom-experiment-with-proofing.md)
-3. [3D Geometry acording to our custom experiments -- legacy for v.-1.0](docs/tutorial:-3D-custom-experiment.md)
 
 License
 -------
