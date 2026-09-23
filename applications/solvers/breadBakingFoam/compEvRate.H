@@ -6,7 +6,37 @@ pSat.correctBoundaryConditions();
 moistureSafe = max(moisture, moistureFloor);
 a = Foam::exp(evCoef1 * T / dummyT + evCoef2);
 a.correctBoundaryConditions();
-aw = Foam::pow(moistureSafe * 100.0 / a, invNCoeff) / (Foam::pow(moistureSafe * 100.0 / a, invNCoeff) + 1.0); 
+
+// -- update water activity
+forAll(aw, cellI)
+{
+    if (moistureSafe[cellI] > SMALL)
+    {
+        aw[cellI] = Foam::pow(moistureSafe[cellI] * 100.0 / a[cellI], invNCoeff) / (Foam::pow(moistureSafe[cellI] * 100.0 / a[cellI], invNCoeff) + 1.0);    
+    } 
+    else
+    {
+        aw[cellI] = SMALL;
+    }
+}
+forAll(aw.boundaryField(), patchI)
+{
+    scalarField& awP = aw.boundaryFieldRef()[patchI];
+    scalarField& moistureP = moisture.boundaryFieldRef()[patchI];
+    scalarField& aP = a.boundaryFieldRef()[patchI];
+    forAll(awP, faceI)
+    {
+        if (moistureP[faceI] > SMALL)
+        {
+            awP[faceI] = Foam::pow(moistureP[faceI] * 100.0 / aP[faceI], invNCoeff) / (Foam::pow(moistureP[faceI] * 100.0 / aP[faceI], invNCoeff) + 1.0); 
+        }
+        else
+        {
+            awP[faceI] = SMALL;
+        }
+    }
+}
+
 
 // -- regime transition function
 // alpha = Foam::atan((T / dummyT - TOpen - 273.15) / (deltaTOpen * 0.125)) / 3.1415 + 0.5;
