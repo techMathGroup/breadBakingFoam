@@ -17,7 +17,7 @@ import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
-outFolder = '../ZZ_cases/99_breadAx2D/'
+outFolder = '../ZZ_cases/94_ref_NOITERAFTER/'
 # outFolder = '../ZZ_cases/00_breads/newImpl_lambda04const_tortClo40_tortOpen10_3_kmpClosed1_open02_newKin/'
 
 # WHAT SHOULD RUN=======================================================
@@ -115,7 +115,7 @@ nCores = 4 # -- number of cores to run the simulation
 TRelaxAfter = 0.3
 
 # -- relaxation factors
-DRelax = 0.3
+DRelax = 0.8
 DFinalRelax = 1
 
 '''Boundary conditions'''
@@ -149,7 +149,7 @@ kappa0Baked = 2*mu0Baked*nu/(1-2*nu)
 tau2 = 1
 tGelat = 65
 tau0 = 7
-node = "kraken-x4"
+node = "kraken-x3"
 
 # -- prepare blockMeshDict using luckas python class
 if prepBlockMesh:
@@ -296,20 +296,20 @@ if withKynuti:
 
 # RUN THE SIMULATION====================================================
 if runDynSim:
+    if withKynuti:
+        baseCase.setParameters(
+            [
+                ['system/controlDict', 'endTime', str(timeKynuti + plusTime1), ''],
+                ['system/controlDict', 'deltaT', '%.5g'%timeStep, ''],
+            ]
+        )
     if nCores > 1:
         baseCase.setParameters(
             [
                 ['system/decomposeParDict', 'numberOfSubdomains', str(nCores), '']
             ]
         )
-        if withKynuti:
-            baseCase.setParameters(
-                [
-                    ['system/controlDict', 'endTime', str(timeKynuti + plusTime1), ''],
-                    ['system/controlDict', 'deltaT', '%.5g'%timeStep, ''],
-                ]
-            )
-        else:
+        if not withKynuti:
             baseCase.runCommands(
                 [
                     'decomposePar > log.decomposePar',
@@ -328,11 +328,18 @@ if runDynSim:
                 ]
             )
     else:
-        baseCase.runCommands(
-            [
-                '%s > log.%s' %(dynSolver,dynSolver),
-            ]
-        )
+        if runWithSlurm:
+            baseCase.runCommands(
+                [            
+                    'srun -n1 %s > log.%s' %(dynSolver, dynSolver),
+                ]
+            )
+        else:
+            baseCase.runCommands(
+                [            
+                    ' %s > log.%s' %(dynSolver, dynSolver),
+                ]
+            )
 
     # -- run the rest of the simualation without further deformation
     if plusTime2 > 0:
@@ -357,11 +364,18 @@ if runDynSim:
                     ]
                 )
         else:
-            baseCase.runCommands(
-                [
-                    '%s > log.%s_2' %(dynSolver,dynSolver),
-                ]
-            )
+            if runWithSlurm:
+                baseCase.runCommands(
+                    [            
+                        'srun -n1 %s > log.%s_2' %(dynSolver, dynSolver),
+                    ]
+                )
+            else:
+                baseCase.runCommands(
+                    [            
+                        ' %s > log.%s_2' %(dynSolver, dynSolver),
+                    ]
+                )
         
 # POST-PROCESSING=======================================================
 if runPostProcess:
@@ -387,12 +401,13 @@ if runPostProcess:
         if runWithSlurm:
             baseCase.runCommands(
                 [
-                    'srun -n%d --nodelist=%s postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess'%(nCores, node),
-                    'srun -n%d --nodelist=%s postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux'%(nCores, node),
+                    'srun -n%d --nodelist=%s postProcess -parallel -func "probeZhang" -dict system/probeZhang > log.postProcess'%(nCores, node),
+                    'srun -n%d --nodelist=%s postProcess -parallel -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux'%(nCores, node),
                     'rm -rf processor*/0',
-                    'srun -n%d --nodelist=%s intMoisture > log.intMoisture'%(nCores, node),
+                    'srun -n%d --nodelist=%s intMoisture -parallel > log.intMoisture'%(nCores, node),
                 ]
             )
+        else:
             baseCase.runCommands(
                 [
                     'foamJob -parallel -screen postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess',
