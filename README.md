@@ -16,8 +16,7 @@ breadBakingFoam is a free, open-source software based on OpenFOAM (https://openf
 Tutorials
 ---------
 1. [2D Axisymmetrical geometry acording to https://doi.org/10.1002/aic.10518](docs/tutorial:-2D-axisymmetrical-bread.md)
-2. [2D Axisymmetrical geometry acording to our custom experiments](docs/tutorial:-2D-our-custom-experiment.md)
-3. [3D Geometry acording to our custom experiments](docs/tutorial:-3D-custom-experiment.md)
+2. [2D Axisymmetrical geometry acording to our custom experiments with proofing included](docs/tutorial:-2D-our-custom-experiment-with-proofing.md)
 
 License
 -------
