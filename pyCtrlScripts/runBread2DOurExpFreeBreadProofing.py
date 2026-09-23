@@ -16,11 +16,11 @@ import re
 import matplotlib.pyplot as plt
 from expDict import *
 import os
-from compExpSimSingleGraph import saveFigPostProcess
+from compExpSimSingleGraphFromDat import saveFigPostProcess
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_breadAx2DOurExp/'
+outFolder = '../ZZ_cases/01_breadAx2DOurExp3/'
 # expDir = os.path.join('..', 'Experiments2026') # -- when comparing experiments
 
 # WHAT SHOULD RUN=======================================================
@@ -31,6 +31,7 @@ runDynSim = True    # -- run simulation
 # makeGeom = False # -- creation of the geometry for computation
 # runDynSim = False    # -- run simulation
 runPostProcess = True   # -- run post-processing
+runWithSlurm = True
 
 proofing = False  # -- proofing included
 proofing = True  # -- proofing included
@@ -131,8 +132,8 @@ for expNum in range(1):
     omegaVRelax = 0.2
     omegaCRelax = 0.2
     pGRelax = 0.2
-    DRelax = 1
-    TRelaxNonDef = 0.2
+    DRelax = 0.8
+    TRelaxKyn = 0.2
 
     # -- non-deformation simulation
     pGRelaxNonDef = 1
@@ -179,6 +180,7 @@ for expNum in range(1):
     tau2 = 1
     tGelat = 65
     tau0 = 10
+    node = "kraken-x3"
 
     # -- prepare blockMeshDict using luckas python class
     if prepBlockMesh:   
@@ -314,7 +316,7 @@ for expNum in range(1):
             ['system/fvSolution', 'DFinal', str(DFinalRelax), 'fields'],
             ['system/fvSolution', 'omegaV', str(omegaVRelaxKyn), 'fields'],
             ['system/fvSolution', 'omegaC', str(omegaCRelaxKyn), 'fields'],
-            ['system/fvSolution', 'T', str(TRelaxNonDef), 'fields'],
+            ['system/fvSolution', 'T', str(TRelaxKyn), 'fields'],
             ['system/fvSolution', 'pG', str(pGRelaxKyn), 'fields'],
         ]
     )
@@ -371,12 +373,20 @@ for expNum in range(1):
                     ['system/decomposeParDict', 'numberOfSubdomains', str(nCores), '']
                 ]
             )
-            baseCase.runCommands(
-                [
-                    'decomposePar > log.decomposePar',
-                    'foamJob -parallel -screen %s > log.%s' %(dynSolver,dynSolver),
-                ]
-            )
+            if runWithSlurm:
+                baseCase.runCommands(
+                    [
+                        'decomposePar > log.decomposePar',
+                        'srun -n%d --nodelist=%s %s -parallel > log.%s' %(nCores, node, dynSolver,dynSolver),
+                    ]
+                )
+            else:
+                baseCase.runCommands(
+                    [
+                        'decomposePar > log.decomposePar',
+                        'foamJob -parallel -screen %s > log.%s' %(dynSolver,dynSolver),
+                    ]
+                )
         else:
             baseCase.runCommands(
                 [
@@ -401,11 +411,18 @@ for expNum in range(1):
                 ]
             )
             if nCores > 1:
-                baseCase.runCommands(
-                    [
-                        'foamJob -parallel -screen %s > log.%s_2' %(dynSolver,dynSolver),
-                    ]
-                )
+                if runWithSlurm:
+                    baseCase.runCommands(
+                        [
+                            'srun -n%d --nodelist=%s %s -parallel > log.%s_2' %(nCores, node, dynSolver,dynSolver),
+                        ]
+                    )
+                else:
+                    baseCase.runCommands(
+                        [
+                            'foamJob -parallel -screen %s > log.%s_2' %(dynSolver,dynSolver),
+                        ]
+                    )
             else:
                 baseCase.runCommands(
                     [
@@ -429,11 +446,18 @@ for expNum in range(1):
                 ]
             )
             if nCores > 1:
-                baseCase.runCommands(
-                    [
-                        'foamJob -parallel -screen %s > log.%s_3' %(dynSolver,dynSolver),
-                    ]
-                )
+                if runWithSlurm:
+                    baseCase.runCommands(
+                        [
+                            'srun -n%d --nodelist=%s %s -parallel > log.%s_3' %(nCores, node, dynSolver,dynSolver),
+                        ]
+                    )
+                else:
+                    baseCase.runCommands(
+                        [
+                            'foamJob -parallel -screen %s > log.%s_3' %(dynSolver,dynSolver),
+                        ]
+                    )
             else:
                 baseCase.runCommands(
                     [
@@ -466,34 +490,44 @@ for expNum in range(1):
             )
         else:
             baseCase.updateTimesParallel()
-            baseCase.runCommands(
-                [
-                    'rm -rf processor*/0',
-                    'foamJob -parallel -screen postProcess -func "probeOur" -dict system/probeOur > log.postProcess',
-                    'foamJob -parallel -screen TLFProbe -point "(1e-3 1e-3 0)" > log.TPoint6',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.061 1e-3 0)" > log.TPoint7',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.027 0.047 0)" > log.TPoint5',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.032 0.041 0)" > log.TPoint8',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.022 1e-4 0)" > log.TPoint66',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.071 1e-3 0)" > log.TPoint77',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.037 0.047 0)" > log.TPoint55',
-                    # 'foamJob -parallel -screen TLFProbe -point "(0.042 0.041 0)" > log.TPoint88',
-                    'foamJob -parallel -screen intMoisture > log.intMoisture',
-                    # 'foamJob -parallel -screen intWeigth > log.intWeigth',
-                    'foamJob -parallel -screen getBoundPoints > log.getBoundPoints'
-                ]
-            )
+            if runWithSlurm:
+                baseCase.runCommands(
+                    [
+                        'rm -rf processor*/0',
+                        'srun -n%d --nodelist=%s postProcess -parallel -func "probeOur" -dict system/probeOur > log.postProcess'%(nCores, node),
+                        'srun -n%d --nodelist=%s TLFProbe -parallel -point "(1e-3 1e-3 0)" > log.TPoint6'%(nCores, node),
+                        'srun -n%d --nodelist=%s intMoisture -parallel > log.intMoisture'%(nCores, node),
+                        'srun -n%d --nodelist=%s getBoundPoints -parallel > log.getBoundPoints'%(nCores, node),
+                    ]
+                )
+            else:
+                baseCase.runCommands(
+                    [
+                        'rm -rf processor*/0',
+                        'foamJob -parallel -screen postProcess -func "probeOur" -dict system/probeOur > log.postProcess',
+                        'foamJob -parallel -screen TLFProbe -point "(1e-3 1e-3 0)" > log.TPoint6',
+                        'foamJob -parallel -screen intMoisture > log.intMoisture',
+                        'foamJob -parallel -screen getBoundPoints > log.getBoundPoints'
+                    ]
+                )
             for i in range(len(experiments[expNum]['probes'])):
                 # thermoOffsetCorr = np.array([experiments[expNum]['thermoOffset'][0], experiments[expNum]['thermoOffset'][2], -experiments[expNum]['thermoOffset'][1]])
                 thermoOffsetCorr = experiments[expNum]['thermoOffset']
                 probesCorr = experiments[expNum]['probes'][i] - thermoOffsetCorr
                 probesCorr[1] = np.sqrt(probesCorr[1]**2 + probesCorr[2]**2)
                 probesCorr[2] = 0
-                baseCase.runCommands(
-                    [
-                        'foamJob -parallel -screen TLFProbe -point "(%.5g %.5g %.5g)" > log.TPoint%d' %(probesCorr[0], probesCorr[1], probesCorr[2], i+1),
-                    ]
-                )
+                if runWithSlurm:
+                    baseCase.runCommands(
+                        [
+                            'srun -n%d --nodelist=%s TLFProbe  -parallel -point "(%.5g %.5g %.5g)" > log.TPoint%d' %(nCores, node, probesCorr[0], probesCorr[1], probesCorr[2], i+1),
+                        ]
+                    )
+                else:
+                    baseCase.runCommands(
+                        [
+                            'foamJob -parallel -screen TLFProbe -point "(%.5g %.5g %.5g)" > log.TPoint%d' %(probesCorr[0], probesCorr[1], probesCorr[2], i+1),
+                        ]
+                    )
 
         if nCores > 1:
             latestTime = baseCase.latestParTime
