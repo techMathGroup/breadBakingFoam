@@ -230,6 +230,11 @@ int main(int argc, char *argv[])
                 rhoG = Mg / univR / T * pG;
                 rhoG.correctBoundaryConditions();
 
+                if (pNIter == 0)
+                {
+                    break;
+                }
+
             }
 
             

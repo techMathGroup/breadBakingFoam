@@ -33,7 +33,9 @@ pGEq.relax();
 
 SolverPerformance<scalar>::debug = 1;
 
-pResidual = pGEq.solve().initialResidual();
+const solverPerformance& sp = pGEq.solve();
+pResidual = sp.initialResidual();
+pNIter = sp.nIterations();
 
 SolverPerformance<scalar>::debug = 0;
 

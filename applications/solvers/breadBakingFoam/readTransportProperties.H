@@ -131,5 +131,6 @@ double omegaVResidual = 1;
 double omegaCResidual = 1;
 double phiLResidual = 1;
 double TResidual = 1;
+int pNIter = 1;
 
 // ************************************************************************* //
