@@ -17,36 +17,36 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture|rhoDC)"
+    "(moisture|XCO2InL)"
     {
         solver          PBiCGStab;
-        preconditioner  diagonal;
-        tolerance       1e-10;
+        preconditioner  DILU;
+        tolerance       1e-12;
         relTol          0.01;
     }
- 
-    "(pG|T|omegaV|omegaC|alphaS|alphaL|alphaLGel|alphaCrust|rhoG|D|omegaAir2|pGTest|dP|rhoD|omegaS|omegaAir|XCO2InL|moisture|rhoDC)Final"
+
+    "(moisture|XCO2InL)Final"
     {
         solver          PBiCGStab;
-        preconditioner  diagonal;
+        preconditioner  DILU;
         tolerance       1e-12;
     }
 
-    // D
-    // {
-    //     solver          PBiCGStab;
-    //     preconditioner  DILU;
-    //     // preconditioner  DIC;
-    //     tolerance       1e-10;
-    //     relTol          0.01;
-    // }
-    // "(D)Final"
-    // {
-    //     solver          PBiCGStab;
-    //     preconditioner  DILU;
-    //     // preconditioner  DIC;
-    //     tolerance       1e-12;
-    // }
+    "(pG|omegaV|omegaC|T|D)"
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
+        tolerance       1e-12;
+        relTol          0.01;
+    }
+
+    "(pG|omegaV|omegaC|T|D)Final"
+    {
+        solver          PBiCGStab;
+        preconditioner  DIC;
+        tolerance       1e-12;
+    }
+
 
 }
 
@@ -54,7 +54,7 @@ PIMPLE
 {
     nOuterCorrectors 250;
     debug 2;    // -- debug level
-    nItersAfter 200;
+    nItersAfter 1;
     residualControl
     {
         omegaV        

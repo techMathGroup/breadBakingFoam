@@ -17,48 +17,36 @@ FoamFile
 
 solvers
 {
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D|rhoD|omegaS|omegaL|XCO2InL|moisture|rhoDC)"
+    "(moisture|XCO2InL)"
     {
         solver          PBiCGStab;
-        preconditioner  diagonal;
-        tolerance       1e-10;
-        relTol          0.01;
-    }
- 
-    "(pG|T|omegaV|alphaS|alphaL|alphaD|omegaS|omegaC|alphaCrust|D|rhoD|omegaS|omegaL|XCO2InL|moisture|rhoDC)Final"
-    {
-        solver          PBiCGStab;
-        preconditioner  diagonal;
-        tolerance       1e-12;
-    }
-    D
-    {
-        solver          PBiCGStab;
-        preconditioner  DIC;
+        preconditioner  DILU;
         tolerance       1e-12;
         relTol          0.01;
     }
-    DFinal
+
+    "(moisture|XCO2InL)Final"
     {
         solver          PBiCGStab;
-        preconditioner  DIC;
+        preconditioner  DILU;
         tolerance       1e-12;
-        // relTol          0.001;
     }
-    pG
+
+    "(pG|omegaV|omegaC|T|D)"
     {
         solver          PBiCGStab;
         preconditioner  DIC;
         tolerance       1e-12;
         relTol          0.01;
     }
-    pG
+
+    "(pG|omegaV|omegaC|T|D)Final"
     {
         solver          PBiCGStab;
         preconditioner  DIC;
         tolerance       1e-12;
-        // relTol          0.001;
     }
+
 }
 
 interpolationSchemes
