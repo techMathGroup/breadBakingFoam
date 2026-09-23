@@ -17,7 +17,7 @@ import os
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2D/' # -- base case for simulation
-outFolder = '../ZZ_cases/breadAx2D/'
+outFolder = '../ZZ_cases/99_breadAx2D/'
 # outFolder = '../ZZ_cases/00_breads/newImpl_lambda04const_tortClo40_tortOpen10_3_kmpClosed1_open02_newKin/'
 
 # WHAT SHOULD RUN=======================================================
@@ -28,6 +28,7 @@ runDynSim = True    # -- run simulation
 # makeGeom = False # -- creation of the geometry for computation
 # runDynSim = False    # -- run simulation
 runPostProcess = True   # -- run post-processing
+runWithSlurm = True
 
 withKynuti = True
 withKynuti = False
@@ -124,8 +125,7 @@ alphaG = 10 # -- external heat transfer coeficient
 '''Post-processing'''
 fig, axs = plt.subplots(4, 1, figsize=(9, 21))  # figure with plots
 
-outFolder = '../ZZ_cases/00_breads/008_newTau_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, gasPermeabilityRaw)
-# baseCaseDir = '../ZZ_cases/00_breads/83_BK15_availSurf_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, gasPermeabilityRaw)
+# outFolder = '../ZZ_cases/00_breads/x4_008_newTau_tau_%g_Dl_%g_kOp_%g_kCl_%g_torOp_%g_torCl_%g_lambdaS_%g_R0_%g_perm_%g/'%(tau1, Dl, kMPCOpen, kMPCClosed, tortOpen, tortClosed, lambdaS, R0, gasPermeabilityRaw)
 
 
 # SCRIPT ITSELF (DO NOT EDIT)===========================================                       
@@ -149,6 +149,7 @@ kappa0Baked = 2*mu0Baked*nu/(1-2*nu)
 tau2 = 1
 tGelat = 65
 tau0 = 7
+node = "kraken-x4"
 
 # -- prepare blockMeshDict using luckas python class
 if prepBlockMesh:
@@ -277,9 +278,20 @@ if withKynuti:
     baseCase.runCommands(
         [
             'decomposePar > log.decomposePar',
-            'foamJob -parallel -screen %s > log.Kynuti' %(dynSolver),
         ]
     )
+    if runWithSlurm:
+        baseCase.runCommands(
+            [            
+                'srun -n%d --nodelist=%s %s -parallel > log.Kynuti' %(nCores, node, dynSolver),
+            ]
+        )
+    else:
+        baseCase.runCommands(
+            [            
+                'foamJob -parallel -screen %s > log.Kynuti' %(dynSolver),
+            ]
+        )
 
 
 # RUN THE SIMULATION====================================================
@@ -303,11 +315,18 @@ if runDynSim:
                     'decomposePar > log.decomposePar',
                 ]
             )
-        baseCase.runCommands(
-            [
-                'foamJob -parallel -screen %s > log.%s' %(dynSolver,dynSolver),
-            ]
-        )
+        if runWithSlurm:
+            baseCase.runCommands(
+                [            
+                    'srun -n%d --nodelist=%s %s -parallel > log.%s' %(nCores, node, dynSolver, dynSolver),
+                ]
+            )
+        else:
+            baseCase.runCommands(
+                [            
+                    'foamJob -parallel -screen %s > log.%s' %(dynSolver, dynSolver),
+                ]
+            )
     else:
         baseCase.runCommands(
             [
@@ -325,11 +344,18 @@ if runDynSim:
             ]
         )
         if nCores > 1:
-            baseCase.runCommands(
-                [
-                    'foamJob -parallel -screen %s > log.%s_2' %(dynSolver,dynSolver),
-                ]
-            )
+            if runWithSlurm:
+                baseCase.runCommands(
+                    [            
+                        'srun -n%d --nodelist=%s %s -parallel > log.%s_2' %(nCores, node, dynSolver, dynSolver),
+                    ]
+                )
+            else:
+                baseCase.runCommands(
+                    [            
+                        'foamJob -parallel -screen %s > log.%s_2' %(dynSolver, dynSolver),
+                    ]
+                )
         else:
             baseCase.runCommands(
                 [
@@ -358,14 +384,23 @@ if runPostProcess:
         )
     else:
         baseCase.updateTimesParallel()
-        baseCase.runCommands(
-            [
-                'foamJob -parallel -screen postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess',
-                'foamJob -parallel -screen postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux',
-                'rm -rf processor*/0',
-                'foamJob -parallel -screen intMoisture > log.intMoisture',
-            ]
-        )
+        if runWithSlurm:
+            baseCase.runCommands(
+                [
+                    'srun -n%d --nodelist=%s postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess'%(nCores, node),
+                    'srun -n%d --nodelist=%s postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux'%(nCores, node),
+                    'rm -rf processor*/0',
+                    'srun -n%d --nodelist=%s intMoisture > log.intMoisture'%(nCores, node),
+                ]
+            )
+            baseCase.runCommands(
+                [
+                    'foamJob -parallel -screen postProcess -func "probeZhang" -dict system/probeZhang > log.postProcess',
+                    'foamJob -parallel -screen postProcess -func "patchIntegrate(CO2Flux,name=sides)" > log.CO2Flux',
+                    'rm -rf processor*/0',
+                    'foamJob -parallel -screen intMoisture > log.intMoisture',
+                ]
+            )
 
     # -- gather the displacement data from probe points
     rows = []

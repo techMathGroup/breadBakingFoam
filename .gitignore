@@ -20,6 +20,10 @@ applications/solvers/*Test
 applications/solvers/*Molar
 applications/solvers/rhoPimpleFoam
 pyCtrlScripts/runBread*Test*
+pyCtrlScripts/.venv
+pyCtrlScripts/slurmRunBreadAx2D.sh
+pyCtrlScripts/slurm*
+
 # pyCtrlScripts/*Opt.py
 tutorials/*Test
 
