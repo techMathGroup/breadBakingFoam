@@ -43,6 +43,8 @@ zhang 1;
 delta 0.15;
 moistureMin 0.33;
 
+TOpenG   80;
+
 
 omegaVInfTableDict   
 {

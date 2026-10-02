@@ -20,7 +20,8 @@ from compExpSimSingleGraphFromDat import saveFigPostProcess
 
 # CASE FOLDERS==========================================================
 baseCaseDir = '../tutorials/breadAx2DOurExp/' # -- base case for simulation
-outFolder = '../ZZ_cases/01_breadAx2DOurExp3/'
+# outFolder = '../ZZ_cases/afterProofing2/'
+outFolder = '../ZZ_cases/01OurSims/988_wholeSim_nIter_40_TGOpen_90_bakC_25_gasPerm1e11_TauExp1000_mS06/'
 # expDir = os.path.join('..', 'Experiments2026') # -- when comparing experiments
 
 # WHAT SHOULD RUN=======================================================
@@ -38,7 +39,7 @@ proofing = True  # -- proofing included
 
 # DEFINE PARAMETERS=====================================================
 '''Geometry parameters'''
-mSStep = 0.1e-2 # -- aproximate computational cell size
+mSStep = 0.06e-2 # -- aproximate computational cell size
 
 # for expNum in range(len(experiments)): 
 for expNum in range(1): 
@@ -98,6 +99,7 @@ for expNum in range(1):
     muV1Raw = 7400 
     bakedCoeff = 25
     tau1 = 1.6
+    TOpenG = 90
 
     '''Numerics and time control'''
     if proofing:
@@ -107,17 +109,21 @@ for expNum in range(1):
     timeStepProofing = 20 # -- computational time step for proofing
     timeStepSim = 0.5  # -- computational time step for deformable simulation
     timeStepSimNonDef = 0.5  # -- computational time step non-deformable simulation
-    plusTime1 = 450 # -- how long to run with deformation 
+    plusTime1 = 600 # -- how long to run with deformation 
     plusTime2 = 750 # -- how long to run without deformation
 
     writeInt = 30   # -- how often to write results
     writeIntProofing = 200    # -- how often to write results during proofing
     nIterProofing = 300  # -- number of iterations in each time step
-    nIterSim = 250  # -- number of iterations in each time step
+    nIterSim = 30  # -- number of iterations in each time step
     nIterSimNonDef = 50  # -- number of iterations in each time step
     dynSolver = 'breadBakingFoam'   # -- used solver
     # dynSolver = 'breadBakingFoamScratch'   # -- used solver
     nCores = 8 # -- number of cores to run the simulation
+
+    # plusTime1 = 0 # -- how long to run with deformation 
+    # plusTime2 = 0 # -- how long to run without deformation
+    # writeIntProofing = 2400    # -- how often to write results during proofing
 
     # -- relaxation factors
     DRelaxKyn = 0.1
@@ -263,6 +269,7 @@ for expNum in range(1):
             ['constant/transportProperties', 'tortOpen', str(tortOpen), ''],
             ['constant/transportProperties', 'tortClosed', str(tortClosed), ''],
             ['constant/transportProperties', 'alphaD0', str(alphaD0), ''],
+            ['constant/transportProperties', 'TOpenG', str(TOpenG), ''],
         ]
     )
 
@@ -377,7 +384,8 @@ for expNum in range(1):
                 baseCase.runCommands(
                     [
                         'decomposePar > log.decomposePar',
-                        'srun -n%d --nodelist=%s %s -parallel > log.%s' %(nCores, node, dynSolver,dynSolver),
+                        # 'srun -n%d --nodelist=%s %s -parallel > log.%s' %(nCores, node, dynSolver,dynSolver),
+                        'srun -n%d %s -parallel > log.%s' %(nCores, dynSolver,dynSolver),
                     ]
                 )
             else:
@@ -414,7 +422,8 @@ for expNum in range(1):
                 if runWithSlurm:
                     baseCase.runCommands(
                         [
-                            'srun -n%d --nodelist=%s %s -parallel > log.%s_2' %(nCores, node, dynSolver,dynSolver),
+                            # 'srun -n%d --nodelist=%s %s -parallel > log.%s_2' %(nCores, node, dynSolver,dynSolver),
+                            'srun -n%d %s -parallel > log.%s_2' %(nCores, dynSolver,dynSolver),
                         ]
                     )
                 else:
@@ -449,7 +458,8 @@ for expNum in range(1):
                 if runWithSlurm:
                     baseCase.runCommands(
                         [
-                            'srun -n%d --nodelist=%s %s -parallel > log.%s_3' %(nCores, node, dynSolver,dynSolver),
+                            # 'srun -n%d --nodelist=%s %s -parallel > log.%s_3' %(nCores, node, dynSolver,dynSolver),
+                            'srun -n%d %s -parallel > log.%s_3' %(nCores, dynSolver,dynSolver),
                         ]
                     )
                 else:
@@ -494,10 +504,10 @@ for expNum in range(1):
                 baseCase.runCommands(
                     [
                         'rm -rf processor*/0',
-                        'srun -n%d --nodelist=%s postProcess -parallel -func "probeOur" -dict system/probeOur > log.postProcess'%(nCores, node),
-                        'srun -n%d --nodelist=%s TLFProbe -parallel -point "(1e-3 1e-3 0)" > log.TPoint6'%(nCores, node),
-                        'srun -n%d --nodelist=%s intMoisture -parallel > log.intMoisture'%(nCores, node),
-                        'srun -n%d --nodelist=%s getBoundPoints -parallel > log.getBoundPoints'%(nCores, node),
+                        'srun -n%d  postProcess -parallel -func "probeOur" -dict system/probeOur > log.postProcess'%(nCores),
+                        'srun -n%d  TLFProbe -parallel -point "(1e-3 1e-3 0)" > log.TPoint6'%(nCores),
+                        'srun -n%d  intMoisture -parallel > log.intMoisture'%(nCores),
+                        'srun -n%d  getBoundPoints -parallel > log.getBoundPoints'%(nCores),
                     ]
                 )
             else:
@@ -519,7 +529,7 @@ for expNum in range(1):
                 if runWithSlurm:
                     baseCase.runCommands(
                         [
-                            'srun -n%d --nodelist=%s TLFProbe  -parallel -point "(%.5g %.5g %.5g)" > log.TPoint%d' %(nCores, node, probesCorr[0], probesCorr[1], probesCorr[2], i+1),
+                            'srun -n%d  TLFProbe  -parallel -point "(%.5g %.5g %.5g)" > log.TPoint%d' %(nCores, probesCorr[0], probesCorr[1], probesCorr[2], i+1),
                         ]
                     )
                 else:
@@ -541,4 +551,4 @@ for expNum in range(1):
         np.savetxt(os.path.join(baseCase.dir, 'Shape/D_values_%d_sorted.dat' % timeProofing), shapeBef, header='x\ty\tz', comments='')
         np.savetxt(os.path.join(baseCase.dir, 'Shape/D_values_%d_sorted.dat' % latestTime), shapeAft, header='x\ty\tz', comments='')
 
-        saveFigPostProcess(timeProofing, outFolder)
+        saveFigPostProcess(timeProofing, outFolder, latestTime=latestTime)

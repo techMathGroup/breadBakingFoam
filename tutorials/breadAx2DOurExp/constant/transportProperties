@@ -49,6 +49,8 @@ moistureMin 0.27;
 
 zhang 0;
 
+TOpenG   80;
+
 omegaVInfTableDict   
 {
     file "$FOAM_CASE/constant/omegaVInfTable";

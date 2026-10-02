@@ -81,11 +81,11 @@ relaxationFactors
     {
         D 0.1;
         // // DFinal 0.1;
-        omegaV 0.2;
-        omegaC 0.2;
+        omegaV 0.4;
+        omegaC 0.4;
         // // // // omegaAir 0.1;
-        T 0.2;
-        pG 0.2;
+        T 0.4;
+        pG 0.4;
         // rhoG 0.1;
     }
     equations
