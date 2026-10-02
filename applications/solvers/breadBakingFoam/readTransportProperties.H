@@ -55,7 +55,7 @@ IOdictionary fvSolution
 
 // -- model transport parameters 
 dimensionedScalar univR, gasPermeabilityRaw, gasPermeabilityBaked, kappaS;
-scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang, deltaSc, moistureMin, nItersAfter;
+scalar withDeformation, tortOpen, tortClosed, alphaD0, zhang, deltaSc, moistureMin, nItersAfter, TOpenG;
 transportProperties.subDict("genProps").readEntry("univR", univR); // -- universal gas constant
 transportProperties.readEntry("withDeformation", withDeformation);
 transportProperties.readEntry("gasPermeabilityRaw", gasPermeabilityRaw);
@@ -64,6 +64,7 @@ transportProperties.readEntry("tortOpen", tortOpen);
 transportProperties.readEntry("tortClosed", tortClosed);
 transportProperties.readEntry("alphaD0",alphaD0);
 transportProperties.readEntry("zhang",zhang);
+transportProperties.readEntry("TOpenG",TOpenG);
 transportProperties.readEntry("delta",deltaSc);
 transportProperties.readEntry("moistureMin",moistureMin);
 fvSolution.subDict("PIMPLE").readEntry("nItersAfter",nItersAfter);

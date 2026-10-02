@@ -24,11 +24,11 @@ DEffaM.correctBoundaryConditions();
 scalar logKRaw = Foam::log(gasPermeabilityRaw.value());
 scalar logKBaked = Foam::log(gasPermeabilityBaked.value());
 
-// volScalarField alphaGP = 0.5 + Foam::atan((T/dummyT - 273 - 65) / 10.0) / 3.14159; // Smooth transition from 0 to 1 around T = 65°C
+volScalarField alphaGP = 0.5 + Foam::atan((T/dummyT - 273 - TOpenG) / (2.0 * 0.5)) / 3.14159; // Smooth transition from 0 to 1 around T = 65°C
 
 // -- permiability MPC Zhang 2025
-gasDarcyMobility = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
-// gasDarcyMobility = Foam::exp(logKRaw + alphaGP * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
+// gasDarcyMobility = Foam::exp(logKRaw + alpha * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
+gasDarcyMobility = Foam::exp(logKRaw + alphaGP * (logKBaked - logKRaw)) * dimensionedScalar("gasPermeability", gasPermeabilityRaw.dimensions(), 1.0) / nuG;
 gasDarcyMobility.correctBoundaryConditions();
 
 // -- effective heat conductivity https://www.sciencedirect.com/science/article/pii/S0960308508000333
