@@ -536,6 +536,7 @@ Foam::viscoBread::viscoBread
         "zeroGradient"
     ),
     tau1_(0),
+    bakedForTau_(0),
     tau2_(0),
     tGelat_(0),
     alphaBiot_(1.0),
@@ -589,6 +590,7 @@ Foam::viscoBread::viscoBread
     }
 
     tau1_ = dict.lookupOrDefault<scalar>("tau1", 1.0);
+    bakedForTau_ = dict.lookupOrDefault<scalar>("bakedForTau", 1.0);
     tau2_ = dict.lookupOrDefault<scalar>("tau2", 1.0);
     tGelat_ = dict.lookupOrDefault<scalar>("tGelat", 65.0);
 
@@ -613,6 +615,7 @@ Foam::viscoBread::viscoBread
     Info << "kappa0Raw_ Raw: " << kappa0Raw_ << endl;
     Info << "muV1Raw_ Raw: " << muV1Raw_ << endl;
     Info << "muV2Raw_ Raw: " << muV2Raw_ << endl;
+    Info << "bakedForTau_: " << bakedForTau_ << endl;
     Info << "Tau1: " << tau1_ << endl;
     Info << "Tau2: " << tau2_ << endl;
     Info << "TGelat: " << tGelat_ << endl;
@@ -709,7 +712,8 @@ void Foam::viscoBread::correct(volSymmTensorField& sigma)
     volScalarField lambdaV = (1.0 - kappaGel) * kappaVRaw_ + kappaGel * kappaVRaw_;
 
     // tau_ = tau0_ / (1.0 - kappaGel + 1e-5) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
-    tau1VSF_ = tau1_ * (2.0 * (1.0 - kappaGel) + 20.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    // tau1VSF_ = tau1_ * (2.0 * (1.0 - kappaGel) + 100.0 * kappaGel) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
+    tau1VSF_ = tau1_ * Foam::exp(Foam::log(2.0) + kappaGel * (Foam::log(bakedForTau_) - Foam::log(2.0))) * dimensionedScalar("dummyTime", dimTime, 1); // Avoid division by zero
     // scalar logTauRaw = Foam::log(2.0);
     // scalar logTauBaked = Foam::log(200.0);
     // tau1VSF_ = tau1_ * Foam::exp(logTauRaw + kappaGel * (logTauBaked - logTauRaw)) * dimensionedScalar("dummyTime", dimTime, 1);

@@ -127,6 +127,7 @@ class viscoBread
         volScalarField nuField_;
 
         scalar tau1_;
+        scalar bakedForTau_;
         scalar tau2_;
         scalar tGelat_;
         scalar alphaBiot_;
