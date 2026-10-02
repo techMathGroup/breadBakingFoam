@@ -15,7 +15,7 @@ def save_for_latex(filename, x, y, header="Time Value"):
     data = np.column_stack((x, y))
     np.savetxt(filename, data, header=header, comments='', fmt='%.6f', delimiter='\t')
 
-def saveFigPostProcess(kynuti, simDir):
+def saveFigPostProcess(kynuti, simDir, latestTime=6000):
     expProbeInds = [3, 7, 11, 15] 
     expMois = 18
     mLInit = 159.9/2
@@ -54,6 +54,10 @@ def saveFigPostProcess(kynuti, simDir):
         # weight = breadInOven['Weight'].values
         # exp_data_dict['weightData'] = np.column_stack((time-time[0], weight))
         # all_experiments_data.append(exp_data_dict)
+        shapeBef = np.loadtxt(simDir + '/Shape/D_values_%d.dat' % kynuti, skiprows=1)   
+        shapeAft = np.loadtxt(simDir + '/Shape/D_values_%d.dat' % latestTime, skiprows=1)   
+        shapeBef = shapeBef[np.argsort(shapeBef[:, 0])]
+        shapeAft = shapeAft[np.argsort(shapeAft[:, 0])]
 
     # Pick the first experiment for plotting individually
     exp = experiments[0]
@@ -62,7 +66,7 @@ def saveFigPostProcess(kynuti, simDir):
     # 3. Load simulation data
     simData = {}
     for j in range(4): # First 4 thermocouples
-        TPoint = readDataFromLogFile("%s/log.TPoint%d" %(simDir, j+1))
+        TPoint = readDataFromLogFile("%s/log.TPoint%d" %(simDir, j+1), nCols=3)
         simData[f'sim{j+1}'] = TPoint
         
     # simData['weight'] = readDataFromLogFile("%s/log.intWeigth" %simDir)
@@ -74,7 +78,7 @@ def saveFigPostProcess(kynuti, simDir):
     os.makedirs(out_dir, exist_ok=True)
 
     # 4. Create subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 8))
     colorLst = ['r', 'g', 'b', 'm']
 
     # --- Plot 1: Temperatures ---
@@ -130,6 +134,10 @@ def saveFigPostProcess(kynuti, simDir):
     ax2.set_ylim(0.3, 0.5)
     ax2.set_xlim(0, 25)
     ax2.legend()
+
+    ax3.plot(shapeAft[:,1],shapeAft[:,0])
+    ax3.plot(shapeBef[:,1],shapeBef[:,0])
+    ax3.axis('equal')
     
     # --- Create unified dataset ---
     t_unified = simData['sim1'][:,0] / 60 - kynuti / 60
@@ -146,7 +154,12 @@ def saveFigPostProcess(kynuti, simDir):
     plt.tight_layout()
     # plt.show()
     # plt.savefig(os.path.join(simDir, 'exp_vs_sim3.png'))
-    plt.savefig(os.path.join(simDir, 'exp_vs_sim4.png'))
+    plt.savefig(os.path.join(simDir, 'exp_vs_sim5.png'))
     # plt.savefig(os.path.join(simDir, 'exp_vs_sim2.png'))
 
-# saveFigPostProcess(2400, "../ZZ_cases/01_breadAx2DOurExp2/")
+# saveFigPostProcess(2400, "../ZZ_cases/01OurSims/999_TOpenG_95_Perm2_1e11_nIters_250_bakedCoeff_35/")
+# saveFigPostProcess(2400, "../ZZ_cases/01OurSims/995_wholeSim_nIter_250/", latestTime=2760)
+# saveFigPostProcess(2400, "../ZZ_cases/01OurSims/992_wholeSim_nIter_30/", latestTime=2760)
+# saveFigPostProcess(2400, "../ZZ_cases/01OurSims/992_wholeSim_nIter_40/", latestTime=2820)
+# saveFigPostProcess(2400, "../ZZ_cases/01OurSims/992_wholeSim_nIter_50/", latestTime=2760)
+# saveFigPostProcess(2400, "../ZZ_cases/01_breadAx2DOurExp3/", latestTime=2760)

@@ -118,22 +118,23 @@ int main(int argc, char *argv[])
             ),
             mesh
         );
-        volScalarField J
-        (
-            IOobject
-                (
-                "J", 
-                runTime.timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh
-        );
+        // volScalarField J
+        // (
+        //     IOobject
+        //         (
+        //         "J", 
+        //         runTime.timeName(),
+        //         mesh,
+        //         IOobject::MUST_READ,
+        //         IOobject::NO_WRITE
+        //     ),
+        //     mesh
+        // );
 
         // Compute local partial sums
         // scalar localSum = gSum(moisture.internalField() * J.internalField() * mesh.V().field());
-        scalar localSum = sum(moisture.internalField()  * mesh.V().field());
+        scalarField moisV = moisture.internalField()  * mesh.V().field();
+        scalar localSum = sum(moisV);
         // scalar localSum = sum(moisture.internalField()  * mesh.V().field() * J.internalField());
         // scalar localSum = sum(moisture.internalField()   * mesh.V().field());
 

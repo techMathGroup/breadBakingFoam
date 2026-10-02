@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[i], timeDirs.size()-1);   
 
         // -- Parameters for Newton
-        int maxIter = 30;
+        int maxIter = 120;
         scalar tol = 1e-9;
 
         // -----------------------------
@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
         bool probeFoundThisProc = false;
         // point X_ref = X_phys;
         point X_ref = point(1e-2, 1e-2, 0);
+        point testWherePointIs = point(0, 0, 0);
 
         for (int iter=0; iter<maxIter; iter++)
         {
@@ -126,25 +127,33 @@ int main(int argc, char *argv[])
                 break;
             }
             X_ref -= 0.2*globalDeltaX;
+            testWherePointIs = X_ref + Di;
             // Info << "Iter " << iter << ": X_ref = " << X_ref << ", F = " << F << ", globalDeltaX = " << globalDeltaX << endl;
         }
 
         label cellI = mesh.findCell(X_ref);
         probeFoundThisProc = (cellI >= 0);
         autoPtr<interpolation<scalar>> Tinterp(nullptr);
+        autoPtr<interpolation<vector>> Dinterp(nullptr);
+
         scalar Ti = -1;
+        vector Di(0,0,0);
         if (mesh.nCells() > 0)  // construct on all ranks
         {
             dictionary interpolationDict = mesh.solutionDict().subDict("interpolationSchemes");
             Tinterp = interpolation<scalar>::New(interpolationDict, T);
+            dictionary interpolationDictD = mesh.solutionDict().subDict("interpolationSchemes");
+            Dinterp = interpolation<vector>::New(interpolationDictD, D);
         }
         if (probeFoundThisProc)  // this processor owns the cell
         {
             Ti = Tinterp->interpolate(X_ref, cellI);
+            Di = Dinterp->interpolate(X_ref, cellI);
         }
+        scalar dist = mag(X_ref + Di - X_phys);
         scalar globalT = Ti;
         Foam::reduce(globalT, Foam::maxOp<scalar>());
-        Info << "Time = " << runTime.timeName() << "; T = " << globalT << endl;
+        Info << "Time = " << runTime.timeName() << "; T = " << globalT << "; Distance From Point = " << dist << endl;
     }
     Info << "End" <<endl;
     return 0;

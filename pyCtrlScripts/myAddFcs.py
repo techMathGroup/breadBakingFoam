@@ -10,7 +10,7 @@ def isFloat(val):
     except:
         return False
     
-def readDataFromLogFile(file_path):
+def readDataFromLogFile(file_path, nCols=2):
     skiprows = -1
     endLine = -1
     with open(file_path, "r") as file:
@@ -27,10 +27,15 @@ def readDataFromLogFile(file_path):
     numbers = []
     for lineI in range(skiprows, endLine):
         line = lines[lineI]
-        matches = re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", line)  # Matches integers and decimals
+        matches = re.findall(
+            r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?",
+            line,
+        )
         numbers.extend(map(float, matches))  # Convert to float and add to the list
 
     # print(numbers)
     # Convert the list to a NumPy array
-    moistureSim = np.array(numbers).reshape(-1,2)
+    moistureSim = np.array(numbers)
+    # print(moistureSim)
+    moistureSim = moistureSim.reshape(-1,nCols)
     return moistureSim
